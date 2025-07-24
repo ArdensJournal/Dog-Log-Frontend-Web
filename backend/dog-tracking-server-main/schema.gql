@@ -1,0 +1,558 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input AddDogCollaboratorDto {
+  dogId: ID!
+  email: String!
+  role: DogCollaboratorRole!
+}
+
+type AuthModel {
+  accessToken: String!
+  refreshToken: String!
+}
+
+"""The role of the collaborator in the dog"""
+type CollaboratorRoleModel {
+  role: DogCollaboratorRole!
+  user: UserModel!
+}
+
+type Coordinates {
+  latitude: Float!
+  longitude: Float!
+}
+
+input CoordinatesInput {
+  latitude: Float!
+  longitude: Float!
+}
+
+input CreateDogDto {
+  birthday: DateTime
+  breed: [DogBreed!]
+  gender: Gender
+  image: Upload
+  name: String!
+}
+
+input CreateFileDto {
+  image: Upload
+}
+
+input CreatePottyDto {
+  coordinates: CoordinatesInput
+  date: DateTime!
+  dog: ID!
+  environment: PottyEnvironment
+  healthFlags: [PottyHealthFlag]
+  note: String
+  type: PottyType!
+}
+
+input CreateTaskDto {
+  """The due date of the task"""
+  date: DateTime!
+
+  """The description of the task"""
+  description: String
+  dog: ID!
+
+  """The completion status of the task"""
+  isCompleted: Boolean! = false
+  name: String!
+
+  """The vaccine of the task"""
+  vaccine: String
+}
+
+input CreateVaccineDto {
+  isMandatory: Boolean! = false
+  name: VaccineName!
+  recommendedAge: TimeDurationInput!
+  recommendedFrequency: TimeDurationInput!
+  type: VaccineType!
+}
+
+input CreateVaccineRecordDto {
+  date: DateTime!
+  dog: ID!
+  nextVaccinationDate: DateTime
+  note: String
+  vaccine: ID!
+  validFor: TimeDurationInput!
+}
+
+input CreateWeightDto {
+  date: DateTime!
+  dog: ID!
+  value: Float!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+enum DogBreed {
+  Affenpinscher
+  AfghanHound
+  AiredaleTerrier
+  Akita
+  AlaskanMalamute
+  AmericanEnglishCoonhound
+  AmericanEskimoDog
+  AmericanFoxhound
+  AmericanHairlessTerrier
+  AmericanLeopardHound
+  AmericanStaffordshireTerrier
+  AmericanWaterSpaniel
+  AnatolianShepherdDog
+  AppenzellerSennenhund
+  AustralianCattleDog
+  AustralianShepherd
+  AustralianTerrier
+  Azawakh
+  BarbadoDaTerceira
+  Barbet
+  Basenji
+  BassetFauveDeBretagne
+  BassetHound
+  Beagle
+  BeardedCollie
+  Beauceron
+  BedlingtonTerrier
+  BelgianLaekenois
+  BelgianMalinois
+  BelgianSheepdog
+  BelgianTervuren
+  BergamascoSheepdog
+  BergerPicard
+  BerneseMountainDog
+  BichonFrise
+  BiewerTerrier
+  BlackAndTanCoonhound
+  BlackRussianTerrier
+  Bloodhound
+  BluetickCoonhound
+  Boerboel
+  Bolognese
+  BorderCollie
+  BorderTerrier
+  Borzoi
+  BostonTerrier
+  BouvierDesFlandres
+  Boxer
+  BraccoItaliano
+  Briard
+  Brittany
+  Broholmer
+  BrusselsGriffon
+  BullTerrier
+  Bulldog
+  Bullmastiff
+  CairnTerrier
+  CanaanDog
+  CaneCorso
+  CardiganWelshCorgi
+  CavalierKingCharlesSpaniel
+  CeskyTerrier
+  ChesapeakeBayRetriever
+  Chihuahua
+  ChineseCrested
+  ChineseSharPei
+  Chinook
+  ChowChow
+  ClumberSpaniel
+  CockerSpaniel
+  Collie
+  CotonDeTulear
+  CurlyCoatedRetriever
+  CzechoslovakianVlcak
+  Dachshund
+  Dalmatian
+  DandieDinmontTerrier
+  DanishSwedishFarmdog
+  DobermanPinscher
+  DogoArgentino
+  DogueDeBordeaux
+  DutchShepherd
+  EnglishCockerSpaniel
+  EnglishFoxhound
+  EnglishSetter
+  EnglishSpringerSpaniel
+  EnglishToySpaniel
+  EntlebucherMountainDog
+  FieldSpaniel
+  FinnishLapphund
+  FinnishSpitz
+  FlatCoatedRetriever
+  FrenchBulldog
+  GermanPinscher
+  GermanShepherdDog
+  GermanShorthairedPointer
+  GermanWirehairedPointer
+  GiantSchnauzer
+  GlenOfImaalTerrier
+  GoldenRetriever
+  GordonSetter
+  GrandBassetGriffonVendeen
+  GreatDane
+  GreatPyrenees
+  GreaterSwissMountainDog
+  Greyhound
+  Harrier
+  Havanese
+  IbizanHound
+  IcelandicSheepdog
+  IrishRedAndWhiteSetter
+  IrishSetter
+  IrishTerrier
+  IrishWaterSpaniel
+  IrishWolfhound
+  ItalianGreyhound
+  JapaneseAkitainu
+  JapaneseChin
+  KaiKen
+  Keeshond
+  KerryBlueTerrier
+  Komondor
+  Kuvasz
+  LabradorRetriever
+  LagottoRomagnolo
+  LancashireHeeler
+  Leonberger
+  LhasaApso
+  Lowchen
+  Maltese
+  ManchesterTerrierStandard
+  ManchesterTerrierToy
+  Mastiff
+  MiniatureAmericanShepherd
+  MiniatureBullTerrier
+  MiniaturePinscher
+  MiniatureSchnauzer
+  Mudi
+  NeapolitanMastiff
+  NederlandseKooikerhondje
+  Newfoundland
+  NorfolkTerrier
+  Norrbottenspets
+  NorwegianBuhund
+  NorwegianElkhound
+  NorwegianLundehund
+  NorwichTerrier
+  NovaScotiaDuckTollingRetriever
+  OldEnglishSheepdog
+  Otterhound
+  Papillon
+  ParsonRussellTerrier
+  Pekingese
+  PembrokeWelshCorgi
+  PeruvianIncaOrchid
+  PetitBassetGriffonVendeen
+  PharaohHound
+  PlottHound
+  Pointer
+  PolishLowlandSheepdog
+  Pomeranian
+  PoodleMiniature
+  PoodleStandard
+  PoodleToy
+  PortuguesePodengo
+  PortuguesePodengoPequeno
+  PortugueseWaterDog
+  Pug
+  Puli
+  Pumi
+  PyreneanShepherd
+  RatTerrier
+  RedloneCoonhound
+  RhodesianRidgeback
+  Rottweiler
+  RussellTerrier
+  RussianToy
+  SaintBernard
+  Saluki
+  Samoyed
+  Schipperke
+  ScottishDeerhound
+  ScottishTerrier
+  SealyhamTerrier
+  ShetlandSheepdog
+  ShibaInu
+  ShihTzu
+  SiberianHusky
+  SilkyTerrier
+  SkyeTerrier
+  Sloughi
+  SmallMunsterlander
+  SoftCoatedWheatenTerrier
+  SpanishWaterDog
+  SpinoneItaliano
+  StaffordshireBullTerrier
+  StandardSchnauzer
+  SussexSpaniel
+  SwedishVallhund
+  TibetanMastiff
+  TibetanSpaniel
+  TibetanTerrier
+  ToyFoxTerrier
+  TreeingWalkerCoonhound
+  Vizsla
+  Weimaraner
+  WelshSpringerSpaniel
+  WelshTerrier
+  WestHighlandWhiteTerrier
+  Whippet
+  WirehairedPointingGriffon
+  WirehairedVizsla
+  Xoloitzcuintli
+  YorkshireTerrier
+}
+
+enum DogCollaboratorRole {
+  Editor
+  Viewer
+}
+
+type DogModel {
+  _id: ID!
+
+  """The birthday of the dog"""
+  birthday: DateTime
+
+  """The breed of the dog"""
+  breed: [DogBreed!]
+
+  """The collaborators of the dog"""
+  collaborators: [CollaboratorRoleModel!]
+
+  """The gender of the dog"""
+  gender: Gender
+
+  """The image url of the dog"""
+  imageUrl: String
+
+  """The name of the dog"""
+  name: String!
+}
+
+input FindByDogIdDto {
+  dogId: ID!
+}
+
+enum Gender {
+  FEMALE
+  MALE
+}
+
+input GetUserTasksDto {
+  dogId: ID
+}
+
+type Mutation {
+  addDogCollaborator(addDogCollaboratorDto: AddDogCollaboratorDto!): DogModel!
+  createDog(createDogDto: CreateDogDto!): DogModel!
+  createPotty(createPottyDto: CreatePottyDto!): PottyModel!
+  createTask(createTaskDto: CreateTaskDto!): TaskModel!
+  createVaccine(createVaccineDto: CreateVaccineDto!): VaccineModel!
+  createVaccineRecord(createVaccineRecordDto: CreateVaccineRecordDto!): VaccineRecordModel!
+  createWeight(createWeightDto: CreateWeightDto!): WeightModel!
+  refreshToken: AuthModel!
+  removeDogCollaborator(removeDogCollaboratorDto: RemoveDogCollaboratorDto!): DogModel!
+  signInByCredentials(signInByCredentialsDto: SignInOrSignUpByCredentialsDto!): AuthModel!
+  signInByGoogle: AuthModel!
+  signUpByCredentials(signUpByCredentialsDto: SignInOrSignUpByCredentialsDto!): AuthModel!
+  updateDog(updateDogDto: UpdateDogDto!): DogModel!
+  uploadFile(body: CreateFileDto!): String!
+}
+
+enum PottyEnvironment {
+  INDOORS
+  OUTDOORS
+}
+
+enum PottyHealthFlag {
+  BLACK_TARRY
+  BLOOD
+  BLOODY_URINE
+  CONSTIPATION
+  DARK_URINE
+  DIARRHEA
+  FREQUENT_URINATION
+  MUCUS
+  PAINFUL_URINATION
+  UNDIGESTED_FOOD
+  UNUSUAL_COLOR
+  WORMS
+}
+
+type PottyModel {
+  _id: ID!
+  addedBy: UserModel!
+  coordinates: Coordinates
+  createdAt: DateTime!
+  date: DateTime!
+  environment: PottyEnvironment!
+  healthFlags: [PottyHealthFlag]
+  note: String
+  type: PottyType!
+}
+
+enum PottyType {
+  PEE
+  POOP
+}
+
+type Query {
+  findAllVaccineRecordsByDog(findByDogIdDto: FindByDogIdDto!): [VaccineRecordModel!]!
+  findAllVaccines: [VaccineModel!]!
+  findPottyByDogId(findByDogIdDto: FindByDogIdDto!): [PottyModel!]!
+  findWeightsByDog(findByDogIdDto: FindByDogIdDto!): [WeightModel!]!
+  getUserTasks(getUserTasksDto: GetUserTasksDto!): [TaskModel!]!
+  recentActivity(findByDogIdDto: FindByDogIdDto!): [RecentActivityResponseDto!]!
+  sayHello: String!
+  userDogs: [DogModel!]!
+  whoAmI: UserModel!
+}
+
+type RecentActivityResponseDto {
+  potty: PottyModel
+  task: TaskModel
+  type: RecentActivityType!
+  vaccineRecord: VaccineRecordModel
+  weight: WeightModel
+}
+
+enum RecentActivityType {
+  POTTY_RECORD
+  TASK_RECORDS
+  VACCINE_RECORD
+  WEIGHT_RECORD
+}
+
+input RemoveDogCollaboratorDto {
+  collaboratorId: ID!
+  dogId: ID!
+}
+
+input SignInOrSignUpByCredentialsDto {
+  email: String!
+  name: String
+  password: String!
+}
+
+type TaskModel {
+  _id: ID!
+  addedBy: UserModel!
+  createdAt: DateTime!
+
+  """The due date of the task"""
+  date: DateTime!
+
+  """The description of the task"""
+  description: String
+
+  """The dog of the task, relevant just for all user tasks"""
+  dog: DogModel
+
+  """The completion status of the task"""
+  isCompleted: Boolean!
+
+  """The name of the task"""
+  name: String!
+  updatedAt: DateTime!
+
+  """The vaccine of the task"""
+  vaccine: VaccineModel
+}
+
+input TimeDurationInput {
+  unit: TimeDurationUnit!
+  value: Int!
+}
+
+type TimeDurationModel {
+  unit: TimeDurationUnit!
+  value: Int!
+}
+
+"""The time duration of the vaccine"""
+enum TimeDurationUnit {
+  Days
+  Months
+  Weeks
+  Years
+}
+
+input UpdateDogDto {
+  birthday: DateTime
+  breed: [DogBreed!]
+  dogId: ID
+  image: Upload
+  name: String
+}
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
+
+type UserModel {
+  _id: ID!
+  email: String!
+  name: String
+  profileImageUrl: String
+}
+
+type VaccineModel {
+  _id: ID!
+  isMandatory: Boolean!
+  name: VaccineName!
+  recommendedAge: TimeDurationModel!
+  recommendedFrequency: TimeDurationModel!
+  type: VaccineType!
+}
+
+"""The name of the vaccine"""
+enum VaccineName {
+  DHP
+  Parvovirus
+  Rabies
+}
+
+type VaccineRecordModel {
+  _id: ID!
+  addedBy: UserModel!
+  createdAt: DateTime!
+  date: DateTime!
+  note: String
+  updatedAt: DateTime!
+  vaccine: VaccineModel!
+  validFor: TimeDurationModel!
+}
+
+"""The type of the vaccine"""
+enum VaccineType {
+  Combination
+  Inactivated
+  LiveAttenuated
+  Other
+}
+
+type WeightModel {
+  _id: ID!
+  addedBy: UserModel!
+
+  """The date and time the weight was created"""
+  createdAt: DateTime!
+
+  """The date and time the weight was recorded"""
+  date: DateTime!
+
+  """The ID of the dog the weight was recorded for"""
+  dog: String!
+
+  """The weight value in kilograms"""
+  value: Float!
+}
