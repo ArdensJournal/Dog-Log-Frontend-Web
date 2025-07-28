@@ -102,16 +102,16 @@ export default function AddDogPage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 via-white to-indigo-100 p-8">
-      <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md">
-        <h1 className="text-3xl font-bold text-indigo-700 mb-4 text-center">Add a New Dog</h1>
+    <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 via-white to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900 p-8">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 w-full max-w-md">
+        <h1 className="text-3xl font-bold text-indigo-700 dark:text-indigo-400 mb-4 text-center">Add a New Dog</h1>
         <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
           <input
             type="text"
             placeholder="Dog Name"
             value={name}
             onChange={e => setName(e.target.value)}
-            className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-400"
             required
           />
           <input
@@ -119,7 +119,7 @@ export default function AddDogPage() {
             placeholder="Breed"
             value={breed}
             onChange={e => setBreed(e.target.value)}
-            className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-400"
             required
           />
           <input
@@ -127,12 +127,12 @@ export default function AddDogPage() {
             placeholder="Birthday"
             value={birthday}
             onChange={e => setBirthday(e.target.value)}
-            className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
           <select
             value={gender}
             onChange={e => setGender(e.target.value)}
-            className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-400"
           >
             <option value="">Select Gender</option>
             <option value="MALE">Male</option>
@@ -142,17 +142,25 @@ export default function AddDogPage() {
             type="file"
             accept="image/*"
             onChange={e => setImage(e.target.files?.[0] || null)}
-            className="px-4 py-2 rounded-lg border border-gray-300"
+            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           />
           <button
             type="submit"
-            className="bg-green-600 text-white font-bold py-2 rounded-lg shadow hover:bg-green-700 transition"
+            className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg shadow transition"
             disabled={loading}
           >
             {loading ? 'Adding...' : 'Add Dog'}
           </button>
-          {error && <div className="text-red-500 text-center">{error}</div>}
+          {error && <div className="text-red-500 dark:text-red-400 text-center">{error}</div>}
         </form>
+        <div className="mt-4 text-center">
+          <Link
+            href="/dogs"
+            className="text-indigo-500 dark:text-indigo-400 underline font-semibold hover:text-indigo-600 dark:hover:text-indigo-300"
+          >
+            ← Back to Dogs
+          </Link>
+        </div>
       </div>
     </main>
   );

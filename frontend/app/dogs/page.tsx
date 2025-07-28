@@ -55,44 +55,44 @@ export default function DogsPage() {
   }, []);
 
   return (
-    <main className="min-h-screen flex flex-col items-center bg-gradient-to-br from-blue-100 via-white to-indigo-100 p-8">
-      <div className="w-full max-w-3xl bg-white rounded-2xl shadow-lg p-8">
-        <h1 className="text-3xl font-bold text-indigo-700 mb-6 text-center">All Dogs</h1>
-        <p className="text-gray-600 mb-6 text-center">This is where you will see all registered dogs.</p>
-        <Link href="/add-dog" className="bg-green-500 text-white font-bold px-6 py-2 rounded-lg shadow hover:bg-green-600 transition mx-auto block w-fit">
+    <main className="min-h-screen flex flex-col items-center bg-gradient-to-br from-blue-100 via-white to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900 p-8">
+      <div className="w-full max-w-3xl bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
+        <h1 className="text-3xl font-bold text-indigo-700 dark:text-indigo-400 mb-6 text-center">All Dogs</h1>
+        <p className="text-gray-600 dark:text-gray-400 mb-6 text-center">This is where you will see all registered dogs.</p>
+        <Link href="/add-dog" className="bg-green-500 hover:bg-green-600 text-white font-bold px-6 py-2 rounded-lg shadow transition mx-auto block w-fit">
           Add Dog
         </Link>
         <div className="mt-8">
           {loading ? (
-            <div className="text-center text-gray-500">Loading...</div>
+            <div className="text-center text-gray-500 dark:text-gray-400">Loading...</div>
           ) : dogs.length === 0 ? (
-            <div className="text-center text-gray-500">No dogs found.</div>
+            <div className="text-center text-gray-500 dark:text-gray-400">No dogs found.</div>
           ) : (
             <ul className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {dogs.map(dog => (
-                <li key={dog._id} className="bg-indigo-50 rounded-xl p-6 shadow flex flex-col items-start">
-                  <span className="text-2xl font-bold text-indigo-700 mb-2">{dog.name}</span>
-                  <span className="text-sm text-gray-700 mb-1">
+                <li key={dog._id} className="bg-indigo-50 dark:bg-indigo-900/30 rounded-xl p-6 shadow flex flex-col items-start">
+                  <span className="text-2xl font-bold text-indigo-700 dark:text-indigo-300 mb-2">{dog.name}</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300 mb-1">
                     <strong>Breed:</strong> {Array.isArray(dog.breed) ? dog.breed.join(', ') : dog.breed || 'Unknown'}
                   </span>
-                  <span className="text-sm text-gray-700 mb-1">
+                  <span className="text-sm text-gray-700 dark:text-gray-300 mb-1">
                     <strong>Born:</strong> {dog.birthday ? new Date(dog.birthday).toLocaleDateString() : 'Unknown'}
                   </span>
-                  <span className="text-sm text-gray-700 mb-1">
+                  <span className="text-sm text-gray-700 dark:text-gray-300 mb-1">
                     <strong>Gender:</strong> {dog.gender || 'Unknown'}
                   </span>
                   {dog.imageUrl ? (
                     <img
                       src={dog.imageUrl}
                       alt={dog.name}
-                      className="mt-3 w-24 h-24 object-cover rounded-full border-2 border-indigo-300 shadow"
+                      className="mt-3 w-24 h-24 object-cover rounded-full border-2 border-indigo-300 dark:border-indigo-600 shadow"
                     />
                   ) : (
-                    <span className="mt-3 w-24 h-24 flex items-center justify-center rounded-full border-2 border-indigo-200 bg-indigo-100 text-indigo-400 text-xs">
+                    <span className="mt-3 w-24 h-24 flex items-center justify-center rounded-full border-2 border-indigo-200 dark:border-indigo-700 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-400 dark:text-indigo-500 text-xs">
                       No photo available
                     </span>
                   )}
-                  <div className="mt-2 text-sm text-gray-700">
+                  <div className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                     <strong>Collaborators:</strong>
                     {dog.collaborators && dog.collaborators.length > 0 ? (
                       <ul className="list-disc ml-5">
@@ -108,7 +108,7 @@ export default function DogsPage() {
                   </div>
                   <Link
                     href={`/dogs/${dog._id}/edit`}
-                    className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition"
+                    className="mt-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow transition"
                   >
                     Edit
                   </Link>

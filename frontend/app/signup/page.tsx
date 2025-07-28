@@ -55,16 +55,16 @@ export default function SignUpPage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 via-white to-indigo-100 p-8">
-      <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md">
-        <h1 className="text-3xl font-bold text-indigo-700 mb-4 text-center">Create Your Dog Log Account</h1>
+    <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 via-white to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900 p-8">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 w-full max-w-md">
+        <h1 className="text-3xl font-bold text-indigo-700 dark:text-indigo-400 mb-4 text-center">Create Your Dog Log Account</h1>
         <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
           <input
             type="email"
             placeholder="Email"
             value={email}
             onChange={e => setEmail(e.target.value)}
-            className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-400"
             required
           />
           <input
@@ -72,7 +72,7 @@ export default function SignUpPage() {
             placeholder="Name"
             value={name}
             onChange={e => setName(e.target.value)}
-            className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-400"
             required
           />
           <input
@@ -80,7 +80,7 @@ export default function SignUpPage() {
             placeholder="Password"
             value={password}
             onChange={e => setPassword(e.target.value)}
-            className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-400"
             required
           />
           <input
@@ -88,7 +88,7 @@ export default function SignUpPage() {
             placeholder="Repeat Password"
             value={repeatPassword}
             onChange={e => setRepeatPassword(e.target.value)}
-            className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-400"
             required    
           />
           <div className="flex items-center gap-2">
@@ -98,19 +98,19 @@ export default function SignUpPage() {
               checked={showPassword}
               onChange={() => setShowPassword(!showPassword)}
             />
-            <label htmlFor="showPassword" className="text-gray-700 text-sm">Show Password</label>
+            <label htmlFor="showPassword" className="text-gray-700 dark:text-gray-300 text-sm">Show Password</label>
           </div>
           <button
             type="submit"
-            className="bg-indigo-600 text-white font-bold py-2 rounded-lg shadow hover:bg-indigo-700 transition"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-lg shadow transition"
           >
             Sign Up
           </button>
-          {error && <div className="text-red-500 text-center">{error}</div>}
+          {error && <div className="text-red-500 dark:text-red-400 text-center">{error}</div>}
         </form>
-        <p className="mt-4 text-center text-gray-600">
+        <p className="mt-4 text-center text-gray-600 dark:text-gray-400">
           Already have an account?{' '}
-          <Link href="/signin" className="text-indigo-500 underline font-semibold">
+          <Link href="/signin" className="text-indigo-500 dark:text-indigo-400 underline font-semibold">
             Sign In
           </Link>
         </p>
