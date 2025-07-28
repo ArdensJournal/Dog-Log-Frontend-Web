@@ -71,7 +71,6 @@ export default function DogsPage() {
             <ul className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {dogs.map(dog => (
                 <li key={dog._id} className="bg-indigo-50 rounded-xl p-6 shadow flex flex-col items-start">
-                  {console.log('Dog:', dog)}
                   <span className="text-2xl font-bold text-indigo-700 mb-2">{dog.name}</span>
                   <span className="text-sm text-gray-700 mb-1">
                     <strong>Breed:</strong> {Array.isArray(dog.breed) ? dog.breed.join(', ') : dog.breed || 'Unknown'}
