@@ -209,9 +209,9 @@ async function updateDog(dogData: {
   formData.append('0', dogData.image);
 
   console.log('📎 FormData contents:');
-  for (const [key, value] of formData.entries()) {
-    console.log(`  ${key}:`, value instanceof File ? `File: ${value.name}` : value);
-  }
+  console.log('  operations:', JSON.stringify(operations, null, 2));
+  console.log('  map:', JSON.stringify({ '0': ['variables.updateDogDto.image'] }));
+  console.log('  0: File:', dogData.image.name, dogData.image.size, 'bytes');
 
   try {
     const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL!, {
