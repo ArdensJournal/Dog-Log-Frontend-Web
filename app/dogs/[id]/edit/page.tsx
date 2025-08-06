@@ -254,6 +254,15 @@ export default function EditDogPage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
 
+  // Breed search and filtering
+  const [breedSearch, setBreedSearch] = useState('');
+  const [showBreedDropdown, setShowBreedDropdown] = useState(false);
+
+  // Filter breeds based on search
+  const filteredBreeds = DOG_BREEDS.filter(breed =>
+    breed.toLowerCase().includes(breedSearch.toLowerCase())
+  );
+
   useEffect(() => {
     if (dogId) {
       console.log('🔄 useEffect: Fetching dog data...');
@@ -285,13 +294,18 @@ export default function EditDogPage() {
     }
   };
 
-  const handleBreedChange = (breed: string, checked: boolean) => {
-    console.log(`🐕 Breed change: ${breed} = ${checked}`);
-    if (checked) {
+  const handleAddBreed = (breed: string) => {
+    if (!selectedBreeds.includes(breed)) {
       setSelectedBreeds([...selectedBreeds, breed]);
-    } else {
-      setSelectedBreeds(selectedBreeds.filter(b => b !== breed));
+      console.log(`🐕 Added breed: ${breed}`);
     }
+    setBreedSearch('');
+    setShowBreedDropdown(false);
+  };
+
+  const handleRemoveBreed = (breed: string) => {
+    setSelectedBreeds(selectedBreeds.filter(b => b !== breed));
+    console.log(`🐕 Removed breed: ${breed}`);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -409,29 +423,76 @@ export default function EditDogPage() {
             </p>
           </div>
 
-          {/* Breeds */}
+          {/* Improved Breeds Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Breeds
             </label>
-            <div className="max-h-32 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-lg p-3 bg-white dark:bg-gray-700">
-              {DOG_BREEDS.map(breed => (
-                <label key={breed} className="flex items-center space-x-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={selectedBreeds.includes(breed)}
-                    onChange={(e) => handleBreedChange(breed, e.target.checked)}
-                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                  />
-                  <span className="text-gray-700 dark:text-gray-300">{breed}</span>
-                </label>
-              ))}
+            
+            {/* Search Input */}
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search for a breed..."
+                value={breedSearch}
+                onChange={(e) => {
+                  setBreedSearch(e.target.value);
+                  setShowBreedDropdown(true);
+                }}
+                onFocus={() => setShowBreedDropdown(true)}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+              
+              {/* Dropdown with filtered breeds */}
+              {showBreedDropdown && breedSearch && (
+                <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                  {filteredBreeds.length > 0 ? (
+                    filteredBreeds.slice(0, 10).map(breed => (
+                      <button
+                        key={breed}
+                        type="button"
+                        onClick={() => handleAddBreed(breed)}
+                        className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-600 last:border-b-0"
+                      >
+                        {breed}
+                      </button>
+                    ))
+                  ) : (
+                    <div className="px-4 py-2 text-gray-500 dark:text-gray-400">
+                      No breeds found matching "{breedSearch}"
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
+
+            {/* Selected Breeds Display */}
             {selectedBreeds.length > 0 && (
-              <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                Selected: {selectedBreeds.join(', ')}
+              <div className="mt-3">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Selected breeds:</p>
+                <div className="flex flex-wrap gap-2">
+                  {selectedBreeds.map(breed => (
+                    <span
+                      key={breed}
+                      className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200"
+                    >
+                      {breed}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveBreed(breed)}
+                        className="ml-2 text-indigo-600 dark:text-indigo-300 hover:text-indigo-800 dark:hover:text-indigo-100"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
               </div>
             )}
+
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+              💡 Tip: Start typing to search for breeds, then click to add them
+            </p>
           </div>
 
           {/* Image Upload */}
@@ -477,6 +538,14 @@ export default function EditDogPage() {
             </Link>
           </div>
         </form>
+
+        {/* Click outside to close dropdown */}
+        {showBreedDropdown && (
+          <div
+            className="fixed inset-0 z-5"
+            onClick={() => setShowBreedDropdown(false)}
+          />
+        )}
       </div>
     </main>
   );
