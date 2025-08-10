@@ -65,8 +65,8 @@ export default function SignUpPage() {
     
     let oauthUrl;
     if (isDevelopment) {
-      // Local development: Use port 3000 (backend developer's OAuth setup)
-      oauthUrl = 'http://localhost:3000/auth/callback/google';
+      // Local development: Use port 3456 (your backend port)
+      oauthUrl = 'http://localhost:3456/auth/callback/google';
     } else {
       // Production: Use your existing working setup
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL!.replace('/graphql', '');
