@@ -62,7 +62,7 @@ export default function SignUpPage() {
     
     // Remove '/graphql' from backend URL and redirect to OAuth endpoint
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL!.replace('/graphql', '');
-    const oauthUrl = `${backendUrl}/auth/google`;
+    const oauthUrl = `${backendUrl}/auth/callback/google`;
     
     console.log('📍 OAuth URL:', oauthUrl);
     window.location.href = oauthUrl;
