@@ -61,16 +61,26 @@ export default function SignInPage() {
     }
   }
 
-  // NEW: Simple redirect to backend OAuth endpoint
+  // Environment-aware Google OAuth
   function handleGoogleAuth() {
     setGoogleLoading(true);
     console.log('🚀 Redirecting to Google OAuth...');
     
-    // Remove '/graphql' from backend URL and redirect to OAuth endpoint
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL!.replace('/graphql', '');
-    const oauthUrl = `${backendUrl}/auth/callback/google`;
+    // Check if we're in development or production
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    
+    let oauthUrl;
+    if (isDevelopment) {
+      // Local development: Use port 3000 (backend developer's OAuth setup)
+      oauthUrl = 'http://localhost:3000/auth/callback/google';
+    } else {
+      // Production: Use your existing working setup
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL!.replace('/graphql', '');
+      oauthUrl = `${backendUrl}/auth/callback/google`;
+    }
     
     console.log('📍 OAuth URL:', oauthUrl);
+    console.log('🌍 Environment:', isDevelopment ? 'Development' : 'Production');
     window.location.href = oauthUrl;
   }
 
