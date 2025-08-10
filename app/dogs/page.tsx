@@ -43,9 +43,43 @@ async function fetchUserDogs() {
   }
 }
 
+async function deleteDog(dogId: string) {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+  if (!token) throw new Error('No access token');
+  
+  const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL!, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      query: `
+        mutation DeleteDog($findByDogIdDto: FindByDogIdDto!) {
+          deleteDog(findByDogIdDto: $findByDogIdDto) {
+            _id
+            name
+          }
+        }
+      `,
+      variables: {
+        findByDogIdDto: { dogId }
+      }
+    }),
+  });
+  
+  const json = await res.json();
+  if (!res.ok || json.errors) {
+    throw new Error(json.errors?.[0]?.message || 'Failed to delete dog');
+  }
+  
+  return json.data.deleteDog;
+}
+
 export default function DogsPage() {
   const [dogs, setDogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
 
   useEffect(() => {
     fetchUserDogs().then(dogs => {
@@ -53,6 +87,24 @@ export default function DogsPage() {
       setLoading(false);
     });
   }, []);
+
+  const handleDeleteDog = async (dogId: string, dogName: string) => {
+    if (!confirm(`Are you sure you want to delete ${dogName}? This action cannot be undone.`)) {
+      return;
+    }
+
+    setDeleteLoading(dogId);
+    try {
+      await deleteDog(dogId);
+      // Remove the deleted dog from the local state
+      setDogs(prevDogs => prevDogs.filter(dog => dog._id !== dogId));
+    } catch (error) {
+      alert(`Failed to delete ${dogName}. Please try again.`);
+      console.error('Delete error:', error);
+    } finally {
+      setDeleteLoading(null);
+    }
+  };
 
   return (
     <main className="min-h-screen flex flex-col items-center bg-gradient-to-br from-blue-100 via-white to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900 p-8">
@@ -106,12 +158,23 @@ export default function DogsPage() {
                       <span> None</span>
                     )}
                   </div>
-                  <Link
-                    href={`/dogs/${dog._id}/edit`}
-                    className="mt-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow transition"
-                  >
-                    Edit
-                  </Link>
+                  
+                  {/* Action buttons */}
+                  <div className="mt-4 flex gap-2 w-full">
+                    <Link
+                      href={`/dogs/${dog._id}/edit`}
+                      className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow transition text-center"
+                    >
+                      Edit
+                    </Link>
+                    <button
+                      onClick={() => handleDeleteDog(dog._id, dog.name)}
+                      disabled={deleteLoading === dog._id}
+                      className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white rounded-lg shadow transition"
+                    >
+                      {deleteLoading === dog._id ? 'Deleting...' : 'Delete'}
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
