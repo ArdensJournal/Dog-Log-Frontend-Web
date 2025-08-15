@@ -154,6 +154,7 @@ export default function AddDogPage() {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
+            "x-apollo-operation-name": "CreateDog"
           },
           body: formData,
         });

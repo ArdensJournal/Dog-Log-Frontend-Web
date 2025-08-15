@@ -218,6 +218,7 @@ async function updateDog(dogData: {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
+        "x-apollo-operation-name": "UpdateDog"
       },
       body: formData,
     });
