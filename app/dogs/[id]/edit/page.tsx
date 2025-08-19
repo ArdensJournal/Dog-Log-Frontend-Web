@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 
-// Dog breeds enum (you can move this to a separate file later)
+// Complete Dog breeds enum
 const DOG_BREEDS = [
   'Affenpinscher', 'AfghanHound', 'AiredaleTerrier', 'Akita', 'AlaskanMalamute',
   'AmericanEnglishCoonhound', 'AmericanEskimoDog', 'AmericanFoxhound', 'AmericanHairlessTerrier',
@@ -59,6 +59,41 @@ interface Dog {
   imageUrl?: string;
 }
 
+// Upload file function - Remove CORS headers that are blocked
+async function uploadFile(file: File): Promise<string> {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+  if (!token) throw new Error('No access token');
+
+  const formData = new FormData();
+  formData.append('operations', JSON.stringify({
+    query: `
+      mutation UploadFile($file: Upload!) {
+        uploadFile(body: { image: $file })
+      }
+    `,
+    variables: { file: null }
+  }));
+  formData.append('map', JSON.stringify({ '0': ['variables.file'] }));
+  formData.append('0', file);
+
+  const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL!, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      // Remove the CORS-blocked headers
+    },
+    body: formData,
+  });
+
+  const json = await res.json();
+  if (!res.ok || json.errors) {
+    throw new Error(json.errors?.[0]?.message || 'Failed to upload file');
+  }
+
+  return json.data.uploadFile;
+}
+
+// Fetch dog by ID function
 async function fetchDogById(dogId: string): Promise<Dog | null> {
   const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
   if (!token) {
@@ -108,130 +143,56 @@ async function fetchDogById(dogId: string): Promise<Dog | null> {
   }
 }
 
+// Update dog function
 async function updateDog(dogData: {
   dogId: string;
   name?: string;
   breed?: string[];
   birthday?: string;
-  image?: File;
 }) {
   const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
-  if (!token) {
-    console.error('❌ No access token found');
-    throw new Error('No access token');
-  }
+  if (!token) throw new Error('No access token');
 
-  console.log('🔧 updateDog called with data:', dogData);
-
-  // If no image, use regular JSON request
-  if (!dogData.image) {
-    const variables = {
-      updateDogDto: {
-        dogId: dogData.dogId,
-        ...(dogData.name && { name: dogData.name }),
-        ...(dogData.breed && dogData.breed.length > 0 && { breed: dogData.breed }),
-        ...(dogData.birthday && { birthday: dogData.birthday }),
-        // ❌ Removed gender - not supported by UpdateDogDto schema
-      }
-    };
-
-    console.log('📨 Sending JSON request with variables:', JSON.stringify(variables, null, 2));
-
-    try {
-      const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL!, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          query: `
-            mutation UpdateDog($updateDogDto: UpdateDogDto!) {
-              updateDog(updateDogDto: $updateDogDto) {
-                _id
-                name
-                breed
-                birthday
-                gender
-                imageUrl
-              }
-            }
-          `,
-          variables
-        }),
-      });
-
-      console.log('📡 Update response status:', res.status);
-      console.log('📡 Update response headers:', Object.fromEntries(res.headers.entries()));
-
-      const result = await res.json();
-      console.log('🔄 JSON response:', JSON.stringify(result, null, 2));
-      return result;
-    } catch (error) {
-      console.error('💥 Network error in JSON request:', error);
-      throw error;
-    }
-  }
-
-  // For file uploads, use FormData
-  console.log('📎 Using FormData for file upload');
-  
-  const operations = {
-    query: `
-      mutation UpdateDog($updateDogDto: UpdateDogDto!) {
-        updateDog(updateDogDto: $updateDogDto) {
-          _id
-          name
-          breed
-          birthday
-          gender
-          imageUrl
-        }
-      }
-    `,
-    variables: {
-      updateDogDto: {
-        dogId: dogData.dogId,
-        ...(dogData.name && { name: dogData.name }),
-        ...(dogData.breed && dogData.breed.length > 0 && { breed: dogData.breed }),
-        ...(dogData.birthday && { birthday: dogData.birthday }),
-        // ❌ Removed gender - not supported by UpdateDogDto schema
-        image: null // Will be mapped to the uploaded file
-      }
+  const variables = {
+    updateDogDto: {
+      dogId: dogData.dogId,
+      ...(dogData.name && { name: dogData.name }),
+      ...(dogData.breed && dogData.breed.length > 0 && { breed: dogData.breed }),
+      ...(dogData.birthday && { birthday: dogData.birthday }),
     }
   };
 
-  console.log('📎 FormData operations:', JSON.stringify(operations, null, 2));
+  console.log('🐕 Updating dog with data:', variables);
 
-  const formData = new FormData();
-  formData.append('operations', JSON.stringify(operations));
-  formData.append('map', JSON.stringify({ '0': ['variables.updateDogDto.image'] }));
-  formData.append('0', dogData.image);
+  const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL!, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      query: `
+        mutation UpdateDog($updateDogDto: UpdateDogDto!) {
+          updateDog(updateDogDto: $updateDogDto) {
+            _id
+            name
+            breed
+            birthday
+            gender
+            imageUrl
+          }
+        }
+      `,
+      variables
+    }),
+  });
 
-  console.log('📎 FormData contents:');
-  console.log('  operations:', JSON.stringify(operations, null, 2));
-  console.log('  map:', JSON.stringify({ '0': ['variables.updateDogDto.image'] }));
-  console.log('  0: File:', dogData.image.name, dogData.image.size, 'bytes');
-
-  try {
-    const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL!, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-      body: formData,
-    });
-
-    console.log('📡 FormData response status:', res.status);
-    console.log('📡 FormData response headers:', Object.fromEntries(res.headers.entries()));
-
-    const result = await res.json();
-    console.log('🔄 FormData response:', JSON.stringify(result, null, 2));
-    return result;
-  } catch (error) {
-    console.error('💥 Network error in FormData request:', error);
-    throw error;
+  const json = await res.json();
+  if (!res.ok || json.errors) {
+    throw new Error(json.errors?.[0]?.message || 'Failed to update dog');
   }
+
+  return json.data.updateDog;
 }
 
 export default function EditDogPage() {
@@ -257,6 +218,9 @@ export default function EditDogPage() {
   // Breed search and filtering
   const [breedSearch, setBreedSearch] = useState('');
   const [showBreedDropdown, setShowBreedDropdown] = useState(false);
+
+  // Get today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split('T')[0];
 
   // Filter breeds based on search
   const filteredBreeds = DOG_BREEDS.filter(breed =>
@@ -316,34 +280,36 @@ export default function EditDogPage() {
     console.log('🚀 Form submission started');
 
     try {
+      // Step 1: Update dog data first (this works)
       const updateData = {
         dogId,
         name: name || undefined,
         breed: selectedBreeds.length > 0 ? selectedBreeds : undefined,
         birthday: birthday || undefined,
-        // ❌ Removed gender from update data - backend doesn't support it
-        image: imageFile || undefined,
       };
 
       console.log('🐕 Updating dog with data:', updateData);
-      
       const result = await updateDog(updateData);
-      
-      console.log('📝 Update result received:', result);
-      
-      if (result.errors) {
-        console.error('❌ GraphQL errors:', result.errors);
-        setError(result.errors[0].message);
-      } else if (result.data?.updateDog) {
-        console.log('✅ Dog updated successfully:', result.data.updateDog);
-        router.push('/dogs');
-      } else {
-        console.log('⚠️ No data returned from update');
-        setError('Update failed - no data returned');
+      console.log('✅ Dog updated successfully:', result);
+
+      // Step 2: Try to upload image after updating dog (optional)
+      if (imageFile) {
+        try {
+          console.log('📸 Attempting to upload image...');
+          const imageUrl = await uploadFile(imageFile);
+          console.log('✅ Image uploaded successfully:', imageUrl);
+          console.log('⚠️ Note: Image upload successful but not linked to dog yet');
+        } catch (imageError) {
+          console.warn('⚠️ Image upload failed, but dog was updated successfully:', imageError);
+          // Don't fail the whole operation if image upload fails
+        }
       }
-    } catch (err) {
-      console.error('💥 Network/parsing error:', err);
-      setError('Failed to update dog - network error');
+
+      router.push('/dogs');
+
+    } catch (err: any) {
+      console.error('💥 Error updating dog:', err);
+      setError(err.message || 'Failed to update dog');
     } finally {
       setSaving(false);
       console.log('🏁 Form submission completed');
@@ -400,8 +366,12 @@ export default function EditDogPage() {
               type="date"
               value={birthday}
               onChange={(e) => setBirthday(e.target.value)}
+              max={today}
               className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-400"
             />
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              * Birthday cannot be in the future
+            </p>
           </div>
 
           {/* Gender - Display only, not editable */}
@@ -423,7 +393,7 @@ export default function EditDogPage() {
             </p>
           </div>
 
-          {/* Improved Breeds Selection */}
+          {/* Breeds Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Breeds
@@ -515,6 +485,9 @@ export default function EditDogPage() {
                 />
               </div>
             )}
+            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+              ⚠️ Note: Image upload currently has CORS issues. Dog will be updated without image changes.
+            </p>
           </div>
 
           {error && (
