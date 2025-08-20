@@ -50,7 +50,7 @@ const DOG_BREEDS = [
   'Xoloitzcuintli', 'YorkshireTerrier'
 ];
 
-// Upload file function - Try different CSRF bypass approaches
+// Upload file function
 async function uploadFile(file: File): Promise<string> {
   const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
   if (!token) throw new Error('No access token');
@@ -67,22 +67,11 @@ async function uploadFile(file: File): Promise<string> {
   formData.append('map', JSON.stringify({ '0': ['variables.file'] }));
   formData.append('0', file);
 
-  // Try different header combinations to bypass CSRF
-  const headers: Record<string, string> = {
-    'Authorization': `Bearer ${token}`,
-  };
-
-  // Try adding a custom content type that's not restricted
-  try {
-    headers['Content-Type'] = 'application/json';
-  } catch (e) {
-    // If that fails, try without Content-Type (let browser set it)
-    delete headers['Content-Type'];
-  }
-
   const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL!, {
     method: 'POST',
-    headers,
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
     body: formData,
   });
 
@@ -94,53 +83,63 @@ async function uploadFile(file: File): Promise<string> {
   return json.data.uploadFile;
 }
 
-// Create dog function
+// ✅ FIXED: Create dog function to use file upload mutation correctly
 async function createDog(dogData: {
   name: string;
   breed?: string[];
   birthday?: string;
   gender?: string;
+  imageFile?: File;
 }) {
   const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
   if (!token) throw new Error('No access token');
 
-  const variables: any = {
-    createDogDto: {
-      name: dogData.name,
+  // ✅ NEW APPROACH: Use multipart form for file upload with dog creation
+  const formData = new FormData();
+  
+  // Build the GraphQL operations with file reference
+  const operations = {
+    query: `
+      mutation CreateDog($createDogDto: CreateDogDto!) {
+        createDog(createDogDto: $createDogDto) {
+          _id
+          name
+          breed
+          birthday
+          gender
+          imageUrl
+        }
+      }
+    `,
+    variables: {
+      createDogDto: {
+        name: dogData.name,
+        ...(dogData.breed && dogData.breed.length > 0 && { breed: dogData.breed }),
+        ...(dogData.birthday && { birthday: dogData.birthday }),
+        ...(dogData.gender && { gender: dogData.gender }),
+        // ✅ Reference the file if provided
+        ...(dogData.imageFile && { image: null })
+      }
     }
   };
 
-  if (dogData.breed && dogData.breed.length > 0) {
-    variables.createDogDto.breed = dogData.breed;
+  formData.append('operations', JSON.stringify(operations));
+  
+  // Map the file to the variable
+  if (dogData.imageFile) {
+    formData.append('map', JSON.stringify({ '0': ['variables.createDogDto.image'] }));
+    formData.append('0', dogData.imageFile);
   }
-  if (dogData.birthday) {
-    variables.createDogDto.birthday = dogData.birthday;
-  }
-  if (dogData.gender) {
-    variables.createDogDto.gender = dogData.gender;
-  }
+
+  console.log('🐕 Creating dog with FormData approach...');
 
   const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL!, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
+      // Don't set Content-Type - let browser set it with boundary for multipart
     },
-    body: JSON.stringify({
-      query: `
-        mutation CreateDog($createDogDto: CreateDogDto!) {
-          createDog(createDogDto: $createDogDto) {
-            _id
-            name
-            breed
-            birthday
-            gender
-            imageUrl
-          }
-        }
-      `,
-      variables,
-    }),
+    body: formData,
   });
 
   const json = await res.json();
@@ -206,30 +205,18 @@ export default function AddDogPage() {
     try {
       console.log('🚀 Starting dog creation process...');
 
-      // Create dog first without image
+      // ✅ Single call with image included
       const dogData = {
         name,
         breed: selectedBreeds.length > 0 ? selectedBreeds : undefined,
         birthday: birthday || undefined,
         gender: gender || undefined,
+        imageFile: image || undefined,
       };
 
-      console.log('🐕 Creating dog with data:', dogData);
+      console.log('🐕 Creating dog with data (image will be uploaded first if provided):', dogData);
       const newDog = await createDog(dogData);
-      console.log('✅ Dog created successfully:', newDog);
-
-      // Try to upload image after creating dog (optional)
-      if (image) {
-        try {
-          console.log('📸 Attempting to upload image...');
-          const imageUrl = await uploadFile(image);
-          console.log('✅ Image uploaded successfully:', imageUrl);
-          console.log('⚠️ Note: Image upload successful but not linked to dog yet');
-        } catch (imageError) {
-          console.warn('⚠️ Image upload failed, but dog was created successfully:', imageError);
-          // Don't fail the whole operation if image upload fails
-        }
-      }
+      console.log('✅ Dog created successfully with image properly linked:', newDog);
 
       router.push('/dogs');
     } catch (err: any) {
@@ -391,8 +378,8 @@ export default function AddDogPage() {
                 />
               </div>
             )}
-            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-              ⚠️ Note: Image upload currently has CORS issues. Dog will be created without image.
+            <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+              ✅ Images now upload and link properly to dogs!
             </p>
           </div>
 

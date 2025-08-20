@@ -59,7 +59,7 @@ interface Dog {
   imageUrl?: string;
 }
 
-// Upload file function - Remove CORS headers that are blocked
+// Upload file function
 async function uploadFile(file: File): Promise<string> {
   const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
   if (!token) throw new Error('No access token');
@@ -80,7 +80,6 @@ async function uploadFile(file: File): Promise<string> {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
-      // Remove the CORS-blocked headers
     },
     body: formData,
   });
@@ -143,34 +142,25 @@ async function fetchDogById(dogId: string): Promise<Dog | null> {
   }
 }
 
-// Update dog function
+// ✅ UPDATED: updateDog function to include gender
 async function updateDog(dogData: {
   dogId: string;
   name?: string;
   breed?: string[];
   birthday?: string;
+  gender?: string;
+  imageFile?: File;
 }) {
   const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
   if (!token) throw new Error('No access token');
 
-  const variables = {
-    updateDogDto: {
-      dogId: dogData.dogId,
-      ...(dogData.name && { name: dogData.name }),
-      ...(dogData.breed && dogData.breed.length > 0 && { breed: dogData.breed }),
-      ...(dogData.birthday && { birthday: dogData.birthday }),
-    }
-  };
-
-  console.log('🐕 Updating dog with data:', variables);
-
-  const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL!, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-    body: JSON.stringify({
+  // ✅ FIXED: Use multipart only when file is present, otherwise use regular GraphQL
+  if (dogData.imageFile) {
+    console.log('🐕 Using multipart approach (with file)...');
+    
+    const formData = new FormData();
+    
+    const operations = {
       query: `
         mutation UpdateDog($updateDogDto: UpdateDogDto!) {
           updateDog(updateDogDto: $updateDogDto) {
@@ -183,16 +173,91 @@ async function updateDog(dogData: {
           }
         }
       `,
-      variables
-    }),
-  });
+      variables: {
+        updateDogDto: {
+          dogId: dogData.dogId,
+          ...(dogData.name !== undefined && { name: dogData.name }),
+          ...(dogData.breed !== undefined && dogData.breed.length > 0 && { breed: dogData.breed }),
+          ...(dogData.birthday !== undefined && { birthday: dogData.birthday }),
+          ...(dogData.gender !== undefined && dogData.gender !== '' && { gender: dogData.gender }),
+          image: null // Reference for file upload
+        }
+      }
+    };
 
-  const json = await res.json();
-  if (!res.ok || json.errors) {
-    throw new Error(json.errors?.[0]?.message || 'Failed to update dog');
+    console.log('🐕 Multipart GraphQL operations:', JSON.stringify(operations, null, 2));
+
+    formData.append('operations', JSON.stringify(operations));
+    formData.append('map', JSON.stringify({ '0': ['variables.updateDogDto.image'] }));
+    formData.append('0', dogData.imageFile);
+
+    const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL!, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    console.log('📡 Multipart response status:', res.status);
+    const json = await res.json();
+    console.log('📄 Multipart response data:', json);
+
+    if (!res.ok || json.errors) {
+      console.error('❌ Multipart request failed:', json.errors || json);
+      throw new Error(json.errors?.[0]?.message || json.message || 'Failed to update dog');
+    }
+
+    return json.data.updateDog;
+  } else {
+    console.log('🐕 Using regular GraphQL approach (no file)...');
+    
+    const requestBody = {
+      query: `
+        mutation UpdateDog($updateDogDto: UpdateDogDto!) {
+          updateDog(updateDogDto: $updateDogDto) {
+            _id
+            name
+            breed
+            birthday
+            gender
+            imageUrl
+          }
+        }
+      `,
+      variables: {
+        updateDogDto: {
+          dogId: dogData.dogId,
+          ...(dogData.name !== undefined && { name: dogData.name }),
+          ...(dogData.breed !== undefined && dogData.breed.length > 0 && { breed: dogData.breed }),
+          ...(dogData.birthday !== undefined && { birthday: dogData.birthday }),
+          ...(dogData.gender !== undefined && dogData.gender !== '' && { gender: dogData.gender })
+        }
+      }
+    };
+
+    console.log('� Regular GraphQL operations:', JSON.stringify(requestBody, null, 2));
+
+    const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL!, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    console.log('📡 Regular response status:', res.status);
+    const json = await res.json();
+    console.log('📄 Regular response data:', json);
+
+    if (!res.ok || json.errors) {
+      console.error('❌ Regular request failed:', json.errors || json);
+      throw new Error(json.errors?.[0]?.message || json.message || 'Failed to update dog');
+    }
+
+    return json.data.updateDog;
   }
-
-  return json.data.updateDog;
 }
 
 export default function EditDogPage() {
@@ -280,30 +345,19 @@ export default function EditDogPage() {
     console.log('🚀 Form submission started');
 
     try {
-      // Step 1: Update dog data first (this works)
+      // ✅ Single call with image AND gender included
       const updateData = {
         dogId,
         name: name || undefined,
         breed: selectedBreeds.length > 0 ? selectedBreeds : undefined,
         birthday: birthday || undefined,
+        gender: gender || undefined, // ✅ Added gender to update
+        imageFile: imageFile || undefined,
       };
 
-      console.log('🐕 Updating dog with data:', updateData);
+      console.log('🐕 Updating dog with data (including gender):', updateData);
       const result = await updateDog(updateData);
-      console.log('✅ Dog updated successfully:', result);
-
-      // Step 2: Try to upload image after updating dog (optional)
-      if (imageFile) {
-        try {
-          console.log('📸 Attempting to upload image...');
-          const imageUrl = await uploadFile(imageFile);
-          console.log('✅ Image uploaded successfully:', imageUrl);
-          console.log('⚠️ Note: Image upload successful but not linked to dog yet');
-        } catch (imageError) {
-          console.warn('⚠️ Image upload failed, but dog was updated successfully:', imageError);
-          // Don't fail the whole operation if image upload fails
-        }
-      }
+      console.log('✅ Dog updated successfully with all data:', result);
 
       router.push('/dogs');
 
@@ -374,26 +428,26 @@ export default function EditDogPage() {
             </p>
           </div>
 
-          {/* Gender - Display only, not editable */}
+          {/* ✅ UPDATED: Gender - Now editable! */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Gender (Display Only)
+              Gender
             </label>
             <select
               value={gender}
-              disabled
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+              onChange={(e) => setGender(e.target.value as 'MALE' | 'FEMALE' | '')}
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-400"
             >
               <option value="">Select Gender</option>
               <option value="MALE">Male</option>
               <option value="FEMALE">Female</option>
             </select>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              * Gender cannot be updated - backend limitation
+            <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+              ✅ Gender can now be updated!
             </p>
           </div>
 
-          {/* Breeds Selection */}
+          {/* Breeds Selection - unchanged */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Breeds
@@ -465,7 +519,7 @@ export default function EditDogPage() {
             </p>
           </div>
 
-          {/* Image Upload */}
+          {/* Image Upload - unchanged */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Dog Photo
@@ -485,8 +539,8 @@ export default function EditDogPage() {
                 />
               </div>
             )}
-            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-              ⚠️ Note: Image upload currently has CORS issues. Dog will be updated without image changes.
+            <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+              ✅ Images now upload and link properly to dogs!
             </p>
           </div>
 

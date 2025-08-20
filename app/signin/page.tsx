@@ -61,26 +61,17 @@ export default function SignInPage() {
     }
   }
 
-  // Environment-aware Google OAuth
+  // ✅ FULLY DYNAMIC Google OAuth - works with any backend URL
   function handleGoogleAuth() {
     setGoogleLoading(true);
     console.log('🚀 Redirecting to Google OAuth...');
     
-    // Check if we're in development or production
-    const isDevelopment = process.env.NODE_ENV === 'development';
-    
-    let oauthUrl;
-    if (isDevelopment) {
-      // Local development: Use port 3456 (your backend port)
-      oauthUrl = 'http://localhost:3456/auth/callback/google';
-    } else {
-      // Production: Use your existing working setup
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL!.replace('/graphql', '');
-      oauthUrl = `${backendUrl}/auth/callback/google`;
-    }
+    // Extract base URL from NEXT_PUBLIC_BACKEND_URL and build OAuth URL
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL!.replace('/graphql', '');
+    const oauthUrl = `${backendUrl}/auth/callback/google`;
     
     console.log('📍 OAuth URL:', oauthUrl);
-    console.log('🌍 Environment:', isDevelopment ? 'Development' : 'Production');
+    console.log('🌐 Backend URL:', process.env.NEXT_PUBLIC_BACKEND_URL);
     window.location.href = oauthUrl;
   }
 
