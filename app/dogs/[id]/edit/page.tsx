@@ -80,6 +80,7 @@ async function uploadFile(file: File): Promise<string> {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
+      'x-apollo-operation-name': 'UploadFile', // Add CSRF protection header
     },
     body: formData,
   });
@@ -195,6 +196,7 @@ async function updateDog(dogData: {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
+        'x-apollo-operation-name': 'UpdateDog', // Add CSRF protection header
       },
       body: formData,
     });
