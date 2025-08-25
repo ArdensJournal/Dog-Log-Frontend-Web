@@ -9,6 +9,7 @@ export default function SignUpPage() {
   const [password, setPassword] = useState('');
   const [repeatPassword, setRepeatPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false); // ✅ New state for terms acceptance
   const [error, setError] = useState('');
   const [googleLoading, setGoogleLoading] = useState(false);
   const router = useRouter();
@@ -16,6 +17,13 @@ export default function SignUpPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
+    
+    // Validate terms acceptance
+    if (!acceptTerms) {
+      setError('You must accept the Terms of Service and Privacy Policy to create an account.');
+      return;
+    }
+    
     if (password !== repeatPassword) {
       setError('Passwords do not match');
       return;
@@ -57,6 +65,12 @@ export default function SignUpPage() {
 
   // Environment-aware Google OAuth
   function handleGoogleAuth() {
+    // Validate terms acceptance for Google OAuth too
+    if (!acceptTerms) {
+      setError('You must accept the Terms of Service and Privacy Policy to create an account.');
+      return;
+    }
+    
     setGoogleLoading(true);
     console.log('🚀 Redirecting to Google OAuth...');
     
@@ -125,9 +139,33 @@ export default function SignUpPage() {
             />
             <label htmlFor="showPassword" className="text-gray-700 dark:text-gray-300 text-sm">Show Password</label>
           </div>
+          
+          {/* Terms acceptance checkbox */}
+          <div className="flex items-start gap-2 mt-2">
+            <input
+              type="checkbox"
+              id="acceptTerms"
+              checked={acceptTerms}
+              onChange={(e) => setAcceptTerms(e.target.checked)}
+              className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+              required
+            />
+            <label htmlFor="acceptTerms" className="text-gray-700 dark:text-gray-300 text-sm">
+              I agree to the{' '}
+              <Link href="/terms" className="text-indigo-600 dark:text-indigo-400 hover:underline font-semibold">
+                Terms of Service
+              </Link>{' '}
+              and{' '}
+              <Link href="/privacy" className="text-indigo-600 dark:text-indigo-400 hover:underline font-semibold">
+                Privacy Policy
+              </Link>
+            </label>
+          </div>
+          
           <button
             type="submit"
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-lg shadow transition"
+            disabled={!acceptTerms}
+            className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold py-2 rounded-lg shadow transition"
           >
             Sign Up
           </button>
@@ -147,8 +185,8 @@ export default function SignUpPage() {
           <button
             type="button"
             onClick={handleGoogleAuth}
-            disabled={googleLoading}
-            className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50"
+            disabled={googleLoading || !acceptTerms}
+            className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
