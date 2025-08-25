@@ -16,10 +16,10 @@ export default function LegalLayout({ children, title, lastUpdated }: LegalLayou
         {/* Header */}
         <div className="mb-8">
           <Link 
-            href="/dogs" 
+            href="/" 
             className="inline-flex items-center text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 mb-4"
           >
-            ← Back to App
+            ← Back to Home
           </Link>
           
           {/* Dog Log Logo */}
