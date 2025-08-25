@@ -16,3 +16,42 @@ input[type='number']::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
+/* Fix for anchor links with fixed navbar */
+.scroll-offset {
+  scroll-margin-top: 100px;
+}
+
+/* Apply scroll offset to all elements with anchor IDs in legal pages */
+#infocollect,
+#infouse,
+#legalbases,
+#whoshare,
+#cookies,
+#ai,
+#sociallogins,
+#inforetain,
+#infosafe,
+#privacyrights,
+#policyupdates,
+#controls,
+#residents,
+#acceptance,
+#description,
+#accounts,
+#privacy,
+#acceptable,
+#payment,
+#intellectual,
+#thirdparty,
+#availability,
+#disclaimers,
+#limitation,
+#indemnification,
+#termination,
+#governing,
+#severability,
+#force,
+#changes {
+  scroll-margin-top: 100px;
+}
