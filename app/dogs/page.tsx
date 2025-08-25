@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import ProtectedRoute from '../../components/ProtectedRoute';
 
 async function fetchUserDogs() {
   const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
@@ -107,7 +108,8 @@ export default function DogsPage() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col items-center bg-gradient-to-br from-blue-100 via-white to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900 p-8">
+    <ProtectedRoute fallbackMessage="You need to be signed in to view your dogs.">
+      <main className="min-h-screen flex flex-col items-center bg-gradient-to-br from-blue-100 via-white to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900 p-8">
       <div className="w-full max-w-3xl bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
         <h1 className="text-3xl font-bold text-indigo-700 dark:text-indigo-400 mb-6 text-center">All Dogs</h1>
         <p className="text-gray-600 dark:text-gray-400 mb-6 text-center">This is where you will see all registered dogs.</p>
@@ -182,5 +184,6 @@ export default function DogsPage() {
         </div>
       </div>
     </main>
+    </ProtectedRoute>
   );
 }

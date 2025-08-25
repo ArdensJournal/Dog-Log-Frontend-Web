@@ -2,55 +2,33 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-
-// Updated to use whoAmI instead of me
-async function fetchUserName(): Promise<string> {
-  if (typeof window === 'undefined') return 'visitor';
-  const token = localStorage.getItem('accessToken');
-  if (!token) return 'visitor';
-
-  try {
-    const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL!, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        query: `
-          query {
-            whoAmI {
-              name
-              email
-            }
-          }
-        `,
-      }),
-    });
-    const json = await res.json();
-    const name = json.data?.whoAmI?.name;
-    const email = json.data?.whoAmI?.email;
-    return name || (email ? email.split('@')[0] : 'user');
-  } catch {
-    return 'user';
-  }
-}
+import { checkAuthStatus, clearAuth } from '@/app/lib/auth';
 
 export default function Page() {
   const [userName, setUserName] = useState('visitor');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    fetchUserName().then(setUserName);
+    const verifyUser = async () => {
+      const { isAuthenticated: authStatus, user } = await checkAuthStatus();
+      setIsAuthenticated(authStatus);
+      
+      if (authStatus && user) {
+        setUserName(user.name || user.email?.split('@')[0] || 'user');
+      } else {
+        setUserName('visitor');
+      }
+    };
+
+    verifyUser();
   }, []);
 
   function handleLogout() {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+    clearAuth();
     setUserName('visitor');
+    setIsAuthenticated(false);
     window.location.reload();
   }
-
-  const isSignedIn = userName !== 'visitor';
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900 flex flex-col items-center p-8">
@@ -68,13 +46,13 @@ export default function Page() {
           Your all-in-one dog care and tracking app.
         </p>
         <div className="flex justify-center gap-4 mt-4 mb-4">
-          {!isSignedIn && (
+          {!isAuthenticated && (
             <>
               <Link href="/signup" className="px-6 py-2 rounded-full bg-blue-500 text-white font-semibold shadow hover:bg-blue-600 transition">Sign Up</Link>
               <Link href="/signin" className="px-6 py-2 rounded-full bg-blue-400 text-white font-semibold shadow hover:bg-blue-500 transition">Sign In</Link>
             </>
           )}
-          {isSignedIn && (
+          {isAuthenticated && (
             <button
               onClick={handleLogout}
               className="px-6 py-2 rounded-full bg-red-500 text-white font-semibold shadow hover:bg-red-600 transition"
@@ -87,7 +65,7 @@ export default function Page() {
       </header>
 
       {/* Only show these sections if signed in */}
-      {isSignedIn && (
+      {isAuthenticated && (
         <>
           <section className="w-full max-w-3xl mb-8 flex flex-wrap justify-center gap-4">
             <Link href="/dogs" className="px-6 py-4 rounded-xl bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 font-bold shadow hover:bg-indigo-200 dark:hover:bg-indigo-800 transition w-48 text-center">

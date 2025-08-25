@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { DarkModeToggle } from './DarkModeToggle';
+import { checkAuthStatus, hasValidToken } from '@/app/lib/auth';
 
 const publicLinks = [
   { href: '/', label: 'Home' },
@@ -25,17 +26,24 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  const checkSignedIn = () => !!localStorage.getItem('accessToken');
+  // Improved authentication check
+  const verifyAuthentication = async () => {
+    const { isAuthenticated } = await checkAuthStatus();
+    setIsSignedIn(isAuthenticated);
+  };
 
   useEffect(() => {
-    setIsSignedIn(checkSignedIn());
+    // Initial check
+    verifyAuthentication();
 
-    const handleStorage = () => setIsSignedIn(checkSignedIn());
+    // Listen for storage changes (when user signs in/out in another tab)
+    const handleStorage = () => verifyAuthentication();
     window.addEventListener('storage', handleStorage);
 
+    // Check authentication status periodically, but less frequently
     const interval = setInterval(() => {
-      setIsSignedIn(checkSignedIn());
-    }, 500);
+      verifyAuthentication();
+    }, 10000); // Check every 10 seconds instead of 500ms
 
     // Check screen size
     const checkScreenSize = () => {

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import ProtectedRoute from '../../components/ProtectedRoute';
 
 // Complete Dog breeds enum
 const DOG_BREEDS = [
@@ -230,6 +231,7 @@ export default function AddDogPage() {
   };
 
   return (
+    <ProtectedRoute fallbackMessage="You need to be signed in to add a new dog.">
     <main className="min-h-screen flex flex-col items-center bg-gradient-to-br from-blue-100 via-white to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900 p-8">
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 w-full max-w-2xl">
         <div className="flex items-center gap-4 mb-6">
@@ -416,5 +418,6 @@ export default function AddDogPage() {
         )}
       </div>
     </main>
+    </ProtectedRoute>
   );
 }
