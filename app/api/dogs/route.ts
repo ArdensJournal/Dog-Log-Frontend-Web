@@ -1,10 +1,10 @@
 import { NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
 
-const BACKEND_URL = process.env.BACKEND_URL;
+const BACKEND_URL = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
 
 if (!BACKEND_URL) {
-  throw new Error('BACKEND_URL is not defined in environment variables');
+  console.error('❌ BACKEND_URL is not defined. Please set BACKEND_URL or NEXT_PUBLIC_BACKEND_URL environment variable');
 }
 
 // Helper function to get auth token
