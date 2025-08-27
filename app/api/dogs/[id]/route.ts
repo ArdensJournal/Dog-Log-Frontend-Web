@@ -16,8 +16,9 @@ async function getAuthToken() {
 // GET /api/dogs/[id] - Fetch specific dog
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const token = await getAuthToken();
     
@@ -75,7 +76,7 @@ export async function GET(
 
     // Filter to find the specific dog
     const dogs = dogData.data.userDogs || [];
-    const specificDog = dogs.find((dog: any) => dog._id === params.id);
+    const specificDog = dogs.find((dog: any) => dog._id === id);
     
     if (!specificDog) {
       return Response.json(
