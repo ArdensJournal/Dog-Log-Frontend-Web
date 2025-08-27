@@ -18,12 +18,9 @@ export function notifyAuthStateChanged() {
     // Dispatch custom event
     window.dispatchEvent(new CustomEvent(AUTH_CHANGED_EVENT));
     
-    // Also trigger storage event for cross-tab compatibility
-    window.dispatchEvent(new StorageEvent('storage', {
-      key: 'auth-state-changed',
-      newValue: Date.now().toString(),
-      storageArea: localStorage
-    }));
+    // Use localStorage to trigger cross-tab updates 
+    localStorage.setItem('auth-state-changed', Date.now().toString());
+    localStorage.removeItem('auth-state-changed'); // Trigger the storage event
   }
 }
 
@@ -36,7 +33,7 @@ export function onAuthStateChanged(callback: () => void) {
   // Listen to custom event
   window.addEventListener(AUTH_CHANGED_EVENT, handleAuthChange);
   
-  // Listen to storage events for cross-tab changes
+  // Listen to real storage events for cross-tab changes
   window.addEventListener('storage', (e) => {
     if (e.key === 'auth-state-changed') {
       handleAuthChange();

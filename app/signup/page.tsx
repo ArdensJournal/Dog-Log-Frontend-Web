@@ -35,9 +35,13 @@ export default function SignUpPage() {
       const result = await apiClient.signup(name, email, password, acceptTerms);
       
       if (result.user) {
-        // Notify all components about the auth state change
-        notifyAuthStateChanged();
+        // Navigate first, then notify about auth state change
         router.push('/');
+        
+        // Delay the notification slightly to allow navigation to complete
+        setTimeout(() => {
+          notifyAuthStateChanged();
+        }, 100);
       } else {
         setError('Sign up failed');
       }

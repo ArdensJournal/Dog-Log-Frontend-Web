@@ -43,14 +43,15 @@ function TransitionPageContent() {
       .then(data => {
         if (data.success) {
           console.log('✅ HTTP-only cookies set successfully');
-          // Notify all components about the auth state change
-          console.log('📡 Notifying components of auth state change...');
-          notifyAuthStateChanged();
           
-          // Small delay to ensure state propagates, then redirect
+          // Navigate first
+          router.push('/');
+          
+          // Then notify about auth state change with a small delay
           setTimeout(() => {
-            router.push('/');
-          }, 100);
+            console.log('📡 Notifying components of auth state change...');
+            notifyAuthStateChanged();
+          }, 200);
         } else {
           console.error('❌ Failed to set cookies:', data.error);
           router.push('/signin?error=cookie_setup_failed');

@@ -33,9 +33,13 @@ export default function SignInPage() {
       const result = await apiClient.signin(email, password);
       
       if (result.user) {
-        // Notify all components about the auth state change
-        notifyAuthStateChanged();
-        router.push('/'); // Redirect to homepage
+        // Navigate first, then notify about auth state change
+        router.push('/');
+        
+        // Delay the notification slightly to allow navigation to complete
+        setTimeout(() => {
+          notifyAuthStateChanged();
+        }, 100);
       } else {
         setError('Sign in failed');
       }
