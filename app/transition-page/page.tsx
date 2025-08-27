@@ -25,14 +25,34 @@ function TransitionPageContent() {
       console.log('🔑 Access token:', accessToken.substring(0, 50) + '...');
       console.log('🔄 Refresh token:', refreshToken.substring(0, 50) + '...');
       
-      // Store tokens in localStorage
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
+      // Instead of localStorage, send tokens to our API to set HTTP-only cookies
+      console.log('🍪 Setting tokens as HTTP-only cookies via API...');
       
-      console.log('💾 Tokens stored in localStorage');
-      
-      // Redirect to main dashboard
-      router.push('/');
+      fetch('/api/auth/google-callback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          accessToken,
+          refreshToken
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log('✅ HTTP-only cookies set successfully');
+          // Redirect to main dashboard
+          router.push('/');
+        } else {
+          console.error('❌ Failed to set cookies:', data.error);
+          router.push('/signin?error=cookie_setup_failed');
+        }
+      })
+      .catch(error => {
+        console.error('❌ Error setting cookies:', error);
+        router.push('/signin?error=cookie_setup_failed');
+      });
     } else {
       console.error('❌ Missing tokens in transition page');
       console.log('🔍 Available params:', Array.from(searchParams.entries()));
