@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { apiClient } from '../lib/api-client';
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('');
@@ -28,38 +29,17 @@ export default function SignUpPage() {
       setError('Passwords do not match');
       return;
     }
+    
     try {
-      const graphqlQuery = {
-        query: `
-          mutation SignUp($signUpByCredentialsDto: SignInOrSignUpByCredentialsDto!) {
-            signUpByCredentials(signUpByCredentialsDto: $signUpByCredentialsDto) {
-              accessToken
-              refreshToken
-            }
-          }
-        `,
-        variables: {
-          signUpByCredentialsDto: { email, name, password }
-        }
-      };
-
-      const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL!, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(graphqlQuery),
-      });
-
-      const result = await res.json();
-      const data = result.data?.signUpByCredentials;
-      if (res.ok && data?.accessToken) {
-        localStorage.setItem('accessToken', data.accessToken);
-        localStorage.setItem('refreshToken', data.refreshToken);
+      const result = await apiClient.signup(name, email, password, acceptTerms);
+      
+      if (result.user) {
         router.push('/');
       } else {
-        setError(result.errors?.[0]?.message || 'Sign up failed');
+        setError('Sign up failed');
       }
-    } catch (err) {
-      setError('Sign up failed');
+    } catch (error: any) {
+      setError(error.message || 'Sign up failed');
     }
   }
 

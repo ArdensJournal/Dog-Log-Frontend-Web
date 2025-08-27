@@ -96,35 +96,14 @@ async function uploadFile(file: File): Promise<string> {
 
 // Fetch dog by ID function
 async function fetchDogById(dogId: string): Promise<Dog | null> {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
-  if (!token) {
-    console.log('❌ No access token found');
-    return null;
-  }
-
   try {
     console.log('🔍 Fetching dog with ID:', dogId);
     
-    const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL!, {
-      method: 'POST',
+    const res = await fetch(`/api/dogs/${dogId}`, {
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
       },
-      body: JSON.stringify({
-        query: `
-          query {
-            userDogs {
-              _id
-              name
-              breed
-              birthday
-              gender
-              imageUrl
-            }
-          }
-        `,
-      }),
     });
 
     console.log('📡 Fetch response status:', res.status);
@@ -132,8 +111,7 @@ async function fetchDogById(dogId: string): Promise<Dog | null> {
     const json = await res.json();
     console.log('📄 Fetch response data:', json);
 
-    const dogs = json.data?.userDogs || [];
-    const foundDog = dogs.find((dog: Dog) => dog._id === dogId) || null;
+    const foundDog = json.data?.dog || null;
     
     console.log('🐕 Found dog:', foundDog);
     
@@ -144,7 +122,7 @@ async function fetchDogById(dogId: string): Promise<Dog | null> {
   }
 }
 
-// ✅ UPDATED: updateDog function to include gender
+// ✅ UPDATED: updateDog function to use API routes
 async function updateDog(dogData: {
   dogId: string;
   name?: string;
@@ -153,10 +131,7 @@ async function updateDog(dogData: {
   gender?: string;
   imageFile?: File;
 }) {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
-  if (!token) throw new Error('No access token');
-
-  // ✅ FIXED: Use multipart only when file is present, otherwise use regular GraphQL
+  // ✅ Use API routes instead of direct backend calls - no token needed
   if (dogData.imageFile) {
     console.log('🐕 Using multipart approach (with file)...');
     
@@ -193,59 +168,54 @@ async function updateDog(dogData: {
     formData.append('map', JSON.stringify({ '0': ['variables.updateDogDto.image'] }));
     formData.append('0', dogData.imageFile);
 
-    const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL!, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'x-apollo-operation-name': 'UpdateDog', // Add CSRF protection header
-      },
-      body: formData,
+    const res = await fetch(`/api/dogs/${dogData.dogId}`, {
+      method: 'PUT',
+      body: formData, // API route will handle the multipart forwarding
     });
 
     console.log('📡 Multipart response status:', res.status);
-    const json = await res.json();
-    console.log('📄 Multipart response data:', json);
-
-    if (!res.ok || json.errors) {
-      console.error('❌ Multipart request failed:', json.errors || json);
-      throw new Error(json.errors?.[0]?.message || json.message || 'Failed to update dog');
+    console.log('📡 Multipart response headers:', Object.fromEntries(res.headers.entries()));
+    
+    const responseText = await res.text();
+    console.log('📄 Raw response text:', responseText);
+    
+    let json;
+    try {
+      json = JSON.parse(responseText);
+      console.log('📄 Parsed response data:', json);
+    } catch (parseError) {
+      console.error('❌ Failed to parse response as JSON:', parseError);
+      console.log('📄 Response was not valid JSON, raw text:', responseText);
+      throw new Error(`Server returned invalid response: ${responseText}`);
     }
 
-    return json.data.updateDog;
+    if (!res.ok || json.error) {
+      console.error('❌ Multipart request failed:', json);
+      console.error('❌ Full error details:', { 
+        status: res.status, 
+        statusText: res.statusText, 
+        response: json 
+      });
+      throw new Error(json.error || `Failed to update dog (${res.status}: ${res.statusText})`);
+    }
+
+    return json.data?.updateDog || json.data;
   } else {
-    console.log('🐕 Using regular GraphQL approach (no file)...');
+    console.log('🐕 Using regular JSON approach (no file)...');
     
     const requestBody = {
-      query: `
-        mutation UpdateDog($updateDogDto: UpdateDogDto!) {
-          updateDog(updateDogDto: $updateDogDto) {
-            _id
-            name
-            breed
-            birthday
-            gender
-            imageUrl
-          }
-        }
-      `,
-      variables: {
-        updateDogDto: {
-          dogId: dogData.dogId,
-          ...(dogData.name !== undefined && { name: dogData.name }),
-          ...(dogData.breed !== undefined && dogData.breed.length > 0 && { breed: dogData.breed }),
-          ...(dogData.birthday !== undefined && { birthday: dogData.birthday }),
-          ...(dogData.gender !== undefined && dogData.gender !== '' && { gender: dogData.gender })
-        }
-      }
+      ...(dogData.name !== undefined && { name: dogData.name }),
+      ...(dogData.breed !== undefined && dogData.breed.length > 0 && { breed: dogData.breed }),
+      ...(dogData.birthday !== undefined && { birthday: dogData.birthday }),
+      ...(dogData.gender !== undefined && dogData.gender !== '' && { gender: dogData.gender })
     };
 
     console.log('� Regular GraphQL operations:', JSON.stringify(requestBody, null, 2));
 
-    const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL!, {
-      method: 'POST',
+    const res = await fetch(`/api/dogs/${dogData.dogId}`, {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify(requestBody),
     });
@@ -254,12 +224,12 @@ async function updateDog(dogData: {
     const json = await res.json();
     console.log('📄 Regular response data:', json);
 
-    if (!res.ok || json.errors) {
-      console.error('❌ Regular request failed:', json.errors || json);
-      throw new Error(json.errors?.[0]?.message || json.message || 'Failed to update dog');
+    if (!res.ok || json.error) {
+      console.error('❌ Regular request failed:', json);
+      throw new Error(json.error || 'Failed to update dog');
     }
 
-    return json.data.updateDog;
+    return json.data?.updateDog || json.data;
   }
 }
 

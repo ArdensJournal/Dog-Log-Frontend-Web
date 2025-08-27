@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { checkAuthStatus, clearAuth } from '@/app/lib/auth';
+import { apiClient } from '@/app/lib/api-client';
 
 export default function Page() {
   const [userName, setUserName] = useState('visitor');
@@ -10,12 +10,17 @@ export default function Page() {
 
   useEffect(() => {
     const verifyUser = async () => {
-      const { isAuthenticated: authStatus, user } = await checkAuthStatus();
-      setIsAuthenticated(authStatus);
-      
-      if (authStatus && user) {
-        setUserName(user.name || user.email?.split('@')[0] || 'user');
-      } else {
+      try {
+        const result = await apiClient.getCurrentUser();
+        setIsAuthenticated(result.isAuthenticated);
+        
+        if (result.isAuthenticated && result.user) {
+          setUserName(result.user.name || result.user.email?.split('@')[0] || 'user');
+        } else {
+          setUserName('visitor');
+        }
+      } catch (error) {
+        setIsAuthenticated(false);
         setUserName('visitor');
       }
     };
@@ -23,11 +28,19 @@ export default function Page() {
     verifyUser();
   }, []);
 
-  function handleLogout() {
-    clearAuth();
-    setUserName('visitor');
-    setIsAuthenticated(false);
-    window.location.reload();
+  async function handleLogout() {
+    try {
+      await apiClient.signout();
+      setUserName('visitor');
+      setIsAuthenticated(false);
+      window.location.reload();
+    } catch (error) {
+      console.error('Error during logout:', error);
+      // Still clear local state even if API call fails
+      setUserName('visitor');
+      setIsAuthenticated(false);
+      window.location.reload();
+    }
   }
 
   return (

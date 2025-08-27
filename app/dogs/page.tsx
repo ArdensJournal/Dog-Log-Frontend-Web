@@ -3,78 +3,25 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import ProtectedRoute from '../../components/ProtectedRoute';
+import { apiClient } from '../lib/api-client';
 
 async function fetchUserDogs() {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
-  if (!token) return [];
   try {
-    const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL!, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        query: `
-          query {
-            userDogs {
-              _id
-              name
-              breed
-              birthday
-              gender
-              imageUrl
-              collaborators {
-                role
-                user {
-                  _id
-                  name
-                  email
-                }
-              }
-            }
-          }
-        `,
-      }),
-    });
-    const json = await res.json();
-    return json.data?.userDogs || [];
-  } catch {
+    const result = await apiClient.getDogs();
+    return result.data?.userDogs || [];
+  } catch (error) {
+    console.error('Error fetching dogs:', error);
     return [];
   }
 }
 
 async function deleteDog(dogId: string) {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
-  if (!token) throw new Error('No access token');
-  
-  const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL!, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      query: `
-        mutation DeleteDog($findByDogIdDto: FindByDogIdDto!) {
-          deleteDog(findByDogIdDto: $findByDogIdDto) {
-            _id
-            name
-          }
-        }
-      `,
-      variables: {
-        findByDogIdDto: { dogId }
-      }
-    }),
-  });
-  
-  const json = await res.json();
-  if (!res.ok || json.errors) {
-    throw new Error(json.errors?.[0]?.message || 'Failed to delete dog');
+  try {
+    await apiClient.deleteDog(dogId);
+  } catch (error) {
+    console.error('Error deleting dog:', error);
+    throw error;
   }
-  
-  return json.data.deleteDog;
 }
 
 export default function DogsPage() {

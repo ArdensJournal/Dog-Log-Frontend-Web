@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { apiClient } from '../lib/api-client';
 
 export default function SignInPage() {
   const [email, setEmail] = useState('');
@@ -26,38 +27,17 @@ export default function SignInPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
+    
     try {
-      const graphqlQuery = {
-        query: `
-          mutation SignIn($signInByCredentialsDto: SignInOrSignUpByCredentialsDto!) {
-            signInByCredentials(signInByCredentialsDto: $signInByCredentialsDto) {
-              accessToken
-              refreshToken
-            }
-          }
-        `,
-        variables: {
-          signInByCredentialsDto: { email, password }
-        }
-      };
-
-      const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL!, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(graphqlQuery),
-      });
-
-      const result = await res.json();
-      const data = result.data?.signInByCredentials;
-      if (res.ok && data?.accessToken) {
-        localStorage.setItem('accessToken', data.accessToken);
-        localStorage.setItem('refreshToken', data.refreshToken);
+      const result = await apiClient.signin(email, password);
+      
+      if (result.user) {
         router.push('/'); // Redirect to homepage
       } else {
-        setError(result.errors?.[0]?.message || 'Sign in failed');
+        setError('Sign in failed');
       }
-    } catch (err) {
-      setError('Sign in failed');
+    } catch (error: any) {
+      setError(error.message || 'Sign in failed');
     }
   }
 

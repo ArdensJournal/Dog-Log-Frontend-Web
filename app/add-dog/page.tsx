@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from '../../components/ProtectedRoute';
+import { apiClient } from '../lib/api-client';
 
 // Complete Dog breeds enum
 const DOG_BREEDS = [
@@ -208,18 +209,62 @@ export default function AddDogPage() {
     try {
       console.log('🚀 Starting dog creation process...');
 
-      // ✅ Single call with image included
-      const dogData = {
-        name,
-        breed: selectedBreeds.length > 0 ? selectedBreeds : undefined,
-        birthday: birthday || undefined,
-        gender: gender || undefined,
-        imageFile: image || undefined,
-      };
+      if (image) {
+        // Handle file upload case - create FormData
+        const formData = new FormData();
+        
+        const operations = {
+          query: `
+            mutation CreateDog($createDogDto: CreateDogDto!) {
+              createDog(createDogDto: $createDogDto) {
+                _id
+                name
+                breed
+                birthday
+                gender
+                imageUrl
+              }
+            }
+          `,
+          variables: {
+            createDogDto: {
+              name,
+              ...(selectedBreeds.length > 0 && { breed: selectedBreeds }),
+              ...(birthday && { birthday }),
+              ...(gender && { gender }),
+              image: null
+            }
+          }
+        };
 
-      console.log('🐕 Creating dog with data (image will be uploaded first if provided):', dogData);
-      const newDog = await createDog(dogData);
-      console.log('✅ Dog created successfully with image properly linked:', newDog);
+        formData.append('operations', JSON.stringify(operations));
+        formData.append('map', JSON.stringify({ '0': ['variables.createDogDto.image'] }));
+        formData.append('0', image);
+
+        // Use fetch directly to the API route for file upload
+        const res = await fetch('/api/dogs', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!res.ok) {
+          const error = await res.json();
+          throw new Error(error.error || 'Failed to create dog');
+        }
+
+        const result = await res.json();
+        console.log('✅ Dog created successfully with image:', result);
+      } else {
+        // Handle regular creation without file
+        const result = await apiClient.addDog({
+          name,
+          breed: selectedBreeds.join(','),
+          birthday: birthday || '',
+          gender: gender || ''
+        });
+        
+        console.log('✅ Dog created successfully:', result);
+      }
 
       router.push('/dogs');
     } catch (err: any) {
