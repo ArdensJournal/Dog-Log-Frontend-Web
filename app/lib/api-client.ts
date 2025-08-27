@@ -24,12 +24,24 @@ class ApiClient {
       const data = await response.json();
 
       if (!response.ok) {
+        // Don't log 401 errors for auth endpoints - they're expected when user isn't authenticated
+        const isAuthCheck = endpoint === '/auth/me';
+        const isUnauthorized = response.status === 401;
+        
+        if (!(isAuthCheck && isUnauthorized)) {
+          console.error(`API request failed: ${endpoint}`, data.error || 'Request failed');
+        }
+        
         throw new Error(data.error || 'API request failed');
       }
 
       return data;
     } catch (error) {
-      console.error(`API request failed: ${endpoint}`, error);
+      // Don't log network errors for auth checks - they're expected
+      const isAuthCheck = endpoint === '/auth/me';
+      if (!isAuthCheck) {
+        console.error(`API request failed: ${endpoint}`, error);
+      }
       throw error;
     }
   }

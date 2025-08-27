@@ -28,8 +28,13 @@ export default function Navbar() {
 
   // Improved authentication check
   const verifyAuthentication = async () => {
-    const { isAuthenticated } = await checkAuthStatus();
-    setIsSignedIn(isAuthenticated);
+    try {
+      const { isAuthenticated } = await checkAuthStatus();
+      setIsSignedIn(isAuthenticated);
+    } catch (error) {
+      // Silently handle authentication failures
+      setIsSignedIn(false);
+    }
   };
 
   useEffect(() => {
@@ -43,7 +48,7 @@ export default function Navbar() {
     // Check authentication status periodically, but less frequently
     const interval = setInterval(() => {
       verifyAuthentication();
-    }, 10000); // Check every 10 seconds instead of 500ms
+    }, 30000); // Check every 30 seconds instead of 10 seconds
 
     // Check screen size
     const checkScreenSize = () => {

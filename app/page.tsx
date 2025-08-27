@@ -20,6 +20,7 @@ export default function Page() {
           setUserName('visitor');
         }
       } catch (error) {
+        // Silently handle expected authentication failures
         setIsAuthenticated(false);
         setUserName('visitor');
       }
