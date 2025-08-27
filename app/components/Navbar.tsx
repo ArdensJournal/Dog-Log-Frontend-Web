@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { DarkModeToggle } from './DarkModeToggle';
-import { checkAuthStatus, hasValidToken } from '@/app/lib/auth';
+import { checkAuthStatus, hasValidToken, onAuthStateChanged } from '@/app/lib/auth';
 
 const publicLinks = [
   { href: '/', label: 'Home' },
@@ -41,6 +41,12 @@ export default function Navbar() {
     // Initial check
     verifyAuthentication();
 
+    // Listen for auth state changes (immediate updates)
+    const unsubscribe = onAuthStateChanged(() => {
+      console.log('🔄 Auth state change detected, updating navbar...');
+      verifyAuthentication();
+    });
+
     // Listen for storage changes (when user signs in/out in another tab)
     const handleStorage = () => verifyAuthentication();
     window.addEventListener('storage', handleStorage);
@@ -59,6 +65,7 @@ export default function Navbar() {
     window.addEventListener('resize', checkScreenSize);
 
     return () => {
+      unsubscribe();
       window.removeEventListener('storage', handleStorage);
       window.removeEventListener('resize', checkScreenSize);
       clearInterval(interval);

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { apiClient } from '@/app/lib/api-client';
+import { onAuthStateChanged, clearAuth } from '@/app/lib/auth';
 
 export default function Page() {
   const [userName, setUserName] = useState('visitor');
@@ -26,12 +27,23 @@ export default function Page() {
       }
     };
 
+    // Initial check
     verifyUser();
+    
+    // Listen for auth state changes
+    const unsubscribe = onAuthStateChanged(() => {
+      console.log('🔄 Auth state change detected on homepage, refreshing user info...');
+      verifyUser();
+    });
+    
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   async function handleLogout() {
     try {
-      await apiClient.signout();
+      await clearAuth(); // This will notify components and clear cache
       setUserName('visitor');
       setIsAuthenticated(false);
       window.location.reload();

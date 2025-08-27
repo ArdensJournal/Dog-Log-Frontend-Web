@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiClient } from '../lib/api-client';
+import { notifyAuthStateChanged } from '../lib/auth';
 
 export default function SignInPage() {
   const [email, setEmail] = useState('');
@@ -32,6 +33,8 @@ export default function SignInPage() {
       const result = await apiClient.signin(email, password);
       
       if (result.user) {
+        // Notify all components about the auth state change
+        notifyAuthStateChanged();
         router.push('/'); // Redirect to homepage
       } else {
         setError('Sign in failed');

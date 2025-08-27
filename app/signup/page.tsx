@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiClient } from '../lib/api-client';
+import { notifyAuthStateChanged } from '../lib/auth';
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('');
@@ -34,6 +35,8 @@ export default function SignUpPage() {
       const result = await apiClient.signup(name, email, password, acceptTerms);
       
       if (result.user) {
+        // Notify all components about the auth state change
+        notifyAuthStateChanged();
         router.push('/');
       } else {
         setError('Sign up failed');
