@@ -9,13 +9,20 @@ if (!BACKEND_URL) {
 
 // GET /api/auth/me - Get current user info
 export async function GET() {
+  console.log('👤 GET /api/auth/me - Getting current user info');
+  
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
     
+    console.log('🍪 Token from cookies:', token ? `${token.substring(0, 20)}...` : 'No token found');
+    
     if (!token) {
+      console.log('❌ No authentication token found in cookies');
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    console.log('✅ Authentication token found, querying backend...');
 
     const query = `
       query WhoAmI {
@@ -28,6 +35,7 @@ export async function GET() {
       }
     `;
 
+    console.log('🚀 Sending whoAmI query to backend...');
     const response = await fetch(BACKEND_URL!, {
       method: 'POST',
       headers: {
@@ -37,18 +45,29 @@ export async function GET() {
       body: JSON.stringify({ query }),
     });
 
+    console.log('📡 Backend response status:', response.status);
+    
     if (!response.ok) {
+      console.log('❌ Backend response not OK:', response.status);
+      const errorText = await response.text();
+      console.log('📄 Backend error response:', errorText);
+      
       // If unauthorized, clear the cookie
       if (response.status === 401) {
+        console.log('🧹 Clearing invalid token cookie');
+        const cookieStore = await cookies();
         cookieStore.delete('token');
       }
       return Response.json(
-        { error: 'Failed to get user info' }, 
+        { error: 'Failed to get user info', details: errorText }, 
         { status: response.status }
       );
     }
 
-    const data = await response.json();
+    const responseText = await response.text();
+    console.log('📄 Backend response text:', responseText);
+    
+    const data = JSON.parse(responseText);
 
     if (data.errors) {
       // If unauthorized, clear the cookie
