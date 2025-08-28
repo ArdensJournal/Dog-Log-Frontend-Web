@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { checkAuthStatus } from '@/app/lib/auth';
 import { Dog } from '@/app/lib/api-client';
 import { PottyRecord } from '@/app/lib/types/potty';
-import { apiClient } from '@/app/lib/api-client';
+import { fetchDogs } from '@/app/lib/fetchDogs';
 import PottyLogForm from '@/app/components/potty/PottyLogForm';
 import PottyHistoryList from '@/app/components/potty/PottyHistoryList';
 
@@ -21,26 +21,6 @@ export default function NeedsPage() {
   const [showLogForm, setShowLogForm] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-
-  // Handle escape key to close modal
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && showLogForm) {
-        setShowLogForm(false);
-      }
-    };
-
-    if (showLogForm) {
-      document.addEventListener('keydown', handleEscape);
-      // Prevent background scrolling when modal is open
-      document.body.style.overflow = 'hidden';
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
-    };
-  }, [showLogForm]);
 
   // Load user authentication
   useEffect(() => {
@@ -66,13 +46,6 @@ export default function NeedsPage() {
       setAuthLoading(true);
       const authenticatedUser = await checkAuthStatus();
       setUser(authenticatedUser.isAuthenticated ? authenticatedUser.user : null);
-      
-      // Debug logging
-      console.log('Auth check result:', {
-        isAuthenticated: authenticatedUser.isAuthenticated,
-        user: authenticatedUser.user
-      });
-      
     } catch (error) {
       console.error('Auth check failed:', error);
       setUser(null);
@@ -82,32 +55,19 @@ export default function NeedsPage() {
   };
 
   const loadDogs = async () => {
-    // Don't try to load dogs if not authenticated
-    if (!user) {
-      console.log('No authenticated user, skipping dog loading');
-      return;
-    }
-
     try {
       setIsLoadingDogs(true);
       setError(null);
-      console.log('Loading dogs for user:', user);
-      
-      // Use the same method as the working /dogs page
-      const result = await apiClient.getDogs();
-      const fetchedDogs = result.data?.userDogs || [];
-      console.log('Fetched dogs response:', fetchedDogs);
-      
-      setDogs(fetchedDogs);
+      const fetchedDogs = await fetchDogs();
+      setDogs(fetchedDogs.userDogs || []);
       
       // Auto-select first dog if available
-      if (fetchedDogs && fetchedDogs.length > 0 && !selectedDog) {
-        setSelectedDog(fetchedDogs[0]);
+      if (fetchedDogs.userDogs && fetchedDogs.userDogs.length > 0 && !selectedDog) {
+        setSelectedDog(fetchedDogs.userDogs[0]);
       }
     } catch (error) {
       console.error('Error loading dogs:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      setError(`Failed to load your dogs: ${errorMessage}. Please try signing in again.`);
+      setError('Failed to load your dogs. Please try again.');
     } finally {
       setIsLoadingDogs(false);
     }
@@ -119,21 +79,8 @@ export default function NeedsPage() {
     try {
       setIsLoadingPotty(true);
       setError(null);
-      
-      // Load actual potty records from backend
-      const response = await fetch(`/api/potty?dogId=${selectedDog._id}`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to load records: ${response.status}`);
-      }
-      
-      const data = await response.json();
-    console.log('Potty records from backend:', data.records);
-    setPottyRecords(data.records || []);
-      
+      // Note: This will be implemented when backend is connected
+      setPottyRecords([]);
     } catch (error) {
       console.error('Error loading potty records:', error);
       setError('Failed to load potty records. Please try again.');
@@ -148,27 +95,33 @@ export default function NeedsPage() {
     try {
       setIsSaving(true);
       setError(null);
-      // Save to backend using the API route we created
-      const response = await fetch('/api/potty', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      
+      // Create a demo record for now
+      const newRecord: PottyRecord = {
+        _id: 'temp-' + Date.now(),
+        date: pottyData.date,
+        type: pottyData.type,
+        environment: pottyData.environment || 'OUTDOORS',
+        healthFlags: pottyData.healthFlags,
+        note: pottyData.note,
+        coordinates: pottyData.coordinates,
+        addedBy: {
+          _id: user?.id || 'temp-user',
+          name: user?.name || 'Demo User',
+          email: user?.email || 'demo@example.com'
         },
-        credentials: 'include',
-        body: JSON.stringify(pottyData),
-      });
-      if (!response.ok) {
-        throw new Error(`Failed to save record: ${response.status}`);
-      }
-      const data = await response.json();
-      // Reload records from backend so new log appears instantly
-      await loadPottyRecords();
+        createdAt: new Date().toISOString()
+      };
+      
+      // Add new record to the beginning of the list
+      setPottyRecords(prev => [newRecord, ...prev]);
       setShowLogForm(false);
+      
       console.log(`✅ ${pottyData.type === 'PEE' ? 'Pee' : 'Poop'} break logged successfully!`);
+      
     } catch (error) {
       console.error('Error logging potty:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      setError(`Failed to log potty break: ${errorMessage}`);
+      setError('Failed to log potty break. Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -282,58 +235,26 @@ export default function NeedsPage() {
           )}
         </div>
 
+        {/* Error Message */}
         {error && (
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl p-4">
-            <div className="flex items-start gap-2">
+            <div className="flex items-center gap-2">
               <span className="text-xl">❌</span>
-              <div className="flex-1">
-                <p className="text-red-700 dark:text-red-300">{error}</p>
-                <div className="mt-3 flex gap-2">
-                  <button
-                    onClick={() => {
-                      setError(null);
-                      checkAuth();
-                    }}
-                    className="text-sm bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 px-3 py-1 rounded hover:bg-red-200 dark:hover:bg-red-800/50 transition-colors"
-                  >
-                    Retry
-                  </button>
-                  <button
-                    onClick={() => {
-                      setError(null);
-                      router.push('/signin');
-                    }}
-                    className="text-sm bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 px-3 py-1 rounded hover:bg-red-200 dark:hover:bg-red-800/50 transition-colors"
-                  >
-                    Sign In Again
-                  </button>
-                </div>
-              </div>
+              <p className="text-red-700 dark:text-red-300">{error}</p>
             </div>
+            <button
+              onClick={() => setError(null)}
+              className="mt-2 text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200"
+            >
+              Dismiss
+            </button>
           </div>
         )}
 
         {/* Potty Log Form Modal */}
         {showLogForm && selectedDog && (
-          <div 
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setShowLogForm(false)} // Click outside to close
-          >
-            <div 
-              className="max-w-2xl w-full max-h-[90vh] overflow-y-auto relative"
-              onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
-            >
-              {/* X Close Button */}
-              <button
-                onClick={() => setShowLogForm(false)}
-                className="absolute top-4 right-4 z-10 w-8 h-8 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-all duration-200 shadow-lg"
-                title="Close form (Esc)"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-              
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <PottyLogForm
                 dogId={selectedDog._id}
                 onSubmit={handleLogPotty}
@@ -408,17 +329,17 @@ export default function NeedsPage() {
           </div>
         )}
 
-        {/* System Status */}
-        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl p-4">
+        {/* Demo Notice */}
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4">
           <div className="flex items-start gap-3">
-            <span className="text-xl">✅</span>
+            <span className="text-xl">ℹ️</span>
             <div>
-              <h3 className="font-semibold text-green-900 dark:text-green-100 mb-1">
-                Fully Functional
+              <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">
+                Demo Mode
               </h3>
-              <p className="text-green-700 dark:text-green-300 text-sm">
-                Your potty tracking records are now being saved to the backend database and will persist across sessions. 
-                All features including health flags, location tracking, and historical data are fully operational.
+              <p className="text-blue-700 dark:text-blue-300 text-sm">
+                This is a demonstration of the potty tracking system. Records are simulated and won't be saved to the backend yet. 
+                The full integration with the GraphQL backend is ready and will be connected in the next development phase.
               </p>
             </div>
           </div>

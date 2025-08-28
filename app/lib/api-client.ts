@@ -108,6 +108,26 @@ class ApiClient {
       method: 'DELETE',
     });
   }
+
+  // Potty methods
+  async getPottyRecords(dogId: string) {
+    return this.request(`/potty?dogId=${dogId}`);
+  }
+
+  async createPottyRecord(pottyData: {
+    dog: string;
+    date: string;
+    type: string;
+    environment?: string;
+    healthFlags?: string[];
+    note?: string;
+    coordinates?: { latitude: number; longitude: number };
+  }) {
+    return this.request('/potty', {
+      method: 'POST',
+      body: JSON.stringify(pottyData),
+    });
+  }
 }
 
 // Export singleton instance
@@ -154,4 +174,28 @@ export interface DogResponse {
       message: string;
     };
   };
+}
+
+export interface PottyRecord {
+  _id: string;
+  date: string;
+  type: string;
+  environment: string;
+  healthFlags?: string[];
+  note?: string;
+  coordinates?: { latitude: number; longitude: number };
+  addedBy: User;
+  createdAt: string;
+}
+
+export interface PottyResponse {
+  data: PottyRecord[];
+  success: boolean;
+  message?: string;
+}
+
+export interface CreatePottyResponse {
+  data: PottyRecord;
+  success: boolean;
+  message?: string;
 }
