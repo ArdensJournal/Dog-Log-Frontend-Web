@@ -6,10 +6,12 @@ import { checkAuthStatus, clearAuth } from "../lib/auth";
 import { useRouter } from "next/navigation";
 import { DarkModeToggle } from "./DarkModeToggle";
 import { Button } from "../ui/button";
+import { MdArrowBackIos, MdAccountCircle, MdHomeFilled, MdForum } from "react-icons/md";
 
 const NAV_SECTIONS = [
   {
-    label: "👤 Profile",
+    id: "profile",
+    label: <span className="inline-flex items-center gap-1"><MdAccountCircle className="inline text-lg align-middle" /> Profile</span>,
     subcategories: [
       { label: "Account", links: [
         { href: "/profile", label: "Profile" },
@@ -30,7 +32,8 @@ const NAV_SECTIONS = [
     ],
   },
   {
-    label: "🏠 Home",
+    id: "home",
+    label: <span className="inline-flex items-center gap-1"><MdHomeFilled className="inline text-lg align-middle" /> Home</span>,
     subcategories: [
       { label: null, links: [
         { href: "/dogs", label: "All Dogs" },
@@ -42,7 +45,8 @@ const NAV_SECTIONS = [
     ],
   },
   {
-    label: "💬 Forum",
+    id: "forum",
+    label: <span className="inline-flex items-center gap-1"><MdForum className="inline text-lg align-middle" /> Forum</span>,
     subcategories: [
       { label: null, links: [
         { href: "/forum", label: "Forum" },
@@ -154,17 +158,17 @@ export default function Navbar() {
         </div>
         <div className="flex gap-4">
           {isSignedIn && NAV_SECTIONS.map(section => (
-            <div key={section.label} className="relative">
+            <div key={section.id} className="relative">
               <Button
                 type="button"
-                className={`bg-transparent text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 font-bold px-5 py-3 rounded-xl border-none shadow-none text-base ${expandedSection === section.label ? 'underline' : ''}`}
-                onClick={() => setExpandedSection(expandedSection === section.label ? null : section.label)}
+                className={`bg-transparent text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 font-bold px-5 py-3 rounded-xl border-none shadow-none text-base ${expandedSection === section.id ? 'underline' : ''}`}
+                onClick={() => setExpandedSection(expandedSection === section.id ? null : section.id)}
               >
                 {section.label}
               </Button>
-              {expandedSection === section.label && (
+              {expandedSection === section.id && (
                 <div
-                  ref={el => { dropdownRefs.current[section.label] = el; }}
+                  ref={el => { dropdownRefs.current[section.id] = el; }}
                   className="absolute left-0 mt-2 w-72 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50"
                 >
                   <div className="py-2">
@@ -236,13 +240,13 @@ export default function Navbar() {
       {isMobileDrawerOpen && (
         <div className="fixed inset-0 z-50 bg-white dark:bg-gray-900 flex flex-col">
           <div className="flex items-center px-4 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-md">
-            <button onClick={() => setIsMobileDrawerOpen(false)} className="mr-2 text-2xl" aria-label="Close navigation menu">
-              <span role="img" aria-label="Back">🔙</span>
+            <button onClick={() => setIsMobileDrawerOpen(false)} className="mr-2 text-2xl text-indigo-700 dark:text-indigo-300" aria-label="Close navigation menu">
+              <MdArrowBackIos />
             </button>
-            <h2 className="flex-1 text-center text-lg font-bold text-indigo-700 dark:text-indigo-300">
-              {mobileTab === 'Profile' && '👤 Profile'}
-              {mobileTab === 'Home' && '🏠 Home'}
-              {mobileTab === 'Forum' && '💬 Forum'}
+            <h2 className="flex-1 text-center text-lg font-bold text-indigo-700 dark:text-indigo-300 flex items-center gap-2 justify-center">
+              {mobileTab === 'Profile' && (<><MdAccountCircle className="inline text-indigo-700 dark:text-indigo-300" /> Profile</>)}
+              {mobileTab === 'Home' && (<><MdHomeFilled className="inline text-indigo-700 dark:text-indigo-300" /> Home</>)}
+              {mobileTab === 'Forum' && (<><MdForum className="inline text-indigo-700 dark:text-indigo-300" /> Forum</>)}
             </h2>
             <span className="w-8" />
           </div>
@@ -319,15 +323,15 @@ export default function Navbar() {
           {isSignedIn && (
             <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex justify-around items-center h-16 shadow-lg">
               <button className={`flex flex-col items-center justify-center px-2 py-1 text-xs font-semibold transition ${mobileTab === 'Home' ? 'text-indigo-600' : 'text-gray-500 dark:text-gray-300 hover:text-indigo-700 dark:hover:text-indigo-400'}`} onClick={() => setMobileTab('Home')}>
-                <span className="text-xl">🏠</span>
+                <MdHomeFilled className="text-lg mb-1" />
                 <span>Home</span>
               </button>
               <button className={`flex flex-col items-center justify-center px-2 py-1 text-xs font-semibold transition ${mobileTab === 'Forum' ? 'text-indigo-600' : 'text-gray-500 dark:text-gray-300 hover:text-indigo-700 dark:hover:text-indigo-400'}`} onClick={() => setMobileTab('Forum')}>
-                <span className="text-xl">💬</span>
+                <MdForum className="text-lg mb-1" />
                 <span>Forum</span>
               </button>
               <button className={`flex flex-col items-center justify-center px-2 py-1 text-xs font-semibold transition ${mobileTab === 'Profile' ? 'text-indigo-600' : 'text-gray-500 dark:text-gray-300 hover:text-indigo-700 dark:hover:text-indigo-400'}`} onClick={() => setMobileTab('Profile')}>
-                <span className="text-xl">👤</span>
+                <MdAccountCircle className="text-lg mb-1" />
                 <span>Profile</span>
               </button>
             </div>
