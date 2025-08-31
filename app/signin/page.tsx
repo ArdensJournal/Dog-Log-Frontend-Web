@@ -35,11 +35,10 @@ export default function SignInPage() {
       if (result.user) {
         // Navigate first, then notify about auth state change
         router.push('/');
-        
         // Delay the notification slightly to allow navigation to complete
         setTimeout(() => {
           notifyAuthStateChanged();
-        }, 100);
+        }, 300);
       } else {
         setError('Sign in failed');
       }
