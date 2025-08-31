@@ -239,7 +239,11 @@ export default function Navbar() {
             <button onClick={() => setIsMobileDrawerOpen(false)} className="mr-2 text-2xl" aria-label="Close navigation menu">
               <span role="img" aria-label="Back">🔙</span>
             </button>
-            <h2 className="flex-1 text-center text-lg font-bold text-indigo-700 dark:text-indigo-300">Settings</h2>
+            <h2 className="flex-1 text-center text-lg font-bold text-indigo-700 dark:text-indigo-300">
+              {mobileTab === 'Profile' && '👤 Profile'}
+              {mobileTab === 'Home' && '🏠 Home'}
+              {mobileTab === 'Forum' && '💬 Forum'}
+            </h2>
             <span className="w-8" />
           </div>
           <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex gap-2 items-center justify-end">
