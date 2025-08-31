@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { checkAuthStatus, clearAuth } from "../lib/auth";
+import { useRouter } from "next/navigation";
 import { DarkModeToggle } from "./DarkModeToggle";
 import { Button } from "../ui/button";
 
@@ -52,6 +53,7 @@ const NAV_SECTIONS = [
 
 
 export default function Navbar() {
+  const router = useRouter();
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [mobileTab, setMobileTab] = useState("Home");
@@ -199,7 +201,7 @@ export default function Navbar() {
               <Link href="/signup" className="px-4 py-2 rounded-lg font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition" onClick={async () => { localStorage.setItem('authStatus', Date.now().toString()); await checkAuth(); }}>Sign Up</Link>
             </>
           ) : (
-            <button onClick={async () => { await clearAuth(); localStorage.setItem('authStatus', Date.now().toString()); await checkAuth(); }} className="px-4 py-2 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700 transition">Sign Out</button>
+            <button onClick={async () => { await clearAuth(); localStorage.setItem('authStatus', Date.now().toString()); await checkAuth(); router.push('/'); }} className="px-4 py-2 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700 transition">Sign Out</button>
           )}
         </div>
       </div>
@@ -302,7 +304,7 @@ export default function Navbar() {
                     </div>
                     {/* Log Out button at the bottom of Profile tab */}
                     <div className="pt-4">
-                      <button onClick={async () => { await clearAuth(); localStorage.setItem('authStatus', Date.now().toString()); await checkAuth(); setIsMobileDrawerOpen(false); }} className="w-full px-4 py-2 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700 transition">Log Out</button>
+                      <button onClick={async () => { await clearAuth(); localStorage.setItem('authStatus', Date.now().toString()); await checkAuth(); setIsMobileDrawerOpen(false); router.push('/'); }} className="w-full px-4 py-2 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700 transition">Log Out</button>
                     </div>
                   </div>
                 )}
