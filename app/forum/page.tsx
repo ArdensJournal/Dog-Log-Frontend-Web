@@ -6,14 +6,14 @@ export default function ForumMockupPage() {
   return (
     <main className="min-h-screen flex flex-col items-center bg-gradient-to-br from-blue-100 via-white to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900 p-8">
       <div className="w-full max-w-5xl bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
-        <h1 className="text-4xl font-extrabold text-indigo-700 dark:text-indigo-400 mb-2 text-center drop-shadow-lg">🐾 Dog Log Forum (Vision Mockup)</h1>
+        <h1 className="text-4xl font-extrabold text-indigo-700 dark:text-indigo-400 mb-2 text-center drop-shadow-lg">🐾 Dog Log Community (Vision Mockup)</h1>
         <p className="text-lg text-gray-700 dark:text-gray-300 mb-8 text-center">
           The ultimate community for dog lovers—connect, learn, share, and celebrate your pups!
         </p>
 
         {/* Forum Categories */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold text-indigo-600 dark:text-indigo-400 mb-4">Forum Categories</h2>
+          <h2 className="text-2xl font-bold text-indigo-600 dark:text-indigo-400 mb-4">Community Categories</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-indigo-50 dark:bg-indigo-900/30 rounded-xl p-6 shadow">
               <h3 className="font-bold text-indigo-700 dark:text-indigo-300 mb-2">Breed-Specific Communities</h3>
@@ -21,7 +21,7 @@ export default function ForumMockupPage() {
                 <li>Labrador, German Shepherd, Golden Retriever, and more</li>
                 <li>Breed-specific health, training, and stories</li>
               </ul>
-              <span className="inline-block bg-indigo-200 dark:bg-indigo-800 text-indigo-800 dark:text-indigo-200 px-2 py-1 rounded text-xs">Subforums</span>
+              <span className="inline-block bg-indigo-200 dark:bg-indigo-800 text-indigo-800 dark:text-indigo-200 px-2 py-1 rounded text-xs">Communities</span>
             </div>
             <div className="bg-green-50 dark:bg-green-900/30 rounded-xl p-6 shadow">
               <h3 className="font-bold text-green-700 dark:text-green-300 mb-2">Training & Behavior</h3>
@@ -285,7 +285,7 @@ export default function ForumMockupPage() {
         <div className="mt-8 text-center text-gray-500 dark:text-gray-400 text-lg">
           <em>
             This is a vision mockup. <br />
-            <span className="text-indigo-600 dark:text-indigo-400 font-semibold">Forum features coming soon!</span>
+            <span className="text-indigo-600 dark:text-indigo-400 font-semibold">Community features coming soon!</span>
           </em>
         </div>
       </div>

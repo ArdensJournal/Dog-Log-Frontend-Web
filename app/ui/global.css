@@ -55,3 +55,10 @@ input[type='number']::-webkit-outer-spin-button {
 #changes {
   scroll-margin-top: 100px;
 }
+
+/* Mobile bottom navigation padding */
+@media (max-width: 768px) {
+  .mobile-bottom-nav-padding {
+    padding-bottom: 80px;
+  }
+}
