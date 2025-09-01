@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { checkAuthStatus } from "@/app/lib/auth";
-import { apiClient, type Dog, type Vaccine, type DogWithVaccinations, type Vaccination } from "@/app/lib/api-client";
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { checkAuthStatus } from '@/app/lib/auth';
+import { apiClient, type Dog, type Vaccine, type DogWithVaccinations, type Vaccination } from '@/app/lib/api-client';
 
 // --- Types ---
 type VaccinationRecord = {
@@ -31,32 +31,96 @@ export default function VaccinationsPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  // --- Auth ---
-  useEffect(() => { checkAuth(); }, []);
+  // Handle escape key to close modal
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showForm) {
+        setShowForm(false);
+      }
+    };
+
+    if (showForm) {
+      document.addEventListener('keydown', handleEscape);
+      // Prevent background scrolling when modal is open
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [showForm]);
+
+  // Load user authentication
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  // Load dogs when user is authenticated
+  useEffect(() => {
+    if (user && !authLoading) {
+      loadDogs();
+    }
+  }, [user, authLoading]);
+
+  // Load vaccines and vaccinations when dog is selected
+  useEffect(() => {
+    if (selectedDog) {
+      fetchVaccinations();
+    } else {
+      setVaccinations([]);
+    }
+  }, [selectedDog]);
+
+  // Load vaccines on mount
+  useEffect(() => {
+    fetchVaccines();
+  }, []);
+
   const checkAuth = async () => {
-    setAuthLoading(true);
     try {
+      setAuthLoading(true);
       const authenticatedUser = await checkAuthStatus();
       setUser(authenticatedUser.isAuthenticated ? authenticatedUser.user : null);
-    } catch {
+      
+      console.log('Auth check result:', {
+        isAuthenticated: authenticatedUser.isAuthenticated,
+        user: authenticatedUser.user
+      });
+      
+    } catch (error) {
+      console.error('Auth check failed:', error);
       setUser(null);
     } finally {
       setAuthLoading(false);
     }
   };
 
-  // --- Load Dogs ---
-  useEffect(() => { if (user && !authLoading) loadDogs(); }, [user, authLoading]);
   const loadDogs = async () => {
-    if (!user) return;
-    setIsLoadingDogs(true);
+    if (!user) {
+      console.log('No authenticated user, skipping dog loading');
+      return;
+    }
+
     try {
-      const result = await (await import("@/app/lib/api-client")).apiClient.getDogs();
+      setIsLoadingDogs(true);
+      setError(null);
+      console.log('Loading dogs for user:', user);
+      
+      const result = await apiClient.getDogs();
       const fetchedDogs = result.data?.userDogs || [];
+      console.log('Fetched dogs response:', fetchedDogs);
+      
       setDogs(fetchedDogs);
-      if (fetchedDogs.length > 0 && !selectedDog) setSelectedDog(fetchedDogs[0]);
-    } catch {
-      setError("Failed to load your dogs. Please try signing in again.");
+      
+      // Auto-select first dog if available
+      if (fetchedDogs && fetchedDogs.length > 0 && !selectedDog) {
+        setSelectedDog(fetchedDogs[0]);
+      }
+    } catch (error) {
+      console.error('Error loading dogs:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      setError(`Failed to load your dogs: ${errorMessage}. Please try signing in again.`);
     } finally {
       setIsLoadingDogs(false);
     }
@@ -173,20 +237,40 @@ export default function VaccinationsPage() {
 
   // --- UI States ---
   if (authLoading || isLoadingDogs) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-12 h-12 border-4 border-pink-200 border-t-pink-600 rounded-full animate-spin mx-auto"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
   }
+
   if (!user) {
     router.push("/signin");
     return null;
   }
+
   if (dogs.length === 0 && !isLoadingDogs) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="bg-white rounded-xl shadow p-8 text-center">
-          <div className="text-8xl mb-6">🐕</div>
-          <h1 className="text-3xl font-bold mb-4">No Dogs Found</h1>
-          <p className="mb-6">You need to add a dog before you can track vaccinations.</p>
-          <button onClick={() => router.push("/add-dog")} className="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-3 px-6 rounded-xl">Add Your First Dog</button>
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
+        <div className="max-w-4xl mx-auto pt-8">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 text-center border border-gray-200 dark:border-gray-700">
+            <div className="text-8xl mb-6">�</div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+              No Dogs Found
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+              You need to add a dog before you can track vaccinations. Let's get started!
+            </p>
+            <button
+              onClick={() => router.push('/add-dog')}
+              className="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors duration-200"
+            >
+              Add Your First Dog
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -258,78 +342,137 @@ export default function VaccinationsPage() {
         {showForm && selectedDog && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowForm(false)}>
             <div className="max-w-md w-full max-h-[90vh] overflow-y-auto relative" onClick={e => e.stopPropagation()}>
-              <button onClick={() => setShowForm(false)} className="absolute top-4 right-4 z-10 w-8 h-8 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-all duration-200 shadow-lg" title="Close form (Esc)">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              <button 
+                onClick={() => setShowForm(false)} 
+                className="absolute top-4 right-4 z-10 w-8 h-8 bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-700 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-all duration-200 shadow-lg backdrop-blur-sm" 
+                title="Close form (Esc)"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
-              <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-6 w-full">
-                <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Add Vaccination Record</h3>
-                <form onSubmit={handleAddVaccination} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Vaccine *</label>
-                    <select
-                      className="w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                      value={form.vaccine}
-                      onChange={e => setForm(f => ({ ...f, vaccine: e.target.value }))}
-                      required
-                    >
-                      <option value="">Select a vaccine</option>
-                      {vaccines.map(v => (
-                        <option key={v._id} value={v._id}>{v.name}</option>
-                      ))}
-                    </select>
-                    {vaccines.length === 0 && (
-                      <p className="text-xs text-red-500 mt-1">No vaccines available. Contact your admin to add vaccines to the system.</p>
-                    )}
-                    <p className="text-xs text-gray-500 mt-1">Available vaccines: {vaccines.length}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Date *</label>
-                    <input
-                      type="date"
-                      className="w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                      value={form.date}
-                      onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Valid For *</label>
-                    <div className="flex gap-2">
-                      <input
-                        type="number"
-                        min={1}
-                        className="w-20 px-3 py-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                        value={form.validForValue}
-                        onChange={e => setForm(f => ({ ...f, validForValue: Number(e.target.value) }))}
-                        required
-                      />
-                      <select
-                        className="px-3 py-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                        value={form.validForUnit}
-                        onChange={e => setForm(f => ({ ...f, validForUnit: e.target.value }))}
-                        required
-                      >
-                        <option value="Days">Days</option>
-                        <option value="Weeks">Weeks</option>
-                        <option value="Months">Months</option>
-                        <option value="Years">Years</option>
-                      </select>
+              
+              <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div className="bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/20 dark:to-purple-900/20 p-6 border-b border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xl">
+                      💉
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                        Add Vaccination Record
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Record a new vaccination for {selectedDog.name}
+                      </p>
                     </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Notes</label>
-                    <textarea
-                      className="w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                      value={form.note}
-                      onChange={e => setForm(f => ({ ...f, note: e.target.value }))}
-                      rows={3}
-                    />
-                  </div>
-                  <div className="flex gap-3 justify-end">
-                    <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600" disabled={isSaving}>Cancel</button>
-                    <button type="submit" className="px-4 py-2 rounded bg-pink-600 text-white font-semibold hover:bg-pink-700 disabled:opacity-50" disabled={isSaving}>{isSaving ? "Saving..." : "Add Record"}</button>
-                  </div>
-                </form>
+                </div>
+                
+                <div className="p-6">
+                  <form onSubmit={handleAddVaccination} className="space-y-5">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        Vaccine Type *
+                      </label>
+                      <select
+                        className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors"
+                        value={form.vaccine}
+                        onChange={e => setForm(f => ({ ...f, vaccine: e.target.value }))}
+                        required
+                      >
+                        <option value="">Select a vaccine...</option>
+                        {vaccines.map(v => (
+                          <option key={v._id} value={v._id}>{v.name}</option>
+                        ))}
+                      </select>
+                      {vaccines.length === 0 && (
+                        <p className="text-xs text-red-500 mt-2 flex items-center gap-1">
+                          <span>⚠️</span>
+                          No vaccines available. Contact your admin to add vaccines to the system.
+                        </p>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        Vaccination Date *
+                      </label>
+                      <input
+                        type="date"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors"
+                        value={form.date}
+                        onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
+                        required
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        Valid For *
+                      </label>
+                      <div className="flex gap-3">
+                        <input
+                          type="number"
+                          min={1}
+                          className="w-24 px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors"
+                          value={form.validForValue}
+                          onChange={e => setForm(f => ({ ...f, validForValue: Number(e.target.value) }))}
+                          required
+                        />
+                        <select
+                          className="flex-1 px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors"
+                          value={form.validForUnit}
+                          onChange={e => setForm(f => ({ ...f, validForUnit: e.target.value }))}
+                          required
+                        >
+                          <option value="Days">Days</option>
+                          <option value="Weeks">Weeks</option>
+                          <option value="Months">Months</option>
+                          <option value="Years">Years</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        Notes
+                      </label>
+                      <textarea
+                        className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors resize-none"
+                        value={form.note}
+                        onChange={e => setForm(f => ({ ...f, note: e.target.value }))}
+                        rows={3}
+                        placeholder="Add any additional notes about this vaccination..."
+                      />
+                    </div>
+                    
+                    <div className="flex gap-3 pt-4">
+                      <button 
+                        type="button" 
+                        onClick={() => setShowForm(false)} 
+                        className="flex-1 px-6 py-3 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 font-semibold transition-colors duration-200" 
+                        disabled={isSaving}
+                      >
+                        Cancel
+                      </button>
+                      <button 
+                        type="submit" 
+                        className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg" 
+                        disabled={isSaving}
+                      >
+                        {isSaving ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            Saving...
+                          </span>
+                        ) : (
+                          "Add Record"
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                </div>
               </div>
             </div>
           </div>
@@ -337,27 +480,87 @@ export default function VaccinationsPage() {
 
         {/* Vaccination History */}
         {selectedDog && (
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Vaccination History</h2>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                <span className="text-3xl">📋</span>
+                Vaccination History
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
+                Complete vaccination record for {selectedDog.name}
+              </p>
+            </div>
+            
             {isLoadingVaccinations ? (
-              <div className="text-center text-gray-500 dark:text-gray-400">Loading records...</div>
+              <div className="p-8 text-center">
+                <div className="w-8 h-8 border-4 border-pink-200 border-t-pink-600 rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-gray-600 dark:text-gray-400">Loading vaccination records...</p>
+              </div>
             ) : vaccinations.length === 0 ? (
-              <div className="text-center text-gray-400 dark:text-gray-500">No vaccination records found for this dog.</div>
+              <div className="p-8 text-center">
+                <div className="text-6xl mb-4">🏥</div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                  No Vaccinations Yet
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  Start tracking {selectedDog.name}'s vaccination history by adding the first record.
+                </p>
+                <button
+                  onClick={() => setShowForm(true)}
+                  className="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200"
+                >
+                  Add First Vaccination
+                </button>
+              </div>
             ) : (
-              <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-                {vaccinations.map(vax => (
-                  <li key={vax._id} className="py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                    <div>
-                      <div className="font-semibold text-gray-900 dark:text-white">
-                        {typeof vax.vaccine === 'string' ? (vaccines.find(v => v._id === vax.vaccine)?.name || vax.vaccine) : vax.vaccine?.name || ''}
+              <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                {vaccinations
+                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                  .map((vaccination) => (
+                    <div key={vaccination._id} className="p-6 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors duration-200">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className="w-10 h-10 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                              💉
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                {typeof vaccination.vaccine === 'string' 
+                                  ? (vaccines.find(v => v._id === vaccination.vaccine)?.name || vaccination.vaccine)
+                                  : vaccination.vaccine?.name || 'Unknown Vaccine'
+                                }
+                              </h3>
+                              <div className="text-sm text-gray-600 dark:text-gray-400">
+                                Given on {new Date(vaccination.date).toLocaleDateString('en-US', {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric'
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                          {vaccination.note && (
+                            <div className="ml-13 bg-gray-50 dark:bg-gray-700 rounded-lg p-3 mt-3">
+                              <p className="text-gray-700 dark:text-gray-300 text-sm">
+                                <span className="font-medium">Notes: </span>
+                                {vaccination.note}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                        <div className="ml-4 text-right">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+                            ✓ Completed
+                          </span>
+                          <div className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+                            Added: {new Date(vaccination.createdAt).toLocaleDateString()}
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-300">{new Date(vax.date).toLocaleDateString()}</div>
-                      {vax.note && <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{vax.note}</div>}
                     </div>
-                    <div className="text-xs text-gray-400 dark:text-gray-500 md:text-right">Added: {new Date(vax.createdAt).toLocaleDateString()}</div>
-                  </li>
-                ))}
-              </ul>
+                  ))}
+              </div>
             )}
           </div>
         )}
