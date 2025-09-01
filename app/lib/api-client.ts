@@ -128,6 +128,30 @@ class ApiClient {
       body: JSON.stringify(pottyData),
     });
   }
+
+  // Vaccine methods
+  async getVaccines() {
+    return this.request('/vaccines');
+  }
+
+  // Vaccination methods
+  async getVaccinations() {
+    return this.request('/vaccinations');
+  }
+
+  async createVaccination(vaccinationData: {
+    dogId: string;
+    vaccineId: string;
+    dateGiven: string;
+    notes?: string;
+    administeredBy?: string;
+    nextDueDate?: string;
+  }) {
+    return this.request('/vaccinations', {
+      method: 'POST',
+      body: JSON.stringify(vaccinationData),
+    });
+  }
 }
 
 // Export singleton instance
@@ -198,4 +222,41 @@ export interface CreatePottyResponse {
   data: PottyRecord;
   success: boolean;
   message?: string;
+}
+
+export interface Vaccine {
+  _id: string;
+  name: string;
+}
+
+export interface VaccinesResponse {
+  data: {
+    findAllVaccines: Vaccine[];
+  };
+}
+
+export interface Vaccination {
+  _id: string;
+  vaccine: Vaccine;
+  dateGiven: string;
+  notes?: string;
+  administeredBy?: string;
+  nextDueDate?: string;
+  createdAt: string;
+}
+
+export interface DogWithVaccinations extends Dog {
+  vaccinations: Vaccination[];
+}
+
+export interface VaccinationsResponse {
+  data: {
+    userDogs: DogWithVaccinations[];
+  };
+}
+
+export interface CreateVaccinationResponse {
+  data: {
+    createVaccination: Vaccination;
+  };
 }

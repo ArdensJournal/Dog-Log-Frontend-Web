@@ -161,10 +161,11 @@ export default function Navbar() {
             <div key={section.id} className="relative">
               <Button
                 type="button"
-                className={`bg-transparent text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 font-bold px-5 py-3 rounded-xl border-none shadow-none text-base ${expandedSection === section.id ? 'underline' : ''}`}
+                className={`bg-white text-indigo-700 font-bold px-6 py-4 rounded-xl border-none shadow-none text-base transition-colors duration-150 hover:bg-indigo-100 hover:text-indigo-700 dark:bg-transparent dark:text-indigo-400 dark:hover:bg-indigo-900/50 ${expandedSection === section.id ? 'underline' : ''}`}
                 onClick={() => setExpandedSection(expandedSection === section.id ? null : section.id)}
+                style={{ color: '', fill: '' }}
               >
-                {section.label}
+                <span className="inline-flex items-center gap-1 text-indigo-700 dark:text-indigo-400 fill-indigo-700 dark:fill-indigo-400">{section.label}</span>
               </Button>
               {expandedSection === section.id && (
                 <div

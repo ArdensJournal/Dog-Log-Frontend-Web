@@ -1,131 +1,367 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { checkAuthStatus } from "@/app/lib/auth";
+import { apiClient, type Dog, type Vaccine, type DogWithVaccinations, type Vaccination } from "@/app/lib/api-client";
+
+// --- Types ---
+type VaccinationRecord = {
+  _id: string;
+  date: string;
+  note?: string;
+  createdAt: string;
+  updatedAt: string;
+  vaccine: Vaccine | string;
+  validFor?: { unit: string; value: number };
+};
+
 export default function VaccinationsPage() {
+  const [user, setUser] = useState<any>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [dogs, setDogs] = useState<Dog[]>([]);
+  const [selectedDog, setSelectedDog] = useState<Dog | null>(null);
+  const [isLoadingDogs, setIsLoadingDogs] = useState(false);
+  const [isLoadingVaccinations, setIsLoadingVaccinations] = useState(false);
+  const [vaccinations, setVaccinations] = useState<VaccinationRecord[]>([]);
+  const [vaccines, setVaccines] = useState<Vaccine[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ vaccine: "", date: "", note: "", validForValue: 12, validForUnit: "Months" });
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+  // --- Auth ---
+  useEffect(() => { checkAuth(); }, []);
+  const checkAuth = async () => {
+    setAuthLoading(true);
+    try {
+      const authenticatedUser = await checkAuthStatus();
+      setUser(authenticatedUser.isAuthenticated ? authenticatedUser.user : null);
+    } catch {
+      setUser(null);
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  // --- Load Dogs ---
+  useEffect(() => { if (user && !authLoading) loadDogs(); }, [user, authLoading]);
+  const loadDogs = async () => {
+    if (!user) return;
+    setIsLoadingDogs(true);
+    try {
+      const result = await (await import("@/app/lib/api-client")).apiClient.getDogs();
+      const fetchedDogs = result.data?.userDogs || [];
+      setDogs(fetchedDogs);
+      if (fetchedDogs.length > 0 && !selectedDog) setSelectedDog(fetchedDogs[0]);
+    } catch {
+      setError("Failed to load your dogs. Please try signing in again.");
+    } finally {
+      setIsLoadingDogs(false);
+    }
+  };
+
+  // --- Load Vaccines ---
+  useEffect(() => { fetchVaccines(); }, []);
+  const fetchVaccines = async () => {
+    console.log('Fetching vaccines...');
+    try {
+      const result = await apiClient.getVaccines();
+      console.log('Vaccines response:', result);
+      console.log('Vaccines list:', result.data?.findAllVaccines);
+      console.log('Individual vaccines:', result.data?.findAllVaccines?.map((v: any) => ({ id: v._id, name: v.name })));
+      
+      // Remove duplicates by name and keep only the first occurrence
+      const uniqueVaccines = [];
+      const seenNames = new Set();
+      
+      for (const vaccine of (result.data?.findAllVaccines || [])) {
+        if (!seenNames.has(vaccine.name)) {
+          seenNames.add(vaccine.name);
+          uniqueVaccines.push(vaccine);
+        }
+      }
+      
+      console.log('Unique vaccines after deduplication:', uniqueVaccines.map((v: any) => ({ id: v._id, name: v.name })));
+      
+      const vaccinesList = result.data?.findAllVaccines || [];
+      
+      // If no vaccines exist, create them via the seed endpoint
+      if (vaccinesList.length === 0) {
+        console.log('No vaccines found, seeding default vaccines...');
+        await fetch('/api/seed-vaccines');
+        // Refetch after seeding
+        const newResult = await apiClient.getVaccines();
+        setVaccines(uniqueVaccines);
+      } else {
+        // Remove duplicates by name and keep only the first occurrence
+        const uniqueVaccines = [];
+        const seenNames = new Set();
+        
+        for (const vaccine of vaccinesList) {
+          if (!seenNames.has(vaccine.name)) {
+            seenNames.add(vaccine.name);
+            uniqueVaccines.push(vaccine);
+          }
+        }
+        
+        setVaccines(uniqueVaccines);
+      }
+    } catch (error) {
+      console.error('Error fetching vaccines:', error);
+      setVaccines([]);
+    }
+  };
+
+  // --- Load Vaccination Records ---
+  useEffect(() => { if (selectedDog) fetchVaccinations(); else setVaccinations([]); }, [selectedDog]);
+  const fetchVaccinations = async () => {
+    if (!selectedDog) return;
+    setIsLoadingVaccinations(true);
+    try {
+      const result = await apiClient.getVaccinations();
+      const dogsWithVaccinations = result.data?.userDogs || [];
+      
+      // Find the selected dog's vaccinations
+      const currentDog = dogsWithVaccinations.find((dog: DogWithVaccinations) => dog._id === selectedDog._id);
+      const vaccinationRecords = currentDog?.vaccinations || [];
+      
+      // Map the new structure to the old structure for compatibility
+      const mappedVaccinations: VaccinationRecord[] = vaccinationRecords.map((v: Vaccination) => ({
+        _id: v._id,
+        date: v.dateGiven,
+        note: v.notes,
+        createdAt: v.createdAt,
+        updatedAt: v.createdAt, // API doesn't have updatedAt, using createdAt
+        vaccine: v.vaccine,
+        validFor: undefined // Not available in new structure
+      }));
+      
+      setVaccinations(mappedVaccinations);
+    } catch (error) {
+      console.error('Error fetching vaccinations:', error);
+      setVaccinations([]);
+    } finally {
+      setIsLoadingVaccinations(false);
+    }
+  };
+
+  // --- Add Vaccination ---
+  const handleAddVaccination = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    setError(null);
+    try {
+      await apiClient.createVaccination({
+        dogId: selectedDog!._id,
+        vaccineId: form.vaccine,
+        dateGiven: new Date(form.date).toISOString(),
+        notes: form.note,
+        administeredBy: undefined, // Not captured in current form
+        nextDueDate: undefined, // Not captured in current form
+      });
+      setShowForm(false);
+      setForm({ vaccine: "", date: "", note: "", validForValue: 12, validForUnit: "Months" });
+      fetchVaccinations();
+    } catch (err: any) {
+      setError(err?.message || "Failed to add vaccination record.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // --- UI States ---
+  if (authLoading || isLoadingDogs) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+  if (!user) {
+    router.push("/signin");
+    return null;
+  }
+  if (dogs.length === 0 && !isLoadingDogs) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-white rounded-xl shadow p-8 text-center">
+          <div className="text-8xl mb-6">🐕</div>
+          <h1 className="text-3xl font-bold mb-4">No Dogs Found</h1>
+          <p className="mb-6">You need to add a dog before you can track vaccinations.</p>
+          <button onClick={() => router.push("/add-dog")} className="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-3 px-6 rounded-xl">Add Your First Dog</button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <main className="min-h-screen bg-gradient-to-br from-red-50 via-pink-50 to-rose-50 dark:from-gray-900 dark:via-red-900 dark:to-pink-900">
-      <div className="container mx-auto px-6 py-12">
-        {/* Header Section */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-24 h-24 bg-red-100 dark:bg-red-900/30 rounded-full mb-6">
-            <span className="text-5xl">💉</span>
+    <div className="min-h-screen bg-gradient-to-br from-red-50 via-pink-50 to-rose-50 dark:from-gray-900 dark:via-red-900 dark:to-pink-900 p-4">
+      <div className="max-w-3xl mx-auto space-y-6">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-3">
+                <span className="text-4xl">💉</span>
+                Vaccination Records
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400">Track your dog's vaccinations and keep them healthy</p>
+            </div>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              {dogs.length > 1 && (
+                <select
+                  value={selectedDog?._id || ''}
+                  onChange={e => setSelectedDog(dogs.find(d => d._id === e.target.value) || null)}
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-pink-400 min-w-48"
+                >
+                  {dogs.map(dog => (
+                    <option key={dog._id} value={dog._id}>🐕 {dog.name}</option>
+                  ))}
+                </select>
+              )}
+              <button
+                onClick={() => setShowForm(true)}
+                disabled={!selectedDog}
+                className="bg-pink-600 hover:bg-pink-700 disabled:bg-gray-400 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-200 flex items-center gap-2 whitespace-nowrap"
+              >
+                <span className="text-lg">➕</span>
+                Add Vaccination
+              </button>
+            </div>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Vaccination Records
-          </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
-            Keep comprehensive records of your dog's vaccinations, medications, and veterinary care
-          </p>
+          {selectedDog && (
+            <div className="mt-4 p-4 bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 rounded-xl border border-pink-200 dark:border-pink-700">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-pink-400 to-red-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  {selectedDog.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100">{selectedDog.name}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{selectedDog.breed}</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Coming Soon Card */}
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-3xl shadow-2xl p-8 md:p-12 border border-gray-200/50 dark:border-gray-700/50">
-            <div className="text-center">
-              <div className="inline-flex items-center px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 rounded-full text-sm font-medium mb-6">
-                <svg className="w-4 h-4 mr-2 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clipRule="evenodd" />
-                </svg>
-                In Development
-              </div>
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-                Digital Health Records
-              </h2>
-              <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
-                We're creating a comprehensive digital health record system that will help you track 
-                vaccinations, set reminders, and share information with your veterinarian seamlessly.
-              </p>
-
-              {/* Features Preview */}
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-                <div className="bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 rounded-2xl p-6 border border-red-200/50 dark:border-red-800/50">
-                  <div className="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center mb-4 mx-auto">
-                    <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2 text-sm">Vaccine Records</h3>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Digital vaccination certificates</p>
-                </div>
-
-                <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-2xl p-6 border border-blue-200/50 dark:border-blue-800/50">
-                  <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mb-4 mx-auto">
-                    <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM9 7h5l-5-5v5zm0 10v-5H4l5 5z" />
-                    </svg>
-                  </div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2 text-sm">Smart Reminders</h3>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Automated booster alerts</p>
-                </div>
-
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl p-6 border border-green-200/50 dark:border-green-800/50">
-                  <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center mb-4 mx-auto">
-                    <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-                    </svg>
-                  </div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2 text-sm">Vet Sharing</h3>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Easy record sharing</p>
-                </div>
-
-                <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-6 border border-purple-200/50 dark:border-purple-800/50">
-                  <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center mb-4 mx-auto">
-                    <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2 text-sm">Health Analytics</h3>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Track health trends</p>
-                </div>
-              </div>
-
-              {/* Progress Indicator */}
-              <div className="bg-gray-100 dark:bg-gray-700 rounded-full h-3 mb-4 overflow-hidden">
-                <div className="bg-gradient-to-r from-red-400 to-pink-600 h-full rounded-full animate-pulse" style={{ width: '60%' }}></div>
-              </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">Development Progress: 60% Complete</p>
-
-              {/* Medical Information Preview */}
-              <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 rounded-2xl p-6 mb-8 border border-red-200/50 dark:border-red-800/50">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">What You'll Be Able to Track</h3>
-                <div className="grid md:grid-cols-2 gap-4 text-left">
-                  <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                    <li className="flex items-center"><span className="text-red-500 mr-2">•</span> Core vaccines (DHPP, Rabies)</li>
-                    <li className="flex items-center"><span className="text-red-500 mr-2">•</span> Optional vaccines (Bordatella, Lyme)</li>
-                    <li className="flex items-center"><span className="text-red-500 mr-2">•</span> Medication schedules</li>
-                  </ul>
-                  <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                    <li className="flex items-center"><span className="text-pink-500 mr-2">•</span> Vet visit history</li>
-                    <li className="flex items-center"><span className="text-pink-500 mr-2">•</span> Blood work results</li>
-                    <li className="flex items-center"><span className="text-pink-500 mr-2">•</span> Treatment records</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* CTA Section */}
-              <div className="space-y-4">
-                <button disabled className="px-8 py-4 bg-gradient-to-r from-red-400 to-pink-600 text-white font-semibold rounded-2xl shadow-lg opacity-50 cursor-not-allowed transform hover:scale-105 transition-all duration-200">
-                  <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Feature Coming Soon
-                </button>
-                <p className="text-xs text-gray-400 dark:text-gray-500">Join our community to get early access!</p>
+        {/* Error */}
+        {error && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl p-4">
+            <div className="flex items-start gap-2">
+              <span className="text-xl">❌</span>
+              <div className="flex-1">
+                <p className="text-red-700 dark:text-red-300">{error}</p>
+                <button onClick={() => setError(null)} className="text-sm bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 px-3 py-1 rounded hover:bg-red-200 dark:hover:bg-red-800/50 transition-colors mt-2">Dismiss</button>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Bottom Navigation */}
-        <div className="text-center mt-12">
-          <p className="text-gray-500 dark:text-gray-400 mb-4">Continue managing your dogs</p>
-          <div className="flex justify-center space-x-4">
-            <a href="/dogs" className="px-6 py-3 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-xl hover:bg-indigo-200 dark:hover:bg-indigo-800/50 transition-all duration-200 font-medium">
-              View Your Dogs
-            </a>
-            <a href="/" className="px-6 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200 font-medium">
-              Back to Home
-            </a>
+        {/* Add Vaccination Modal */}
+        {showForm && selectedDog && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowForm(false)}>
+            <div className="max-w-md w-full max-h-[90vh] overflow-y-auto relative" onClick={e => e.stopPropagation()}>
+              <button onClick={() => setShowForm(false)} className="absolute top-4 right-4 z-10 w-8 h-8 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-all duration-200 shadow-lg" title="Close form (Esc)">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+              <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-6 w-full">
+                <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Add Vaccination Record</h3>
+                <form onSubmit={handleAddVaccination} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Vaccine *</label>
+                    <select
+                      className="w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                      value={form.vaccine}
+                      onChange={e => setForm(f => ({ ...f, vaccine: e.target.value }))}
+                      required
+                    >
+                      <option value="">Select a vaccine</option>
+                      {vaccines.map(v => (
+                        <option key={v._id} value={v._id}>{v.name}</option>
+                      ))}
+                    </select>
+                    {vaccines.length === 0 && (
+                      <p className="text-xs text-red-500 mt-1">No vaccines available. Contact your admin to add vaccines to the system.</p>
+                    )}
+                    <p className="text-xs text-gray-500 mt-1">Available vaccines: {vaccines.length}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Date *</label>
+                    <input
+                      type="date"
+                      className="w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                      value={form.date}
+                      onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Valid For *</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        min={1}
+                        className="w-20 px-3 py-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                        value={form.validForValue}
+                        onChange={e => setForm(f => ({ ...f, validForValue: Number(e.target.value) }))}
+                        required
+                      />
+                      <select
+                        className="px-3 py-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                        value={form.validForUnit}
+                        onChange={e => setForm(f => ({ ...f, validForUnit: e.target.value }))}
+                        required
+                      >
+                        <option value="Days">Days</option>
+                        <option value="Weeks">Weeks</option>
+                        <option value="Months">Months</option>
+                        <option value="Years">Years</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Notes</label>
+                    <textarea
+                      className="w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                      value={form.note}
+                      onChange={e => setForm(f => ({ ...f, note: e.target.value }))}
+                      rows={3}
+                    />
+                  </div>
+                  <div className="flex gap-3 justify-end">
+                    <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600" disabled={isSaving}>Cancel</button>
+                    <button type="submit" className="px-4 py-2 rounded bg-pink-600 text-white font-semibold hover:bg-pink-700 disabled:opacity-50" disabled={isSaving}>{isSaving ? "Saving..." : "Add Record"}</button>
+                  </div>
+                </form>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Vaccination History */}
+        {selectedDog && (
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Vaccination History</h2>
+            {isLoadingVaccinations ? (
+              <div className="text-center text-gray-500 dark:text-gray-400">Loading records...</div>
+            ) : vaccinations.length === 0 ? (
+              <div className="text-center text-gray-400 dark:text-gray-500">No vaccination records found for this dog.</div>
+            ) : (
+              <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+                {vaccinations.map(vax => (
+                  <li key={vax._id} className="py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+                    <div>
+                      <div className="font-semibold text-gray-900 dark:text-white">
+                        {typeof vax.vaccine === 'string' ? (vaccines.find(v => v._id === vax.vaccine)?.name || vax.vaccine) : vax.vaccine?.name || ''}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-300">{new Date(vax.date).toLocaleDateString()}</div>
+                      {vax.note && <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{vax.note}</div>}
+                    </div>
+                    <div className="text-xs text-gray-400 dark:text-gray-500 md:text-right">Added: {new Date(vax.createdAt).toLocaleDateString()}</div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
       </div>
-    </main>
+    </div>
   );
 }

@@ -78,15 +78,6 @@ export default function Page() {
               <Link href="/signin" className="px-6 py-2 rounded-full bg-blue-400 text-white font-semibold shadow hover:bg-blue-500 transition">Sign In</Link>
             </>
           )}
-          {isAuthenticated && (
-            <button
-              onClick={handleLogout}
-              className="px-6 py-2 rounded-full bg-red-500 text-white font-semibold shadow hover:bg-red-600 transition"
-            >
-              Log Out
-            </button>
-          )}
-          <Link href="/forum" className="px-6 py-2 rounded-full bg-yellow-400 text-white font-semibold shadow hover:bg-yellow-500 transition">Forum</Link>
         </div>
       </header>
 
