@@ -33,14 +33,6 @@ const settingsCategories = [
     available: true
   },
   {
-    id: "recent-activity",
-    title: "Recent Activity",
-    description: "View your dog's recent activities, health records, and tasks",
-    icon: <MdHistory className="text-2xl" />,
-    href: "/recent-activity",
-    available: true
-  },
-  {
     id: "notifications",
     title: "Notifications",
     description: "Manage push notifications and alerts",

@@ -30,22 +30,6 @@ const profileSections = [
         available: true
       },
       {
-        id: "recent-activity",
-        title: "Recent Activity",
-        description: "View your dog's recent activities and health records",
-        icon: <MdHistory className="text-xl" />,
-        href: "/recent-activity",
-        available: true
-      },
-      {
-        id: "weight-tracking",
-        title: "Weight Tracking",
-        description: "Monitor your dog's weight trends and health",
-        icon: <MdScale className="text-xl" />,
-        href: "/weight",
-        available: true
-      },
-      {
         id: "notifications",
         title: "Notifications",
         description: "Manage your notification preferences",
@@ -165,13 +149,13 @@ export default function ProfileMenuPage() {
             </h2>
             <div className="grid grid-cols-2 gap-3">
               <Link
-                href="/recent-activity"
+                href="/profile/edit"
                 className="flex items-center gap-3 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors"
               >
-                <MdHistory className="text-indigo-600 dark:text-indigo-400 text-xl" />
+                <MdPerson className="text-indigo-600 dark:text-indigo-400 text-xl" />
                 <div>
                   <div className="font-medium text-indigo-900 dark:text-indigo-100 text-sm">
-                    Activity
+                    Edit Profile
                   </div>
                 </div>
               </Link>

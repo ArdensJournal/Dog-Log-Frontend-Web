@@ -93,26 +93,40 @@ export default function Page() {
             </Link>
           </section>
 
+          {/* Featured sections - Recent Activity and Weight Tracking */}
+          <section className="w-full max-w-3xl mb-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Link href="/recent-activity" className="flex flex-col items-center px-8 py-8 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/50 dark:to-indigo-900/50 border-2 border-blue-200 dark:border-blue-700 shadow-lg hover:shadow-xl hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/70 dark:hover:to-indigo-900/70 transition-all duration-200">
+              <span className="text-4xl mb-3">📊</span>
+              <span className="font-bold text-blue-700 dark:text-blue-300 mb-2 text-lg">Recent Activity</span>
+              <span className="text-gray-600 dark:text-gray-400 text-sm text-center">View your dog's recent activities, health records, and updates</span>
+            </Link>
+            <Link href="/weight" className="flex flex-col items-center px-8 py-8 rounded-2xl bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/50 dark:to-pink-900/50 border-2 border-purple-200 dark:border-purple-700 shadow-lg hover:shadow-xl hover:from-purple-100 hover:to-pink-100 dark:hover:from-purple-900/70 dark:hover:to-pink-900/70 transition-all duration-200">
+              <span className="text-4xl mb-3">⚖️</span>
+              <span className="font-bold text-purple-700 dark:text-purple-300 mb-2 text-lg">Weight Tracking</span>
+              <span className="text-gray-600 dark:text-gray-400 text-sm text-center">Monitor weight trends, log new measurements, and track health</span>
+            </Link>
+          </section>
+
           <section className="w-full max-w-3xl grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-            <Link href="/needs" className="flex flex-col items-center px-6 py-6 rounded-2xl bg-indigo-50 dark:bg-indigo-900/50 shadow hover:bg-indigo-100 dark:hover:bg-indigo-900/70 transition">
-              <span className="text-3xl mb-2">💩</span>
-              <span className="font-bold text-indigo-700 dark:text-indigo-300 mb-1">Report Needs</span>
-              <span className="text-gray-600 dark:text-gray-400 text-sm">Track your dog's potty breaks</span>
+            <Link href="/needs" className="flex flex-col items-center px-8 py-8 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/50 dark:to-orange-900/50 border-2 border-amber-200 dark:border-amber-700 shadow-lg hover:shadow-xl hover:from-amber-100 hover:to-orange-100 dark:hover:from-amber-900/70 dark:hover:to-orange-900/70 transition-all duration-200">
+              <span className="text-4xl mb-3">💩</span>
+              <span className="font-bold text-amber-700 dark:text-amber-300 mb-2 text-lg">Report Needs</span>
+              <span className="text-gray-600 dark:text-gray-400 text-sm text-center">Track your dog's potty breaks and bathroom schedules</span>
             </Link>
-            <Link href="/vaccinations" className="flex flex-col items-center px-6 py-6 rounded-2xl bg-green-50 dark:bg-green-900/50 shadow hover:bg-green-100 dark:hover:bg-green-900/70 transition">
-              <span className="text-3xl mb-2">💉</span>
-              <span className="font-bold text-green-700 dark:text-green-300 mb-1">Report Vaccination</span>
-              <span className="text-gray-600 dark:text-gray-400 text-sm">Log vaccinations and medication</span>
+            <Link href="/vaccinations" className="flex flex-col items-center px-8 py-8 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/50 dark:to-emerald-900/50 border-2 border-green-200 dark:border-green-700 shadow-lg hover:shadow-xl hover:from-green-100 hover:to-emerald-100 dark:hover:from-green-900/70 dark:hover:to-emerald-900/70 transition-all duration-200">
+              <span className="text-4xl mb-3">💉</span>
+              <span className="font-bold text-green-700 dark:text-green-300 mb-2 text-lg">Report Vaccination</span>
+              <span className="text-gray-600 dark:text-gray-400 text-sm text-center">Log vaccinations, medications, and health records</span>
             </Link>
-            <Link href="/notifications" className="flex flex-col items-center px-6 py-6 rounded-2xl bg-yellow-50 dark:bg-yellow-900/50 shadow hover:bg-yellow-100 dark:hover:bg-yellow-900/70 transition">
-              <span className="text-3xl mb-2">🔔</span>
-              <span className="font-bold text-yellow-700 dark:text-yellow-300 mb-1">View Notifications</span>
-              <span className="text-gray-600 dark:text-gray-400 text-sm">See reminders and alerts</span>
+            <Link href="/notifications" className="flex flex-col items-center px-8 py-8 rounded-2xl bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/50 dark:to-amber-900/50 border-2 border-yellow-200 dark:border-yellow-700 shadow-lg hover:shadow-xl hover:from-yellow-100 hover:to-amber-100 dark:hover:from-yellow-900/70 dark:hover:to-amber-900/70 transition-all duration-200">
+              <span className="text-4xl mb-3">🔔</span>
+              <span className="font-bold text-yellow-700 dark:text-yellow-300 mb-2 text-lg">View Notifications</span>
+              <span className="text-gray-600 dark:text-gray-400 text-sm text-center">See reminders, alerts, and important updates</span>
             </Link>
-            <Link href="/tasks" className="flex flex-col items-center px-6 py-6 rounded-2xl bg-pink-50 dark:bg-pink-900/50 shadow hover:bg-pink-100 dark:hover:bg-pink-900/70 transition">
-              <span className="text-3xl mb-2">📝</span>
-              <span className="font-bold text-pink-700 dark:text-pink-300 mb-1">Task List</span>
-              <span className="text-gray-600 dark:text-gray-400 text-sm">Manage your dog's tasks</span>
+            <Link href="/tasks" className="flex flex-col items-center px-8 py-8 rounded-2xl bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-900/50 dark:to-rose-900/50 border-2 border-pink-200 dark:border-pink-700 shadow-lg hover:shadow-xl hover:from-pink-100 hover:to-rose-100 dark:hover:from-pink-900/70 dark:hover:to-rose-900/70 transition-all duration-200">
+              <span className="text-4xl mb-3">📝</span>
+              <span className="font-bold text-pink-700 dark:text-pink-300 mb-2 text-lg">Task List</span>
+              <span className="text-gray-600 dark:text-gray-400 text-sm text-center">Manage your dog's daily tasks and activities</span>
             </Link>
           </section>
         </>
