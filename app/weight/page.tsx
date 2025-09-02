@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { checkAuthStatus } from '@/app/lib/auth';
@@ -20,7 +20,7 @@ import {
   MdSettings
 } from 'react-icons/md';
 
-export default function WeightPage() {
+function WeightPageContent() {
   const [user, setUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [dogs, setDogs] = useState<Dog[]>([]);
@@ -480,5 +480,26 @@ export default function WeightPage() {
         )}
       </div>
     </div>
+  );
+}
+
+function WeightPageFallback() {
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mb-6">
+          <MdScale className="text-xl" />
+          <span>Loading weight tracking...</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function WeightPage() {
+  return (
+    <Suspense fallback={<WeightPageFallback />}>
+      <WeightPageContent />
+    </Suspense>
   );
 }
