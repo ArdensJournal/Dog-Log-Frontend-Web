@@ -1,8 +1,12 @@
 import { cookies } from 'next/headers';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3456';
+const BACKEND_URL = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
 
 console.log('🌐 Backend URL configured as:', BACKEND_URL);
+
+if (!BACKEND_URL) {
+  console.error('❌ BACKEND_URL is not defined. Please set BACKEND_URL or NEXT_PUBLIC_BACKEND_URL environment variable');
+}
 
 // Helper function to get auth token
 async function getAuthToken() {
@@ -27,7 +31,7 @@ export async function GET(request: Request) {
     }
 
     console.log(`🔄 Fetching weight records for dog: ${dogId}`);
-    console.log(`🌐 Making request to: ${BACKEND_URL}/graphql`);
+    console.log(`🌐 Making request to: ${BACKEND_URL}`);
     console.log(`🔑 Using token: ${token ? 'Present' : 'Missing'}`);
 
     // GraphQL query to fetch weight records for a specific dog
@@ -46,7 +50,7 @@ export async function GET(request: Request) {
       }
     `;
 
-    const response = await fetch(`${BACKEND_URL}/graphql`, {
+    const response = await fetch(BACKEND_URL!, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -117,7 +121,7 @@ export async function POST(request: Request) {
     }
 
     console.log('🔄 Creating weight record:', weightData);
-    console.log(`🌐 Making request to: ${BACKEND_URL}/graphql`);
+    console.log(`🌐 Making request to: ${BACKEND_URL}`);
     console.log(`🔑 Using token: ${token ? 'Present' : 'Missing'}`);
 
     // GraphQL mutation to create a new weight record
@@ -136,7 +140,7 @@ export async function POST(request: Request) {
       }
     `;
 
-    const response = await fetch(`${BACKEND_URL}/graphql`, {
+    const response = await fetch(BACKEND_URL!, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
