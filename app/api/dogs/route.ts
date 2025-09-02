@@ -3,6 +3,8 @@ import { cookies } from 'next/headers';
 
 const BACKEND_URL = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
 
+console.log('🌐 Backend URL configured as:', BACKEND_URL);
+
 if (!BACKEND_URL) {
   console.error('❌ BACKEND_URL is not defined. Please set BACKEND_URL or NEXT_PUBLIC_BACKEND_URL environment variable');
 }

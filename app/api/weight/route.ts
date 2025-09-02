@@ -2,6 +2,8 @@ import { cookies } from 'next/headers';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3456';
 
+console.log('🌐 Backend URL configured as:', BACKEND_URL);
+
 // Helper function to get auth token
 async function getAuthToken() {
   const cookieStore = await cookies();
@@ -25,6 +27,8 @@ export async function GET(request: Request) {
     }
 
     console.log(`🔄 Fetching weight records for dog: ${dogId}`);
+    console.log(`🌐 Making request to: ${BACKEND_URL}/graphql`);
+    console.log(`🔑 Using token: ${token ? 'Present' : 'Missing'}`);
 
     // GraphQL query to fetch weight records for a specific dog
     const query = `
@@ -54,10 +58,18 @@ export async function GET(request: Request) {
       }),
     });
 
+    console.log(`📡 Backend response status: ${response.status}`);
+
     if (!response.ok) {
       console.error('Backend response not OK:', response.status);
+      const errorText = await response.text();
+      console.error('Backend error details:', errorText);
       return Response.json(
-        { error: 'Failed to fetch weight records from backend' },
+        { 
+          error: 'Failed to fetch weight records from backend', 
+          details: `Backend returned ${response.status}`,
+          backend_url: BACKEND_URL 
+        },
         { status: response.status }
       );
     }
@@ -83,7 +95,11 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('Error fetching weight records:', error);
     return Response.json(
-      { error: 'Internal server error' },
+      { 
+        error: 'Internal server error', 
+        details: error instanceof Error ? error.message : 'Unknown error',
+        backend_url: BACKEND_URL
+      },
       { status: 500 }
     );
   }
@@ -101,6 +117,8 @@ export async function POST(request: Request) {
     }
 
     console.log('🔄 Creating weight record:', weightData);
+    console.log(`🌐 Making request to: ${BACKEND_URL}/graphql`);
+    console.log(`🔑 Using token: ${token ? 'Present' : 'Missing'}`);
 
     // GraphQL mutation to create a new weight record
     const mutation = `
@@ -132,10 +150,18 @@ export async function POST(request: Request) {
       }),
     });
 
+    console.log(`📡 Backend response status: ${response.status}`);
+
     if (!response.ok) {
       console.error('Backend response not OK:', response.status);
+      const errorText = await response.text();
+      console.error('Backend error details:', errorText);
       return Response.json(
-        { error: 'Failed to create weight record in backend' },
+        { 
+          error: 'Failed to create weight record in backend', 
+          details: `Backend returned ${response.status}`,
+          backend_url: BACKEND_URL 
+        },
         { status: response.status }
       );
     }
@@ -161,7 +187,11 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Error creating weight record:', error);
     return Response.json(
-      { error: 'Internal server error' },
+      { 
+        error: 'Internal server error', 
+        details: error instanceof Error ? error.message : 'Unknown error',
+        backend_url: BACKEND_URL
+      },
       { status: 500 }
     );
   }
