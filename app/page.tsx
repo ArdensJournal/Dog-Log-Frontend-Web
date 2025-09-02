@@ -267,8 +267,9 @@ export default function Page() {
         </div>
       )}
 
-      {/* Enhanced Features Overview */}
-      <div className="relative max-w-7xl mx-auto px-4 py-20 sm:px-6 lg:px-8">
+      {/* Enhanced Features Overview - Only visible for non-authenticated users */}
+      {!isAuthenticated && (
+        <div className="relative max-w-7xl mx-auto px-4 py-20 sm:px-6 lg:px-8">
         {/* Background decoration */}
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 dark:from-blue-500/3 dark:to-purple-500/3 rounded-3xl"></div>
         
@@ -354,6 +355,7 @@ export default function Page() {
           )}
         </div>
       </div>
+      )}
     </main>
   );
 }
