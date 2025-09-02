@@ -158,108 +158,85 @@ export default function Page() {
           {/* Featured Health Tracking - Enhanced */}
           <div className="mb-16">
             <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Health & Activity Tracking</h2>
-              <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">Monitor your dog's wellbeing with comprehensive tracking tools</p>
+              <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Dog Care Actions</h2>
+              <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">Quick access to all your dog's care activities</p>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 lg:gap-8 max-w-6xl mx-auto">
               <Link 
                 href="/recent-activity" 
-                className="group relative overflow-hidden bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-3xl p-10 shadow-2xl hover:shadow-3xl transform hover:-translate-y-3 transition-all duration-500 border border-blue-200/50 dark:border-blue-700/50"
+                className="group bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 lg:p-8 xl:p-10 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 border border-blue-200/50 dark:border-blue-700/50"
               >
-                {/* Background decoration */}
-                <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-blue-100 to-indigo-200 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-full -translate-y-20 translate-x-20 group-hover:scale-110 transition-transform duration-500"></div>
-                
-                <div className="relative z-10">
-                  <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
-                    <span className="text-4xl text-white">📊</span>
+                <div className="text-center">
+                  <div className="w-12 h-12 lg:w-16 lg:h-16 xl:w-20 xl:h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 lg:mb-4 xl:mb-6 group-hover:scale-110 transition-all duration-300">
+                    <span className="text-2xl lg:text-3xl xl:text-4xl text-white">📊</span>
                   </div>
-                  <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Recent Activity</h3>
-                  <p className="text-gray-600 dark:text-gray-400 text-lg leading-relaxed mb-6">
-                    Monitor your dog's daily activities, health records, and important updates all in one comprehensive dashboard
-                  </p>
-                  <div className="flex items-center text-blue-600 dark:text-blue-400 font-bold text-lg group-hover:translate-x-3 transition-transform duration-300">
-                    View Activity Dashboard
-                    <svg className="w-6 h-6 ml-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
+                  <h3 className="text-lg lg:text-xl xl:text-2xl font-bold text-gray-900 dark:text-white mb-1 lg:mb-2">Recent Activity</h3>
+                  <p className="text-sm lg:text-base text-gray-600 dark:text-gray-400">View activity dashboard</p>
                 </div>
               </Link>
 
               <Link 
                 href="/weight" 
-                className="group relative overflow-hidden bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-3xl p-10 shadow-2xl hover:shadow-3xl transform hover:-translate-y-3 transition-all duration-500 border border-purple-200/50 dark:border-purple-700/50"
+                className="group bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 lg:p-8 xl:p-10 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 border border-purple-200/50 dark:border-purple-700/50"
               >
-                {/* Background decoration */}
-                <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-purple-100 to-pink-200 dark:from-purple-900/20 dark:to-pink-900/20 rounded-full -translate-y-20 translate-x-20 group-hover:scale-110 transition-transform duration-500"></div>
-                
-                <div className="relative z-10">
-                  <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-600 rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
-                    <span className="text-4xl text-white">⚖️</span>
+                <div className="text-center">
+                  <div className="w-12 h-12 lg:w-16 lg:h-16 xl:w-20 xl:h-20 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 lg:mb-4 xl:mb-6 group-hover:scale-110 transition-all duration-300">
+                    <span className="text-2xl lg:text-3xl xl:text-4xl text-white">⚖️</span>
                   </div>
-                  <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Weight Tracking</h3>
-                  <p className="text-gray-600 dark:text-gray-400 text-lg leading-relaxed mb-6">
-                    Track weight trends, log measurements, and maintain your dog's optimal health with detailed analytics and insights
-                  </p>
-                  <div className="flex items-center text-purple-600 dark:text-purple-400 font-bold text-lg group-hover:translate-x-3 transition-transform duration-300">
-                    Track Weight Progress
-                    <svg className="w-6 h-6 ml-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </div>
-              </Link>
-            </div>
-          </div>
-
-          {/* Daily Care Activities - Enhanced Grid */}
-          <div className="mb-16">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Daily Care Activities</h2>
-              <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">Essential tools for your dog's daily health and wellness routine</p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-4xl mx-auto">
-              <Link href="/needs" className="group relative overflow-hidden bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-amber-200/50 dark:border-amber-700/50">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-amber-100 to-orange-200 dark:from-amber-900/20 dark:to-orange-900/20 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-300"></div>
-                <div className="relative z-10 text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
-                    <span className="text-3xl text-white">💩</span>
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Report Needs</h3>
-                  <p className="text-gray-600 dark:text-gray-400 leading-relaxed">Track your dog's potty breaks and bathroom schedules for better health monitoring</p>
+                  <h3 className="text-lg lg:text-xl xl:text-2xl font-bold text-gray-900 dark:text-white mb-1 lg:mb-2">Weight Tracking</h3>
+                  <p className="text-sm lg:text-base text-gray-600 dark:text-gray-400">Track weight changes</p>
                 </div>
               </Link>
 
-              <Link href="/vaccinations" className="group relative overflow-hidden bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-green-200/50 dark:border-green-700/50">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-100 to-emerald-200 dark:from-green-900/20 dark:to-emerald-900/20 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-300"></div>
-                <div className="relative z-10 text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
-                    <span className="text-3xl text-white">💉</span>
+              <Link 
+                href="/needs" 
+                className="group bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 lg:p-8 xl:p-10 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 border border-amber-200/50 dark:border-amber-700/50"
+              >
+                <div className="text-center">
+                  <div className="w-12 h-12 lg:w-16 lg:h-16 xl:w-20 xl:h-20 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 lg:mb-4 xl:mb-6 group-hover:scale-110 transition-all duration-300">
+                    <span className="text-2xl lg:text-3xl xl:text-4xl text-white">💩</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Report Vaccination</h3>
-                  <p className="text-gray-600 dark:text-gray-400 leading-relaxed">Log vaccinations, medications, and health records for comprehensive care tracking</p>
+                  <h3 className="text-lg lg:text-xl xl:text-2xl font-bold text-gray-900 dark:text-white mb-1 lg:mb-2">Report Needs</h3>
+                  <p className="text-sm lg:text-base text-gray-600 dark:text-gray-400">Track potty breaks</p>
                 </div>
               </Link>
 
-              <Link href="/notifications" className="group relative overflow-hidden bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-yellow-200/50 dark:border-yellow-700/50">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-yellow-100 to-amber-200 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-300"></div>
-                <div className="relative z-10 text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-yellow-500 to-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
-                    <span className="text-3xl text-white">🔔</span>
+              <Link 
+                href="/vaccinations" 
+                className="group bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 lg:p-8 xl:p-10 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 border border-green-200/50 dark:border-green-700/50"
+              >
+                <div className="text-center">
+                  <div className="w-12 h-12 lg:w-16 lg:h-16 xl:w-20 xl:h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 lg:mb-4 xl:mb-6 group-hover:scale-110 transition-all duration-300">
+                    <span className="text-2xl lg:text-3xl xl:text-4xl text-white">💉</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">View Notifications</h3>
-                  <p className="text-gray-600 dark:text-gray-400 leading-relaxed">See reminders, alerts, and important updates to stay on top of your dog's care</p>
+                  <h3 className="text-lg lg:text-xl xl:text-2xl font-bold text-gray-900 dark:text-white mb-1 lg:mb-2">Report Vaccination</h3>
+                  <p className="text-sm lg:text-base text-gray-600 dark:text-gray-400">Log vaccinations</p>
                 </div>
               </Link>
 
-              <Link href="/tasks" className="group relative overflow-hidden bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-pink-200/50 dark:border-pink-700/50">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-pink-100 to-rose-200 dark:from-pink-900/20 dark:to-rose-900/20 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-300"></div>
-                <div className="relative z-10 text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
-                    <span className="text-3xl text-white">📝</span>
+              <Link 
+                href="/notifications" 
+                className="group bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 lg:p-8 xl:p-10 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 border border-yellow-200/50 dark:border-yellow-700/50"
+              >
+                <div className="text-center">
+                  <div className="w-12 h-12 lg:w-16 lg:h-16 xl:w-20 xl:h-20 bg-gradient-to-br from-yellow-500 to-amber-600 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 lg:mb-4 xl:mb-6 group-hover:scale-110 transition-all duration-300">
+                    <span className="text-2xl lg:text-3xl xl:text-4xl text-white">🔔</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Task List</h3>
-                  <p className="text-gray-600 dark:text-gray-400 leading-relaxed">Manage your dog's daily tasks and activities with organized scheduling tools</p>
+                  <h3 className="text-lg lg:text-xl xl:text-2xl font-bold text-gray-900 dark:text-white mb-1 lg:mb-2">View Notifications</h3>
+                  <p className="text-sm lg:text-base text-gray-600 dark:text-gray-400">See reminders</p>
+                </div>
+              </Link>
+
+              <Link 
+                href="/tasks" 
+                className="group bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 lg:p-8 xl:p-10 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 border border-pink-200/50 dark:border-pink-700/50"
+              >
+                <div className="text-center">
+                  <div className="w-12 h-12 lg:w-16 lg:h-16 xl:w-20 xl:h-20 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 lg:mb-4 xl:mb-6 group-hover:scale-110 transition-all duration-300">
+                    <span className="text-2xl lg:text-3xl xl:text-4xl text-white">📝</span>
+                  </div>
+                  <h3 className="text-lg lg:text-xl xl:text-2xl font-bold text-gray-900 dark:text-white mb-1 lg:mb-2">Task List</h3>
+                  <p className="text-sm lg:text-base text-gray-600 dark:text-gray-400">Manage daily tasks</p>
                 </div>
               </Link>
             </div>
