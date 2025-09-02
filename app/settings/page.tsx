@@ -11,7 +11,8 @@ import {
   MdCalendarMonth, 
   MdSupport, 
   MdInfo,
-  MdArrowForward
+  MdArrowForward,
+  MdHistory
 } from "react-icons/md";
 
 const settingsCategories = [
@@ -29,6 +30,14 @@ const settingsCategories = [
     description: "Set your preferred units for weight, height, and temperature",
     icon: <MdStraighten className="text-2xl" />,
     href: "/settings/units", 
+    available: true
+  },
+  {
+    id: "recent-activity",
+    title: "Recent Activity",
+    description: "View your dog's recent activities, health records, and tasks",
+    icon: <MdHistory className="text-2xl" />,
+    href: "/recent-activity",
     available: true
   },
   {
