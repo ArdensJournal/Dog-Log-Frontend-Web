@@ -39,6 +39,7 @@ const NAV_SECTIONS = [
         { href: "/dogs", label: "All Dogs" },
         { href: "/add-dog", label: "Add Dog" },
         { href: "/needs", label: "Report Needs" },
+        { href: "/weight", label: "Weight Tracking" },
         { href: "/vaccinations", label: "Vaccinations" },
         { href: "/tasks", label: "Tasks" },
       ]},
