@@ -54,15 +54,28 @@ export async function GET() {
       body: JSON.stringify({ query }),
     });
 
+    console.log('🌐 Backend response status:', response.status);
+    const responseText = await response.text();
+    console.log('📄 Backend response text:', responseText);
+
     if (!response.ok) {
       console.error('Backend response not OK:', response.status);
       return Response.json(
-        { error: 'Failed to fetch dogs from backend' }, 
+        { error: 'Failed to fetch dogs from backend', details: responseText }, 
         { status: response.status }
       );
     }
 
-    const data = await response.json();
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('Failed to parse response as JSON:', parseError);
+      return Response.json(
+        { error: 'Invalid JSON response from backend', details: responseText }, 
+        { status: 500 }
+      );
+    }
 
     if (data.errors) {
       console.error('GraphQL errors:', data.errors);

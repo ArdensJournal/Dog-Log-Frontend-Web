@@ -1,197 +1,398 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { MdAdd, MdCheck, MdClose, MdCalendarToday, MdPets, MdVaccines, MdRefresh } from 'react-icons/md';
+import { apiClient, Task, Dog } from '@/app/lib/api-client';
+import TaskForm from '@/app/components/tasks/TaskForm';
+
 export default function TasksPage() {
-  return (
-    <main className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-blue-50 dark:from-gray-900 dark:via-indigo-900 dark:to-purple-900">
-      <div className="container mx-auto px-6 py-12">
-        {/* Header Section */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-24 h-24 bg-indigo-100 dark:bg-indigo-900/30 rounded-full mb-6">
-            <span className="text-5xl">📝</span>
-          </div>
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Task Management
-          </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
-            Organize, track, and manage all your dog care tasks in one comprehensive dashboard
-          </p>
-        </div>
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [dogs, setDogs] = useState<Dog[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [selectedDogId, setSelectedDogId] = useState<string>('');
 
-        {/* Coming Soon Card */}
-        <div className="max-w-6xl mx-auto">
-          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-3xl shadow-2xl p-8 md:p-12 border border-gray-200/50 dark:border-gray-700/50">
-            <div className="text-center">
-              <div className="inline-flex items-center px-4 py-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-200 rounded-full text-sm font-medium mb-6">
-                <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-                </svg>
-                Advanced Planning System
-              </div>
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-                Complete Care Organization
-              </h2>
-              <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
-                We're building a comprehensive task management system that helps you stay on top of 
-                every aspect of your dog's care, from daily routines to long-term health planning.
-              </p>
+  // Load tasks and dogs
+  useEffect(() => {
+    loadData();
+  }, [selectedDogId]);
 
-              {/* Task Categories Preview */}
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl p-6 border border-green-200/50 dark:border-green-800/50">
-                  <div className="w-14 h-14 bg-green-500/20 rounded-xl flex items-center justify-center mb-4 mx-auto">
-                    <svg className="w-7 h-7 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Daily Care</h3>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Feeding, walks, medication schedules</p>
-                </div>
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-                <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-2xl p-6 border border-blue-200/50 dark:border-blue-800/50">
-                  <div className="w-14 h-14 bg-blue-500/20 rounded-xl flex items-center justify-center mb-4 mx-auto">
-                    <svg className="w-7 h-7 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                  </div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Health Tasks</h3>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Vet appointments, checkups, treatments</p>
-                </div>
+      // Load dogs for filtering
+      const dogsResponse = await apiClient.getDogs();
+      console.log('Dogs response:', dogsResponse);
+      
+      if (dogsResponse?.data?.userDogs) {
+        setDogs(dogsResponse.data.userDogs);
+      } else if (dogsResponse?.data) {
+        // Handle direct data array response
+        setDogs(dogsResponse.data);
+      }
 
-                <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-6 border border-purple-200/50 dark:border-purple-800/50">
-                  <div className="w-14 h-14 bg-purple-500/20 rounded-xl flex items-center justify-center mb-4 mx-auto">
-                    <svg className="w-7 h-7 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                  </div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Training</h3>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Behavior goals, exercise routines</p>
-                </div>
+      // Load tasks with optional dog filter
+      const tasksResponse = await apiClient.getTasks(
+        selectedDogId ? { dogId: selectedDogId } : undefined
+      );
+      
+      console.log('Tasks response:', tasksResponse);
+      
+      if (tasksResponse?.data) {
+        setTasks(tasksResponse.data);
+      } else {
+        setTasks([]);
+      }
 
-                <div className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-2xl p-6 border border-orange-200/50 dark:border-orange-800/50">
-                  <div className="w-14 h-14 bg-orange-500/20 rounded-xl flex items-center justify-center mb-4 mx-auto">
-                    <svg className="w-7 h-7 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                    </svg>
-                  </div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Supplies</h3>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Food orders, toy replacements</p>
-                </div>
-              </div>
+    } catch (error) {
+      console.error('Error loading tasks:', error);
+      setError(error instanceof Error ? error.message : 'Failed to load tasks');
+      setTasks([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-              {/* Task Management Features */}
-              <div className="grid md:grid-cols-3 gap-8 mb-10">
-                <div className="text-left">
-                  <div className="bg-indigo-100 dark:bg-indigo-900/30 w-16 h-16 rounded-2xl flex items-center justify-center mb-4">
-                    <svg className="w-8 h-8 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v6a2 2 0 002 2h2m4 0h2a2 2 0 002-2V7a2 2 0 00-2-2h-2m-4 11H9m4 0a2 2 0 01-2-2V9a2 2 0 012-2m0 0V7a2 2 0 012-2" />
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Smart Organization</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                    Auto-categorize tasks by priority, frequency, and type. Set up recurring tasks and dependencies.
-                  </p>
-                </div>
+  const handleTaskCreated = () => {
+    setShowForm(false);
+    loadData(); // Reload tasks after creation
+  };
 
-                <div className="text-left">
-                  <div className="bg-green-100 dark:bg-green-900/30 w-16 h-16 rounded-2xl flex items-center justify-center mb-4">
-                    <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Mobile Sync</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                    Access your task list anywhere. Complete tasks on-the-go and sync across all your devices.
-                  </p>
-                </div>
+  const formatDateTime = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return dateString;
+    }
+  };
 
-                <div className="text-left">
-                  <div className="bg-purple-100 dark:bg-purple-900/30 w-16 h-16 rounded-2xl flex items-center justify-center mb-4">
-                    <svg className="w-8 h-8 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 00-2-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Progress Tracking</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                    Visualize completion rates, track habits, and celebrate achievements with detailed analytics.
-                  </p>
-                </div>
-              </div>
+  const isOverdue = (dateString: string, isCompleted: boolean) => {
+    if (isCompleted) return false;
+    try {
+      const date = new Date(dateString);
+      return date < new Date();
+    } catch {
+      return false;
+    }
+  };
 
-              {/* Progress Indicator */}
-              <div className="bg-gray-100 dark:bg-gray-700 rounded-full h-3 mb-4 overflow-hidden">
-                <div className="bg-gradient-to-r from-indigo-400 to-purple-600 h-full rounded-full animate-pulse" style={{ width: '30%' }}></div>
-              </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">Development Progress: 30% Complete</p>
+  const getTasksByStatus = () => {
+    const pending = tasks.filter(task => !task.isCompleted);
+    const completed = tasks.filter(task => task.isCompleted);
+    return { pending, completed };
+  };
 
-              {/* Task Preview Mockup */}
-              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl p-8 mb-8 border border-indigo-200/50 dark:border-indigo-800/50">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Preview: What Your Task Dashboard Will Look Like</h3>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="bg-white/60 dark:bg-gray-700/60 rounded-xl p-4 backdrop-blur-sm">
-                    <h4 className="font-medium text-gray-900 dark:text-white mb-3 text-sm">📅 Today's Tasks</h4>
-                    <div className="space-y-2">
-                      <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
-                        <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                        Morning walk with Max (Completed)
-                      </div>
-                      <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
-                        <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
-                        Give Luna her medication (Due 3:00 PM)
-                      </div>
-                      <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-                        Training session: Sit command (Scheduled)
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-white/60 dark:bg-gray-700/60 rounded-xl p-4 backdrop-blur-sm">
-                    <h4 className="font-medium text-gray-900 dark:text-white mb-3 text-sm">📊 This Week's Progress</h4>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
-                        <span>Daily walks</span>
-                        <span className="text-green-600 dark:text-green-400 font-medium">6/7 days</span>
-                      </div>
-                      <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
-                        <span>Feeding schedule</span>
-                        <span className="text-green-600 dark:text-green-400 font-medium">100%</span>
-                      </div>
-                      <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
-                        <span>Training sessions</span>
-                        <span className="text-yellow-600 dark:text-yellow-400 font-medium">3/4 planned</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+  const { pending, completed } = getTasksByStatus();
 
-              {/* CTA Section */}
-              <div className="space-y-4">
-                <button disabled className="px-8 py-4 bg-gradient-to-r from-indigo-400 to-purple-600 text-white font-semibold rounded-2xl shadow-lg opacity-50 cursor-not-allowed transform hover:scale-105 transition-all duration-200">
-                  <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
-                  </svg>
-                  Start Organizing Tasks
-                </button>
-                <p className="text-xs text-gray-400 dark:text-gray-500">This comprehensive system is being carefully crafted for you</p>
-              </div>
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-48 mb-6"></div>
+            <div className="space-y-4">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="h-24 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+              ))}
             </div>
           </div>
         </div>
+      </div>
+    );
+  }
 
-        {/* Bottom Navigation */}
-        <div className="text-center mt-12">
-          <p className="text-gray-500 dark:text-gray-400 mb-4">Keep managing your dogs while we build this powerful system</p>
-          <div className="flex justify-center space-x-4">
-            <a href="/dogs" className="px-6 py-3 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-xl hover:bg-indigo-200 dark:hover:bg-indigo-800/50 transition-all duration-200 font-medium">
-              View Your Dogs
-            </a>
-            <a href="/add-dog" className="px-6 py-3 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-xl hover:bg-green-200 dark:hover:bg-green-800/50 transition-all duration-200 font-medium">
-              Add New Dog
-            </a>
-            <a href="/" className="px-6 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200 font-medium">
-              Dashboard
-            </a>
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              Tasks
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              Manage your dog care tasks and reminders
+            </p>
+          </div>
+          <div className="flex space-x-3 mt-4 sm:mt-0">
+            <button
+              onClick={loadData}
+              disabled={loading}
+              className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-lg shadow-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50"
+            >
+              <MdRefresh className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+            <button
+              onClick={() => setShowForm(true)}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            >
+              <MdAdd className="mr-2 h-4 w-4" />
+              Add Task
+            </button>
           </div>
         </div>
+
+        {/* Dog Filter */}
+        <div className="mb-6">
+          <label htmlFor="dogFilter" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Filter by Dog
+          </label>
+          <select
+            id="dogFilter"
+            value={selectedDogId}
+            onChange={(e) => setSelectedDogId(e.target.value)}
+            className="w-full sm:w-64 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          >
+            <option value="">All Dogs</option>
+            {dogs.map((dog) => (
+              <option key={dog._id} value={dog._id}>
+                {dog.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+            <div className="flex">
+              <MdClose className="h-5 w-5 text-red-400" />
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
+                  Error loading tasks
+                </h3>
+                <p className="mt-1 text-sm text-red-700 dark:text-red-300">{error}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Task Statistics */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{tasks.length}</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Total Tasks</div>
+          </div>
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">{pending.length}</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Pending Tasks</div>
+          </div>
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="text-2xl font-bold text-green-600 dark:text-green-400">{completed.length}</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Completed Tasks</div>
+          </div>
+        </div>
+
+        {/* Task Lists */}
+        <div className="space-y-8">
+          {/* Pending Tasks */}
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+              <MdCalendarToday className="mr-2 h-5 w-5" />
+              Pending Tasks ({pending.length})
+            </h2>
+            
+            {pending.length === 0 ? (
+              <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                <MdCheck className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-white">
+                  No pending tasks
+                </h3>
+                <p className="mt-2 text-gray-500 dark:text-gray-400">
+                  {selectedDogId ? 'No pending tasks for selected dog.' : 'All caught up! No pending tasks.'}
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-4">
+                {pending.map((task) => (
+                  <TaskCard key={task._id} task={task} />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Completed Tasks */}
+          {completed.length > 0 && (
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                <MdCheck className="mr-2 h-5 w-5" />
+                Completed Tasks ({completed.length})
+              </h2>
+              
+              <div className="grid gap-4">
+                {completed.map((task) => (
+                  <TaskCard key={task._id} task={task} />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Task Form Modal */}
+        {showForm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                  Create New Task
+                </h3>
+                <button
+                  onClick={() => setShowForm(false)}
+                  className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                >
+                  <MdClose className="h-6 w-6" />
+                </button>
+              </div>
+              <div className="p-6">
+                <TaskForm 
+                  onSuccess={handleTaskCreated}
+                  onCancel={() => setShowForm(false)}
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-    </main>
+    </div>
+  );
+}
+
+// Task Card Component
+interface TaskCardProps {
+  task: Task;
+}
+
+function TaskCard({ task }: TaskCardProps) {
+  const formatDateTime = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
+  const isOverdue = (dateString: string, isCompleted: boolean) => {
+    if (isCompleted) return false;
+    try {
+      const date = new Date(dateString);
+      return date < new Date();
+    } catch {
+      return false;
+    }
+  };
+
+  const isTaskOverdue = isOverdue(task.date, task.isCompleted);
+  
+  return (
+    <div className={`bg-white dark:bg-gray-800 rounded-lg border p-6 transition-all hover:shadow-md ${
+      task.isCompleted 
+        ? 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/10' 
+        : isTaskOverdue 
+        ? 'border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/10'
+        : 'border-gray-200 dark:border-gray-700'
+    }`}>
+      {/* Task Header */}
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center">
+          <div className={`w-3 h-3 rounded-full mr-3 mt-1 ${
+            task.isCompleted 
+              ? 'bg-green-500' 
+              : isTaskOverdue 
+              ? 'bg-red-500'
+              : 'bg-amber-500'
+          }`}></div>
+          <h3 className={`text-lg font-medium ${
+            task.isCompleted 
+              ? 'text-gray-500 dark:text-gray-400 line-through' 
+              : 'text-gray-900 dark:text-white'
+          }`}>
+            {task.name}
+          </h3>
+        </div>
+        {task.isCompleted && (
+          <MdCheck className="w-5 h-5 text-green-500" />
+        )}
+      </div>
+
+      {/* Task Description */}
+      {task.description && (
+        <p className={`text-sm mb-3 ml-6 ${
+          task.isCompleted 
+            ? 'text-gray-400 dark:text-gray-500' 
+            : 'text-gray-600 dark:text-gray-300'
+        }`}>
+          {task.description}
+        </p>
+      )}
+
+      {/* Task Details */}
+      <div className="flex flex-wrap gap-4 ml-6 text-sm">
+        {/* Date */}
+        <div className="flex items-center">
+          <MdCalendarToday className={`w-4 h-4 mr-1 ${
+            isTaskOverdue && !task.isCompleted ? 'text-red-500' : 'text-gray-400'
+          }`} />
+          <span className={
+            isTaskOverdue && !task.isCompleted 
+              ? 'text-red-600 dark:text-red-400 font-medium' 
+              : task.isCompleted
+              ? 'text-gray-400 dark:text-gray-500'
+              : 'text-gray-600 dark:text-gray-300'
+          }>
+            {formatDateTime(task.date)}
+            {isTaskOverdue && !task.isCompleted && ' (Overdue)'}
+          </span>
+        </div>
+
+        {/* Dog */}
+        <div className="flex items-center">
+          <MdPets className="w-4 h-4 mr-1 text-gray-400" />
+          <span className={
+            task.isCompleted 
+              ? 'text-gray-400 dark:text-gray-500' 
+              : 'text-gray-600 dark:text-gray-300'
+          }>
+            {task.dog.name}
+          </span>
+        </div>
+
+        {/* Vaccine (if applicable) */}
+        {task.vaccine && (
+          <div className="flex items-center">
+            <MdVaccines className="w-4 h-4 mr-1 text-gray-400" />
+            <span className={
+              task.isCompleted 
+                ? 'text-gray-400 dark:text-gray-500' 
+                : 'text-gray-600 dark:text-gray-300'
+            }>
+              {task.vaccine.name}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Added by info */}
+      <div className="mt-3 ml-6 text-xs text-gray-400 dark:text-gray-500">
+        Added by {task.addedBy.name} on {new Date(task.createdAt).toLocaleDateString()}
+      </div>
+    </div>
   );
 }

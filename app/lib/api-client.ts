@@ -152,6 +152,44 @@ class ApiClient {
       body: JSON.stringify(vaccinationData),
     });
   }
+
+  // Task methods
+  async getTasks(options?: { dogId?: string }) {
+    let endpoint = '/tasks';
+    
+    if (options?.dogId) {
+      endpoint += `?dogId=${options.dogId}`;
+    }
+    
+    return this.request(endpoint);
+  }
+
+  async createTask(taskData: {
+    name: string;
+    dog: string; // Dog ID
+    date: string;
+    description?: string;
+    isCompleted?: boolean;
+    vaccine?: string; // Vaccine MongoDB ObjectId (not name!)
+  }) {
+    // Ensure date is properly formatted as ISO string
+    const taskDataToSend: any = { ...taskData };
+    
+    if (taskDataToSend.date) {
+      const dateObj = new Date(taskDataToSend.date);
+      if (isNaN(dateObj.getTime())) {
+        throw new Error("Invalid date format in createTask");
+      }
+      taskDataToSend.date = dateObj.toISOString();
+    }
+
+    console.log('📋 Creating task:', JSON.stringify(taskDataToSend, null, 2));
+    
+    return await this.request('/tasks', {
+      method: 'POST',
+      body: JSON.stringify(taskDataToSend),
+    });
+  }
 }
 
 // Export singleton instance
@@ -259,4 +297,36 @@ export interface CreateVaccinationResponse {
   data: {
     createVaccination: Vaccination;
   };
+}
+
+// Task interfaces
+export interface Task {
+  _id: string;
+  name: string;
+  description?: string;
+  date: string;
+  isCompleted: boolean;
+  dog: {
+    _id: string;
+    name: string;
+  };
+  vaccine?: {
+    _id: string;
+    name: string;
+  };
+  addedBy: User;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TasksResponse {
+  data: Task[];
+  success: boolean;
+  message?: string;
+}
+
+export interface TaskResponse {
+  data: Task;
+  success: boolean;
+  message?: string;
 }

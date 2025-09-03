@@ -23,7 +23,7 @@ export async function GET() {
     }
 
     const query = `
-      query FindAllVaccines {
+      query GetAllVaccines {
         findAllVaccines {
           _id
           name
@@ -40,15 +40,28 @@ export async function GET() {
       body: JSON.stringify({ query }),
     });
 
+    console.log('🌐 Vaccines backend response status:', response.status);
+    const responseText = await response.text();
+    console.log('📄 Vaccines backend response text:', responseText);
+
     if (!response.ok) {
       console.error('Backend response not OK:', response.status);
       return Response.json(
-        { error: 'Failed to fetch vaccines from backend' }, 
+        { error: 'Failed to fetch vaccines from backend', details: responseText }, 
         { status: response.status }
       );
     }
 
-    const data = await response.json();
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('Failed to parse vaccines response as JSON:', parseError);
+      return Response.json(
+        { error: 'Invalid JSON response from backend', details: responseText }, 
+        { status: 500 }
+      );
+    }
 
     if (data.errors) {
       console.error('GraphQL errors:', data.errors);
