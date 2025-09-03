@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MdAdd, MdCheck, MdClose, MdCalendarToday, MdPets, MdVaccines, MdRefresh } from 'react-icons/md';
+import { MdAdd, MdCheck, MdClose, MdCalendarToday, MdPets, MdVaccines, MdRefresh, MdFilterList, MdTrendingUp, MdTaskAlt, MdWarning } from 'react-icons/md';
 import { apiClient, Task, Dog } from '@/app/lib/api-client';
 import TaskForm from '@/app/components/tasks/TaskForm';
 
@@ -89,22 +89,43 @@ export default function TasksPage() {
   const getTasksByStatus = () => {
     const pending = tasks.filter(task => !task.isCompleted);
     const completed = tasks.filter(task => task.isCompleted);
-    return { pending, completed };
+    const overdue = pending.filter(task => isOverdue(task.date, task.isCompleted));
+    return { pending, completed, overdue };
   };
 
-  const { pending, completed } = getTasksByStatus();
+  const { pending, completed, overdue } = getTasksByStatus();
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-48 mb-6"></div>
-            <div className="space-y-4">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="h-24 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
-              ))}
-            </div>
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Loading Header */}
+          <div className="animate-pulse mb-8">
+            <div className="h-10 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 rounded-lg w-64 mb-4"></div>
+            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-80 mb-8"></div>
+          </div>
+          
+          {/* Loading Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-6 animate-pulse">
+                <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-2"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+              </div>
+            ))}
+          </div>
+          
+          {/* Loading Task Cards */}
+          <div className="space-y-6">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-6 animate-pulse">
+                <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-48 mb-4"></div>
+                <div className="space-y-3">
+                  <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                  <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -112,147 +133,206 @@ export default function TasksPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Tasks
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              Manage your dog care tasks and reminders
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8 mobile-bottom-nav-padding">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Enhanced Header */}
+        <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-800 dark:to-purple-800 rounded-2xl p-8 mb-8 shadow-xl">
+          <div className="absolute inset-0 bg-black/10"></div>
+          <div className="relative z-10">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+              <div className="mb-6 lg:mb-0">
+                <h1 className="text-4xl lg:text-5xl font-bold text-white mb-3">
+                  Task Manager
+                </h1>
+                <p className="text-indigo-100 text-lg max-w-2xl">
+                  Keep track of your dog care tasks, schedule reminders, and never miss important appointments.
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={loadData}
+                  disabled={loading}
+                  className="inline-flex items-center px-6 py-3 bg-white/20 hover:bg-white/30 text-white font-medium rounded-xl backdrop-blur-sm border border-white/20 transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
+                >
+                  <MdRefresh className={`mr-2 h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
+                  Refresh
+                </button>
+                <button
+                  onClick={() => setShowForm(true)}
+                  className="inline-flex items-center px-6 py-3 bg-white text-indigo-600 hover:bg-indigo-50 font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border border-white/20"
+                >
+                  <MdAdd className="mr-2 h-5 w-5" />
+                  Create Task
+                </button>
+              </div>
+            </div>
           </div>
-          <div className="flex space-x-3 mt-4 sm:mt-0">
-            <button
-              onClick={loadData}
-              disabled={loading}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-lg shadow-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50"
-            >
-              <MdRefresh className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-              Refresh
-            </button>
-            <button
-              onClick={() => setShowForm(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-            >
-              <MdAdd className="mr-2 h-4 w-4" />
-              Add Task
-            </button>
-          </div>
+          {/* Decorative elements */}
+          <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white/10 rounded-full"></div>
+          <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-32 h-32 bg-white/5 rounded-full"></div>
         </div>
 
-        {/* Dog Filter */}
-        <div className="mb-6">
-          <label htmlFor="dogFilter" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Filter by Dog
-          </label>
-          <select
-            id="dogFilter"
-            value={selectedDogId}
-            onChange={(e) => setSelectedDogId(e.target.value)}
-            className="w-full sm:w-64 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-          >
-            <option value="">All Dogs</option>
-            {dogs.map((dog) => (
-              <option key={dog._id} value={dog._id}>
-                {dog.name}
-              </option>
-            ))}
-          </select>
+        {/* Enhanced Filter Section */}
+        <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-6 mb-8 shadow-lg border border-white/20 dark:border-gray-700/50">
+          <div className="flex items-center mb-4">
+            <MdFilterList className="w-5 h-5 text-indigo-600 dark:text-indigo-400 mr-2" />
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Filter Tasks</h3>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <label htmlFor="dogFilter" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Filter by Dog
+              </label>
+              <select
+                id="dogFilter"
+                value={selectedDogId}
+                onChange={(e) => setSelectedDogId(e.target.value)}
+                className="w-full px-4 py-3 border-0 rounded-lg bg-white dark:bg-gray-700 shadow-sm ring-1 ring-gray-300 dark:ring-gray-600 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-gray-900 dark:text-white font-medium transition-all duration-200"
+              >
+                <option value="">All Dogs</option>
+                {dogs.map((dog) => (
+                  <option key={dog._id} value={dog._id}>
+                    {dog.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {selectedDogId && (
+              <div className="flex items-end">
+                <button
+                  onClick={() => setSelectedDogId('')}
+                  className="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+                >
+                  Clear Filter
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-            <div className="flex">
-              <MdClose className="h-5 w-5 text-red-400" />
+          <div className="mb-8 bg-red-50 dark:bg-red-900/20 backdrop-blur-sm border border-red-200 dark:border-red-800 rounded-xl p-6 shadow-lg">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <MdClose className="h-6 w-6 text-red-500" />
+              </div>
               <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
-                  Error loading tasks
+                <h3 className="text-lg font-semibold text-red-800 dark:text-red-200">
+                  Unable to load tasks
                 </h3>
-                <p className="mt-1 text-sm text-red-700 dark:text-red-300">{error}</p>
+                <p className="mt-2 text-red-700 dark:text-red-300">{error}</p>
               </div>
             </div>
           </div>
         )}
 
-        {/* Task Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{tasks.length}</div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Total Tasks</div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">{pending.length}</div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Pending Tasks</div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="text-2xl font-bold text-green-600 dark:text-green-400">{completed.length}</div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Completed Tasks</div>
-          </div>
+        {/* Enhanced Statistics Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <StatCard
+            title="Total Tasks"
+            value={tasks.length}
+            icon={MdTaskAlt}
+            color="indigo"
+            trend="+2 this week"
+          />
+          <StatCard
+            title="Pending"
+            value={pending.length}
+            icon={MdCalendarToday}
+            color="blue"
+            trend={`${Math.round((pending.length / Math.max(tasks.length, 1)) * 100)}% of total`}
+          />
+          <StatCard
+            title="Overdue"
+            value={overdue.length}
+            icon={MdWarning}
+            color="red"
+            trend={overdue.length > 0 ? "Needs attention!" : "All caught up!"}
+          />
+          <StatCard
+            title="Completed"
+            value={completed.length}
+            icon={MdCheck}
+            color="green"
+            trend={`${Math.round((completed.length / Math.max(tasks.length, 1)) * 100)}% completion`}
+          />
         </div>
 
-        {/* Task Lists */}
+        {/* Enhanced Task Lists */}
         <div className="space-y-8">
-          {/* Pending Tasks */}
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-              <MdCalendarToday className="mr-2 h-5 w-5" />
-              Pending Tasks ({pending.length})
-            </h2>
-            
-            {pending.length === 0 ? (
-              <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                <MdCheck className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-white">
-                  No pending tasks
-                </h3>
-                <p className="mt-2 text-gray-500 dark:text-gray-400">
-                  {selectedDogId ? 'No pending tasks for selected dog.' : 'All caught up! No pending tasks.'}
-                </p>
-              </div>
-            ) : (
-              <div className="grid gap-4">
-                {pending.map((task) => (
-                  <TaskCard key={task._id} task={task} />
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Completed Tasks */}
-          {completed.length > 0 && (
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                <MdCheck className="mr-2 h-5 w-5" />
-                Completed Tasks ({completed.length})
-              </h2>
-              
-              <div className="grid gap-4">
-                {completed.map((task) => (
-                  <TaskCard key={task._id} task={task} />
-                ))}
+          {/* Overdue Tasks - Priority Section */}
+          {overdue.length > 0 && (
+            <div className="relative">
+              <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl border-l-4 border-red-500">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center">
+                    <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-xl mr-4">
+                      <MdWarning className="h-6 w-6 text-red-600 dark:text-red-400" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                        Overdue Tasks
+                      </h2>
+                      <p className="text-sm text-red-600 dark:text-red-400 font-medium">
+                        {overdue.length} task{overdue.length !== 1 ? 's' : ''} need{overdue.length === 1 ? 's' : ''} immediate attention
+                      </p>
+                    </div>
+                  </div>
+                  <div className="bg-red-100 dark:bg-red-900/30 backdrop-blur-sm rounded-lg px-4 py-2">
+                    <span className="text-red-700 dark:text-red-300 text-sm font-semibold">Urgent</span>
+                  </div>
+                </div>
+                <div className="grid gap-4">
+                  {overdue.map((task) => (
+                    <OverdueTaskCard key={task._id} task={task} />
+                  ))}
+                </div>
               </div>
             </div>
           )}
+
+          {/* Pending Tasks */}
+          <TaskSection
+            title="Upcoming Tasks"
+            subtitle={`${pending.length} tasks scheduled`}
+            icon={MdCalendarToday}
+            tasks={pending.filter(task => !isOverdue(task.date, task.isCompleted))}
+            emptyMessage="No upcoming tasks"
+            emptySubtext={selectedDogId ? 'No upcoming tasks for selected dog.' : 'All caught up! No upcoming tasks.'}
+            gradient="from-blue-500 to-indigo-600"
+          />
+
+          {/* Completed Tasks */}
+          {completed.length > 0 && (
+            <TaskSection
+              title="Completed Tasks"
+              subtitle={`${completed.length} tasks completed`}
+              icon={MdCheck}
+              tasks={completed}
+              emptyMessage="No completed tasks"
+              emptySubtext="Complete some tasks to see them here."
+              gradient="from-green-500 to-emerald-600"
+            />
+          )}
         </div>
 
-        {/* Task Form Modal */}
+        {/* Enhanced Task Form Modal */}
         {showForm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                  Create New Task
-                </h3>
-                <button
-                  onClick={() => setShowForm(false)}
-                  className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
-                >
-                  <MdClose className="h-6 w-6" />
-                </button>
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-white/20 dark:border-gray-700/50">
+              <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 rounded-t-2xl">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-bold text-white">
+                    Create New Task
+                  </h3>
+                  <button
+                    onClick={() => setShowForm(false)}
+                    className="text-white/80 hover:text-white p-2 hover:bg-white/20 rounded-lg transition-all duration-200"
+                  >
+                    <MdClose className="h-6 w-6" />
+                  </button>
+                </div>
               </div>
               <div className="p-6">
                 <TaskForm 
@@ -268,20 +348,206 @@ export default function TasksPage() {
   );
 }
 
-// Task Card Component
-interface TaskCardProps {
+// Enhanced StatCard Component
+interface StatCardProps {
+  title: string;
+  value: number;
+  icon: React.ComponentType<{ className?: string }>;
+  color: 'indigo' | 'blue' | 'red' | 'green';
+  trend?: string;
+}
+
+function StatCard({ title, value, icon: Icon, color, trend }: StatCardProps) {
+  const colorClasses = {
+    indigo: 'from-indigo-500 to-indigo-600 text-indigo-600 dark:text-indigo-400',
+    blue: 'from-blue-500 to-blue-600 text-blue-600 dark:text-blue-400',
+    red: 'from-red-500 to-red-600 text-red-600 dark:text-red-400',
+    green: 'from-green-500 to-green-600 text-green-600 dark:text-green-400'
+  };
+
+  return (
+    <div className="relative overflow-hidden bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 dark:border-gray-700/50 hover:shadow-xl transition-all duration-300 hover:scale-105 group">
+      <div className="flex items-center justify-between">
+        <div>
+          <div className={`text-3xl font-bold ${colorClasses[color].split(' ').slice(2).join(' ')} mb-1 group-hover:scale-110 transition-transform duration-300`}>
+            {value}
+          </div>
+          <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+            {title}
+          </div>
+          {trend && (
+            <div className="text-xs text-gray-500 dark:text-gray-500">
+              {trend}
+            </div>
+          )}
+        </div>
+        <div className={`p-3 rounded-xl bg-gradient-to-br ${colorClasses[color].split(' ').slice(0, 2).join(' ')} shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+          <Icon className="h-6 w-6 text-white" />
+        </div>
+      </div>
+      <div className={`absolute inset-0 opacity-0 group-hover:opacity-10 bg-gradient-to-br ${colorClasses[color].split(' ').slice(0, 2).join(' ')} transition-opacity duration-300 rounded-xl`}></div>
+    </div>
+  );
+}
+
+// Enhanced TaskSection Component
+interface TaskSectionProps {
+  title: string;
+  subtitle: string;
+  icon: React.ComponentType<{ className?: string }>;
+  tasks: Task[];
+  emptyMessage: string;
+  emptySubtext: string;
+  gradient: string;
+}
+
+function TaskSection({ title, subtitle, icon: Icon, tasks, emptyMessage, emptySubtext, gradient }: TaskSectionProps) {
+  if (tasks.length === 0) {
+    return (
+      <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-8 shadow-lg border border-white/20 dark:border-gray-700/50">
+        <div className="text-center">
+          <div className={`mx-auto w-16 h-16 bg-gradient-to-br ${gradient} rounded-full flex items-center justify-center mb-4 shadow-lg`}>
+            <Icon className="h-8 w-8 text-white" />
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            {emptyMessage}
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400">
+            {emptySubtext}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 dark:border-gray-700/50">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center">
+          <div className={`p-3 rounded-xl bg-gradient-to-br ${gradient} shadow-lg mr-4`}>
+            <Icon className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+              {title}
+            </h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {subtitle}
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <div className="grid gap-4">
+        {tasks.map((task) => (
+          <TaskCard key={task._id} task={task} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Specialized Overdue Task Card - Clean and minimal
+interface OverdueTaskCardProps {
   task: Task;
 }
 
-function TaskCard({ task }: TaskCardProps) {
+function OverdueTaskCard({ task }: OverdueTaskCardProps) {
+  const formatDateTime = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffMs = now.getTime() - date.getTime();
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      
+      if (diffDays > 0) {
+        return `${diffDays} day${diffDays > 1 ? 's' : ''} overdue`;
+      } else if (diffHours > 0) {
+        return `${diffHours} hour${diffHours > 1 ? 's' : ''} overdue`;
+      } else {
+        return 'Just overdue';
+      }
+    } catch {
+      return 'Overdue';
+    }
+  };
+
+  const formatOriginalDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit'
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg p-5 border-l-4 border-red-400 hover:shadow-lg transition-all duration-200 hover:scale-[1.01]">
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <div className="flex items-center mb-2">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mr-3">
+              {task.name}
+            </h3>
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">
+              {formatDateTime(task.date)}
+            </span>
+          </div>
+          
+          {task.description && (
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">
+              {task.description}
+            </p>
+          )}
+          
+          <div className="flex items-center space-x-6 text-sm text-gray-500 dark:text-gray-400">
+            <div className="flex items-center">
+              <MdPets className="w-4 h-4 mr-1.5 text-indigo-500" />
+              <span className="font-medium">{task.dog.name}</span>
+            </div>
+            <div className="flex items-center">
+              <MdCalendarToday className="w-4 h-4 mr-1.5 text-gray-400" />
+              <span>Due: {formatOriginalDate(task.date)}</span>
+            </div>
+            {task.vaccine && (
+              <div className="flex items-center">
+                <MdVaccines className="w-4 h-4 mr-1.5 text-purple-500" />
+                <span>{task.vaccine.name}</span>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        <div className="flex-shrink-0 ml-4">
+          <div className="w-12 h-12 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+            <MdWarning className="w-6 h-6 text-red-500" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Enhanced Task Card Component
+interface TaskCardProps {
+  task: Task;
+  variant?: 'overdue' | 'normal';
+}
+
+function TaskCard({ task, variant = 'normal' }: TaskCardProps) {
   const formatDateTime = (dateString: string) => {
     try {
       const date = new Date(dateString);
       return date.toLocaleString('en-US', {
-        year: 'numeric',
         month: 'short',
         day: 'numeric',
-        hour: '2-digit',
+        hour: 'numeric',
         minute: '2-digit'
       });
     } catch {
@@ -302,96 +568,79 @@ function TaskCard({ task }: TaskCardProps) {
   const isTaskOverdue = isOverdue(task.date, task.isCompleted);
   
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-lg border p-6 transition-all hover:shadow-md ${
+    <div className={`relative rounded-xl p-6 transition-all duration-300 hover:scale-[1.01] shadow-sm hover:shadow-lg group ${
       task.isCompleted 
-        ? 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/10' 
+        ? 'bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800/50' 
         : isTaskOverdue 
-        ? 'border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/10'
-        : 'border-gray-200 dark:border-gray-700'
+        ? 'bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800/50'
+        : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700/50'
     }`}>
-      {/* Task Header */}
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center">
-          <div className={`w-3 h-3 rounded-full mr-3 mt-1 ${
+      
+      <div className="flex items-start justify-between">
+        <div className="flex items-start flex-1">
+          <div className={`flex-shrink-0 w-5 h-5 rounded-full mr-4 mt-1 flex items-center justify-center ${
             task.isCompleted 
               ? 'bg-green-500' 
               : isTaskOverdue 
               ? 'bg-red-500'
-              : 'bg-amber-500'
-          }`}></div>
-          <h3 className={`text-lg font-medium ${
-            task.isCompleted 
-              ? 'text-gray-500 dark:text-gray-400 line-through' 
-              : 'text-gray-900 dark:text-white'
+              : 'bg-blue-500'
           }`}>
-            {task.name}
-          </h3>
-        </div>
-        {task.isCompleted && (
-          <MdCheck className="w-5 h-5 text-green-500" />
-        )}
-      </div>
-
-      {/* Task Description */}
-      {task.description && (
-        <p className={`text-sm mb-3 ml-6 ${
-          task.isCompleted 
-            ? 'text-gray-400 dark:text-gray-500' 
-            : 'text-gray-600 dark:text-gray-300'
-        }`}>
-          {task.description}
-        </p>
-      )}
-
-      {/* Task Details */}
-      <div className="flex flex-wrap gap-4 ml-6 text-sm">
-        {/* Date */}
-        <div className="flex items-center">
-          <MdCalendarToday className={`w-4 h-4 mr-1 ${
-            isTaskOverdue && !task.isCompleted ? 'text-red-500' : 'text-gray-400'
-          }`} />
-          <span className={
-            isTaskOverdue && !task.isCompleted 
-              ? 'text-red-600 dark:text-red-400 font-medium' 
-              : task.isCompleted
-              ? 'text-gray-400 dark:text-gray-500'
-              : 'text-gray-600 dark:text-gray-300'
-          }>
-            {formatDateTime(task.date)}
-            {isTaskOverdue && !task.isCompleted && ' (Overdue)'}
-          </span>
-        </div>
-
-        {/* Dog */}
-        <div className="flex items-center">
-          <MdPets className="w-4 h-4 mr-1 text-gray-400" />
-          <span className={
-            task.isCompleted 
-              ? 'text-gray-400 dark:text-gray-500' 
-              : 'text-gray-600 dark:text-gray-300'
-          }>
-            {task.dog.name}
-          </span>
-        </div>
-
-        {/* Vaccine (if applicable) */}
-        {task.vaccine && (
-          <div className="flex items-center">
-            <MdVaccines className="w-4 h-4 mr-1 text-gray-400" />
-            <span className={
+            {task.isCompleted && <MdCheck className="w-3 h-3 text-white" />}
+          </div>
+          
+          <div className="flex-1">
+            <h3 className={`text-lg font-semibold mb-2 ${
               task.isCompleted 
-                ? 'text-gray-400 dark:text-gray-500' 
-                : 'text-gray-600 dark:text-gray-300'
-            }>
-              {task.vaccine.name}
-            </span>
+                ? 'text-gray-500 dark:text-gray-400 line-through' 
+                : 'text-gray-900 dark:text-white'
+            }`}>
+              {task.name}
+            </h3>
+            
+            {task.description && (
+              <p className={`text-sm mb-3 leading-relaxed ${
+                task.isCompleted 
+                  ? 'text-gray-400 dark:text-gray-500' 
+                  : 'text-gray-600 dark:text-gray-300'
+              }`}>
+                {task.description}
+              </p>
+            )}
+
+            <div className="flex flex-wrap items-center gap-4 text-sm">
+              <div className="flex items-center text-gray-600 dark:text-gray-400">
+                <MdCalendarToday className="w-4 h-4 mr-1.5" />
+                <span className={isTaskOverdue && !task.isCompleted ? 'text-red-600 dark:text-red-400 font-medium' : ''}>
+                  {formatDateTime(task.date)}
+                </span>
+              </div>
+              
+              <div className="flex items-center text-gray-600 dark:text-gray-400">
+                <MdPets className="w-4 h-4 mr-1.5 text-indigo-500" />
+                <span className="font-medium">{task.dog.name}</span>
+              </div>
+              
+              {task.vaccine && (
+                <div className="flex items-center text-gray-600 dark:text-gray-400">
+                  <MdVaccines className="w-4 h-4 mr-1.5 text-purple-500" />
+                  <span>{task.vaccine.name}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
+              Added by {task.addedBy.name} • {new Date(task.createdAt).toLocaleDateString()}
+            </div>
+          </div>
+        </div>
+
+        {task.isCompleted && (
+          <div className="flex-shrink-0 ml-4">
+            <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+              <MdCheck className="w-5 h-5 text-green-600 dark:text-green-400" />
+            </div>
           </div>
         )}
-      </div>
-
-      {/* Added by info */}
-      <div className="mt-3 ml-6 text-xs text-gray-400 dark:text-gray-500">
-        Added by {task.addedBy.name} on {new Date(task.createdAt).toLocaleDateString()}
       </div>
     </div>
   );
