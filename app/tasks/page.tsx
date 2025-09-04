@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MdAdd, MdCheck, MdClose, MdCalendarToday, MdPets, MdVaccines, MdRefresh, MdFilterList, MdTrendingUp, MdTaskAlt, MdWarning } from 'react-icons/md';
+import { MdAdd, MdCheck, MdClose, MdCalendarToday, MdPets, MdVaccines, MdRefresh, MdFilterList, MdTrendingUp, MdTaskAlt, MdWarning, MdUndo } from 'react-icons/md';
 import { apiClient, Task, Dog } from '@/app/lib/api-client';
 import TaskForm from '@/app/components/tasks/TaskForm';
 
@@ -60,6 +60,48 @@ export default function TasksPage() {
     setShowForm(false);
     loadData(); // Reload tasks after creation
   };
+
+  // Task completion handler - UI ready, waiting for backend updateTask mutation
+  const handleTaskComplete = async (taskId: string, isCompleted: boolean) => {
+    try {
+      console.log(`🔄 ${isCompleted ? 'Completing' : 'Uncompleting'} task ${taskId}...`);
+      
+      // Update the task in local state immediately
+      setTasks(prevTasks => 
+        prevTasks.map(task => 
+          task._id === taskId 
+            ? { ...task, isCompleted } 
+            : task
+        )
+      );
+
+      // Call API (currently just returns success for local state management)
+      await apiClient.completeTask(taskId, isCompleted);
+      
+      console.log(`✅ Task ${isCompleted ? 'completed' : 'marked as incomplete'} successfully`);
+      
+    } catch (error) {
+      console.error('Failed to complete/uncomplete task:', error);
+      
+      // Revert the optimistic update if there's an error
+      setTasks(prevTasks => 
+        prevTasks.map(task => 
+          task._id === taskId 
+            ? { ...task, isCompleted: !isCompleted } 
+            : task
+        )
+      );
+      
+      // Show user-friendly error message
+      const action = isCompleted ? 'mark as completed' : 'mark as incomplete';
+      setError(`Cannot ${action} task: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      
+      // Auto-clear error after 7 seconds to give user time to read
+      setTimeout(() => setError(null), 7000);
+    }
+  };
+
+  // Note: Task deletion removed per requirements - only completion toggle needed
 
   const formatDateTime = (dateString: string) => {
     try {
@@ -210,19 +252,55 @@ export default function TasksPage() {
           </div>
         </div>
 
-        {/* Error Message */}
+        {/* Error/Info Message */}
         {error && (
-          <div className="mb-8 bg-red-50 dark:bg-red-900/20 backdrop-blur-sm border border-red-200 dark:border-red-800 rounded-xl p-6 shadow-lg">
+          <div className={`mb-8 backdrop-blur-sm border rounded-xl p-6 shadow-lg ${
+            error.includes('waiting for backend implementation') 
+              ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800' 
+              : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+          }`}>
             <div className="flex items-start">
               <div className="flex-shrink-0">
-                <MdClose className="h-6 w-6 text-red-500" />
+                {error.includes('waiting for backend implementation') ? (
+                  <MdWarning className="h-6 w-6 text-amber-500" />
+                ) : (
+                  <MdClose className="h-6 w-6 text-red-500" />
+                )}
               </div>
-              <div className="ml-3">
-                <h3 className="text-lg font-semibold text-red-800 dark:text-red-200">
-                  Unable to load tasks
+              <div className="ml-3 flex-1">
+                <h3 className={`text-lg font-semibold ${
+                  error.includes('waiting for backend implementation')
+                    ? 'text-amber-800 dark:text-amber-200'
+                    : 'text-red-800 dark:text-red-200'
+                }`}>
+                  {error.includes('waiting for backend implementation') 
+                    ? 'Feature Coming Soon!' 
+                    : 'Unable to load tasks'
+                  }
                 </h3>
-                <p className="mt-2 text-red-700 dark:text-red-300">{error}</p>
+                <p className={`mt-2 ${
+                  error.includes('waiting for backend implementation')
+                    ? 'text-amber-700 dark:text-amber-300'
+                    : 'text-red-700 dark:text-red-300'
+                }`}>
+                  {error}
+                </p>
+                {error.includes('waiting for backend implementation') && (
+                  <p className="mt-1 text-sm text-amber-600 dark:text-amber-400">
+                    The UI is ready! This message will disappear once the backend is updated.
+                  </p>
+                )}
               </div>
+              <button
+                onClick={() => setError(null)}
+                className={`ml-3 ${
+                  error.includes('waiting for backend implementation')
+                    ? 'text-amber-400 hover:text-amber-600'
+                    : 'text-red-400 hover:text-red-600'
+                } transition-colors`}
+              >
+                <MdClose className="h-5 w-5" />
+              </button>
             </div>
           </div>
         )}
@@ -285,7 +363,11 @@ export default function TasksPage() {
                 </div>
                 <div className="grid gap-4">
                   {overdue.map((task) => (
-                    <OverdueTaskCard key={task._id} task={task} />
+                    <OverdueTaskCard 
+                      key={task._id} 
+                      task={task} 
+                      onComplete={handleTaskComplete}
+                    />
                   ))}
                 </div>
               </div>
@@ -301,6 +383,7 @@ export default function TasksPage() {
             emptyMessage="No upcoming tasks"
             emptySubtext={selectedDogId ? 'No upcoming tasks for selected dog.' : 'All caught up! No upcoming tasks.'}
             gradient="from-blue-500 to-indigo-600"
+            onComplete={handleTaskComplete}
           />
 
           {/* Completed Tasks */}
@@ -313,6 +396,7 @@ export default function TasksPage() {
               emptyMessage="No completed tasks"
               emptySubtext="Complete some tasks to see them here."
               gradient="from-green-500 to-emerald-600"
+              onComplete={handleTaskComplete}
             />
           )}
         </div>
@@ -399,9 +483,10 @@ interface TaskSectionProps {
   emptyMessage: string;
   emptySubtext: string;
   gradient: string;
+  onComplete?: (taskId: string, isCompleted: boolean) => void;
 }
 
-function TaskSection({ title, subtitle, icon: Icon, tasks, emptyMessage, emptySubtext, gradient }: TaskSectionProps) {
+function TaskSection({ title, subtitle, icon: Icon, tasks, emptyMessage, emptySubtext, gradient, onComplete }: TaskSectionProps) {
   if (tasks.length === 0) {
     return (
       <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-8 shadow-lg border border-white/20 dark:border-gray-700/50">
@@ -440,7 +525,11 @@ function TaskSection({ title, subtitle, icon: Icon, tasks, emptyMessage, emptySu
       
       <div className="grid gap-4">
         {tasks.map((task) => (
-          <TaskCard key={task._id} task={task} />
+          <TaskCard 
+            key={task._id} 
+            task={task} 
+            onComplete={onComplete}
+          />
         ))}
       </div>
     </div>
@@ -450,9 +539,10 @@ function TaskSection({ title, subtitle, icon: Icon, tasks, emptyMessage, emptySu
 // Specialized Overdue Task Card - Clean and minimal
 interface OverdueTaskCardProps {
   task: Task;
+  onComplete?: (taskId: string, isCompleted: boolean) => void;
 }
 
-function OverdueTaskCard({ task }: OverdueTaskCardProps) {
+function OverdueTaskCard({ task, onComplete }: OverdueTaskCardProps) {
   const formatDateTime = (dateString: string) => {
     try {
       const date = new Date(dateString);
@@ -488,7 +578,7 @@ function OverdueTaskCard({ task }: OverdueTaskCardProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg p-5 border-l-4 border-red-400 hover:shadow-lg transition-all duration-200 hover:scale-[1.01]">
+    <div className="bg-white dark:bg-gray-800 rounded-lg p-5 border-l-4 border-red-400 hover:shadow-lg transition-all duration-200 hover:scale-[1.01] group">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center mb-2">
@@ -524,7 +614,17 @@ function OverdueTaskCard({ task }: OverdueTaskCardProps) {
           </div>
         </div>
         
-        <div className="flex-shrink-0 ml-4">
+        <div className="flex items-center space-x-2 ml-4">
+          {/* Complete Task Button */}
+          <button
+            onClick={() => onComplete?.(task._id, true)}
+            className="p-2 bg-green-100 hover:bg-green-200 dark:bg-green-900/20 dark:hover:bg-green-900/40 rounded-lg transition-colors group-hover:scale-110 duration-200"
+            title="Mark as completed"
+          >
+            <MdCheck className="w-5 h-5 text-green-600 dark:text-green-400" />
+          </button>
+          
+          {/* Warning Icon */}
           <div className="w-12 h-12 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center">
             <MdWarning className="w-6 h-6 text-red-500" />
           </div>
@@ -538,9 +638,10 @@ function OverdueTaskCard({ task }: OverdueTaskCardProps) {
 interface TaskCardProps {
   task: Task;
   variant?: 'overdue' | 'normal';
+  onComplete?: (taskId: string, isCompleted: boolean) => void;
 }
 
-function TaskCard({ task, variant = 'normal' }: TaskCardProps) {
+function TaskCard({ task, variant = 'normal', onComplete }: TaskCardProps) {
   const formatDateTime = (dateString: string) => {
     try {
       const date = new Date(dateString);
@@ -634,13 +735,36 @@ function TaskCard({ task, variant = 'normal' }: TaskCardProps) {
           </div>
         </div>
 
-        {task.isCompleted && (
-          <div className="flex-shrink-0 ml-4">
-            <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-              <MdCheck className="w-5 h-5 text-green-600 dark:text-green-400" />
-            </div>
-          </div>
-        )}
+        {/* Action Buttons */}
+        <div className="flex items-center space-x-2 ml-4">
+          {task.isCompleted ? (
+            <>
+              {/* Uncomplete Button */}
+              <button
+                onClick={() => onComplete?.(task._id, false)}
+                className="p-2 bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-900/20 dark:hover:bg-yellow-900/40 rounded-lg transition-colors opacity-0 group-hover:opacity-100 duration-200"
+                title="Mark as incomplete"
+              >
+                <MdUndo className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+              </button>
+              {/* Completion Indicator */}
+              <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                <MdCheck className="w-5 h-5 text-green-600 dark:text-green-400" />
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Complete Button */}
+              <button
+                onClick={() => onComplete?.(task._id, true)}
+                className="p-2 bg-green-100 hover:bg-green-200 dark:bg-green-900/20 dark:hover:bg-green-900/40 rounded-lg transition-colors opacity-0 group-hover:opacity-100 duration-200"
+                title="Mark as completed"
+              >
+                <MdCheck className="w-4 h-4 text-green-600 dark:text-green-400" />
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

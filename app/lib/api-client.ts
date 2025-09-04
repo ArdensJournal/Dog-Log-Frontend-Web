@@ -190,6 +190,28 @@ class ApiClient {
       body: JSON.stringify(taskDataToSend),
     });
   }
+
+  async updateTask(taskId: string, updates: {
+    name?: string;
+    dog?: string;
+    date?: string;
+    description?: string;
+    isCompleted?: boolean;
+    vaccine?: string;
+  }) {
+    // This functionality is not available until backend implements updateTask mutation
+    throw new Error("Task updates not supported yet - waiting for backend updateTask mutation");
+  }
+
+  async deleteTask(taskId: string) {
+    // This functionality is not available until backend implements deleteTask mutation
+    throw new Error("Task deletion not supported yet - waiting for backend deleteTask mutation");
+  }
+
+  async completeTask(taskId: string, isCompleted: boolean = true) {
+    // For now, we'll handle this in the frontend state since updateTask mutation isn't available
+    return { success: true, taskId, isCompleted };
+  }
 }
 
 // Export singleton instance

@@ -238,3 +238,19 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
+// Note: PUT and DELETE routes are disabled until backend implements updateTask and deleteTask mutations
+// 
+// export async function PUT(request: NextRequest) {
+//   return Response.json({ 
+//     error: 'Task updates not yet supported by backend',
+//     message: 'The backend does not currently support task updates. Waiting for updateTask mutation implementation.'
+//   }, { status: 501 });
+// }
+// 
+// export async function DELETE(request: NextRequest) {
+//   return Response.json({ 
+//     error: 'Task deletion not yet supported by backend',
+//     message: 'The backend does not currently support task deletion. Waiting for deleteTask mutation implementation.'
+//   }, { status: 501 });
+// }
