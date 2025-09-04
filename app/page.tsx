@@ -65,9 +65,11 @@ export default function Page() {
             </div>
             
             {/* Title with gradient text */}
-            <h1 className="text-6xl sm:text-7xl font-black bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 dark:from-blue-400 dark:via-purple-500 dark:to-indigo-400 bg-clip-text text-transparent drop-shadow-sm mb-4">
-              Dog Log
-            </h1>
+            <div className="mb-6">
+              <h1 className="text-6xl sm:text-7xl font-black bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 dark:from-blue-400 dark:via-purple-500 dark:to-indigo-400 bg-clip-text text-transparent drop-shadow-sm leading-none py-2">
+                Dog Log
+              </h1>
+            </div>
             
             {/* Subtitle with better typography */}
             <div className="space-y-3 mb-8">

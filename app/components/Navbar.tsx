@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { checkAuthStatus, clearAuth } from "../lib/auth";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { DarkModeToggle } from "./DarkModeToggle";
 import { Button } from "../ui/button";
 import { MdArrowBackIos, MdAccountCircle, MdHomeFilled, MdGroups, MdNotifications, MdBusiness } from "react-icons/md";
@@ -77,6 +77,7 @@ const NAV_SECTIONS = [
 
 export default function Navbar() {
   const router = useRouter();
+  const pathname = usePathname(); // Use Next.js pathname hook instead of window.location
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [mobileTab, setMobileTab] = useState("Home");
   const [isMobile, setIsMobile] = useState(false);
@@ -85,7 +86,6 @@ export default function Navbar() {
   const [authChecked, setAuthChecked] = useState(false);
   const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
-  const pathname = typeof window !== 'undefined' ? window.location.pathname : "";
   // Store refs for each dropdown
   const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
   // Expose checkAuth for use in handlers
