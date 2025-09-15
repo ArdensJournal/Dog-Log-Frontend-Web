@@ -197,12 +197,12 @@ export const POTTY_TYPE_INFO: Record<PottyType, {
 }> = {
   [PottyType.PEE]: {
     label: 'Pee',
-    icon: '💛',
+    icon: 'MdWaterDrop',
     color: 'yellow'
   },
   [PottyType.POOP]: {
     label: 'Poop',
-    icon: '💩',
+    icon: 'MdCircle',
     color: 'brown'
   }
 };

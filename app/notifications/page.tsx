@@ -1,3 +1,5 @@
+import { MdNotifications } from 'react-icons/md';
+
 export default function NotificationsPage() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-yellow-50 via-orange-50 to-amber-50 dark:from-gray-900 dark:via-yellow-900 dark:to-orange-900">
@@ -5,7 +7,7 @@ export default function NotificationsPage() {
         {/* Header Section */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center w-24 h-24 bg-yellow-100 dark:bg-yellow-900/30 rounded-full mb-6">
-            <span className="text-5xl animate-bounce">🔔</span>
+            <MdNotifications className="text-5xl animate-bounce text-yellow-600 dark:text-yellow-400" />
           </div>
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Smart Notifications

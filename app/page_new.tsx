@@ -3,6 +3,22 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { onAuthStateChanged, clearAuth } from '@/app/lib/auth';
+import { 
+  MdPets, 
+  MdBarChart, 
+  MdScale, 
+  MdFiberManualRecord, 
+  MdVaccines, 
+  MdNotifications, 
+  MdAssignment,
+  MdArrowForward,
+  MdAdd,
+  MdAssessment,
+  MdPeople,
+  MdScience,
+  MdCloud,
+  MdSchedule
+} from 'react-icons/md';
 
 export default function Page() {
   const [userName, setUserName] = useState<string>('visitor');
@@ -72,7 +88,7 @@ export default function Page() {
             {/* Subtitle with better typography */}
             <div className="space-y-3 mb-8">
               <p className="text-2xl sm:text-3xl font-semibold text-gray-800 dark:text-gray-100">
-                Welcome back, <span className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent font-bold">{userName}</span>! 🐕
+                Welcome back, <span className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent font-bold">{userName}</span>! <MdPets className="inline-block w-6 h-6 text-blue-600 dark:text-blue-400" />
               </p>
               <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
                 Your comprehensive dog care companion for tracking health, monitoring activities, and keeping your furry friend happy & healthy
@@ -117,11 +133,11 @@ export default function Page() {
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="relative z-10 flex items-center justify-center gap-3">
-                  <span className="text-3xl">🐕</span>
                   <div className="text-left">
                     <div className="font-bold text-xl">View All Dogs</div>
                     <div className="text-indigo-100 text-sm">Manage your dog profiles</div>
                   </div>
+                  <MdPets className="text-3xl" />
                 </div>
               </Link>
 
@@ -131,11 +147,11 @@ export default function Page() {
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-emerald-600 to-green-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="relative z-10 flex items-center justify-center gap-3">
-                  <span className="text-3xl">➕</span>
                   <div className="text-left">
                     <div className="font-bold text-xl">Add New Dog</div>
                     <div className="text-emerald-100 text-sm">Register a new companion</div>
                   </div>
+                  <MdAdd className="text-3xl" />
                 </div>
               </Link>
             </div>
@@ -156,7 +172,7 @@ export default function Page() {
                 <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-blue-100 to-indigo-200 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-full -translate-y-12 translate-x-12 group-hover:scale-110 transition-transform duration-300"></div>
                 <div className="relative z-10 text-center">
                   <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
-                    <span className="text-3xl text-white">📊</span>
+                    <MdBarChart className="text-3xl text-white" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Recent Activity</h3>
                   <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">Monitor daily activities and health updates</p>
@@ -171,7 +187,7 @@ export default function Page() {
                 <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-purple-100 to-pink-200 dark:from-purple-900/20 dark:to-pink-900/20 rounded-full -translate-y-12 translate-x-12 group-hover:scale-110 transition-transform duration-300"></div>
                 <div className="relative z-10 text-center">
                   <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
-                    <span className="text-3xl text-white">⚖️</span>
+                    <MdScale className="text-3xl text-white" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Weight Tracking</h3>
                   <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">Track weight changes and health trends</p>
@@ -186,7 +202,7 @@ export default function Page() {
                 <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-amber-100 to-orange-200 dark:from-amber-900/20 dark:to-orange-900/20 rounded-full -translate-y-12 translate-x-12 group-hover:scale-110 transition-transform duration-300"></div>
                 <div className="relative z-10 text-center">
                   <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
-                    <span className="text-3xl text-white">💩</span>
+                    <MdFiberManualRecord className="text-3xl text-white" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Report Needs</h3>
                   <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">Track potty breaks and schedules</p>
@@ -201,7 +217,7 @@ export default function Page() {
                 <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-green-100 to-emerald-200 dark:from-green-900/20 dark:to-emerald-900/20 rounded-full -translate-y-12 translate-x-12 group-hover:scale-110 transition-transform duration-300"></div>
                 <div className="relative z-10 text-center">
                   <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
-                    <span className="text-3xl text-white">💉</span>
+                    <MdVaccines className="text-3xl text-white" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Report Vaccination</h3>
                   <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">Log vaccinations and medications</p>
@@ -216,7 +232,7 @@ export default function Page() {
                 <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-yellow-100 to-amber-200 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-full -translate-y-12 translate-x-12 group-hover:scale-110 transition-transform duration-300"></div>
                 <div className="relative z-10 text-center">
                   <div className="w-16 h-16 bg-gradient-to-br from-yellow-500 to-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
-                    <span className="text-3xl text-white">🔔</span>
+                    <MdNotifications className="text-3xl text-white" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">View Notifications</h3>
                   <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">See reminders and alerts</p>
@@ -231,7 +247,7 @@ export default function Page() {
                 <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-pink-100 to-rose-200 dark:from-pink-900/20 dark:to-rose-900/20 rounded-full -translate-y-12 translate-x-12 group-hover:scale-110 transition-transform duration-300"></div>
                 <div className="relative z-10 text-center">
                   <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
-                    <span className="text-3xl text-white">📝</span>
+                    <MdAssignment className="text-3xl text-white" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Task List</h3>
                   <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">Manage daily tasks and activities</p>
@@ -251,7 +267,7 @@ export default function Page() {
           <div className="relative bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-4xl shadow-2xl border border-white/20 dark:border-gray-700/20 p-12 sm:p-16">
             <div className="text-center mb-16">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mb-6">
-                <span className="text-3xl text-white">🐕</span>
+                <MdPets className="text-3xl text-white" />
               </div>
               <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-6">
                 Everything Your Dog Needs
@@ -264,7 +280,7 @@ export default function Page() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
               <div className="group text-center">
                 <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
-                  <span className="text-3xl text-white">📊</span>
+                  <MdBarChart className="text-3xl text-white" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Health Analytics</h3>
                 <p className="text-gray-600 dark:text-gray-400 leading-relaxed">Advanced tracking of vaccinations, medications, and health records with detailed insights and trend analysis</p>
@@ -272,7 +288,7 @@ export default function Page() {
               
               <div className="group text-center">
                 <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-500 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
-                  <span className="text-3xl text-white">⏰</span>
+                  <MdSchedule className="text-3xl text-white" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Smart Reminders</h3>
                 <p className="text-gray-600 dark:text-gray-400 leading-relaxed">Intelligent notifications for walks, feeding times, medications, and vet appointments so you never miss a beat</p>
@@ -280,7 +296,7 @@ export default function Page() {
               
               <div className="group text-center">
                 <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
-                  <span className="text-3xl text-white">📋</span>
+                  <MdAssessment className="text-3xl text-white" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Medical Records</h3>
                 <p className="text-gray-600 dark:text-gray-400 leading-relaxed">Professional reports ready for veterinary visits, with easy sharing capabilities for care teams and family</p>
@@ -288,7 +304,7 @@ export default function Page() {
               
               <div className="group text-center">
                 <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-red-500 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
-                  <span className="text-3xl text-white">👨‍👩‍👧‍👦</span>
+                  <MdPeople className="text-3xl text-white" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Family Collaboration</h3>
                 <p className="text-gray-600 dark:text-gray-400 leading-relaxed">Share access with family members, trainers, walkers, and pet sitters for seamless care coordination</p>
@@ -296,7 +312,7 @@ export default function Page() {
               
               <div className="group text-center">
                 <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-blue-500 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
-                  <span className="text-3xl text-white">🧬</span>
+                  <MdScience className="text-3xl text-white" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Breed Intelligence</h3>
                 <p className="text-gray-600 dark:text-gray-400 leading-relaxed">Personalized care recommendations, health insights, and activity suggestions based on your dog's breed and age</p>
@@ -304,7 +320,7 @@ export default function Page() {
               
               <div className="group text-center">
                 <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
-                  <span className="text-3xl text-white">☁️</span>
+                  <MdCloud className="text-3xl text-white" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Cloud Sync</h3>
                 <p className="text-gray-600 dark:text-gray-400 leading-relaxed">Access your data anywhere with secure cloud synchronization across all your devices and platforms</p>
@@ -321,9 +337,7 @@ export default function Page() {
                   className="group inline-flex items-center px-10 py-5 rounded-3xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-xl shadow-2xl hover:shadow-3xl transform hover:-translate-y-2 transition-all duration-300"
                 >
                   <span className="relative z-10">Start Your Free Journey</span>
-                  <svg className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform duration-300" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                  </svg>
+                  <MdArrowForward className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform duration-300" />
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-purple-700 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </Link>
               </div>

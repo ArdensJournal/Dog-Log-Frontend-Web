@@ -1,5 +1,6 @@
 import { PottyRecord, POTTY_TYPE_INFO, ENVIRONMENT_INFO } from '@/app/lib/types/potty';
 import HealthFlagIndicator from './HealthFlagIndicator';
+import PottyTypeIcon from '../PottyTypeIcon';
 
 interface PottyCardProps {
   record: PottyRecord;
@@ -53,7 +54,7 @@ export default function PottyCard({ record, className = '' }: PottyCardProps) {
       {/* Header with type and time */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="text-3xl">{typeInfo.icon}</div>
+          <PottyTypeIcon iconName={typeInfo.icon} />
           <div>
             <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-100">
               {typeInfo.label}

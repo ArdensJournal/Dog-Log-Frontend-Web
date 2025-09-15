@@ -225,30 +225,47 @@ export default function TasksPage() {
               <label htmlFor="dogFilter" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Filter by Dog
               </label>
-              <select
-                id="dogFilter"
-                value={selectedDogId}
-                onChange={(e) => setSelectedDogId(e.target.value)}
-                className="w-full px-4 py-3 border-0 rounded-lg bg-white dark:bg-gray-700 shadow-sm ring-1 ring-gray-300 dark:ring-gray-600 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-gray-900 dark:text-white font-medium transition-all duration-200"
-              >
-                <option value="">All Dogs</option>
-                {dogs.map((dog) => (
-                  <option key={dog._id} value={dog._id}>
-                    {dog.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            {selectedDogId && (
-              <div className="flex items-end">
-                <button
-                  onClick={() => setSelectedDogId('')}
-                  className="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
-                >
-                  Clear Filter
-                </button>
+              <div className="flex items-center gap-4">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Select Dog:
+                </span>
+                <div className="flex gap-2 flex-wrap">
+                  <button
+                    onClick={() => setSelectedDogId('')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
+                      selectedDogId === ''
+                        ? 'bg-indigo-600 text-white border-indigo-600'
+                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-indigo-600 hover:text-indigo-600'
+                    }`}
+                  >
+                    <MdTaskAlt className="w-5 h-5" />
+                    All Dogs
+                  </button>
+                  {dogs.map((dog) => (
+                    <button
+                      key={dog._id}
+                      onClick={() => setSelectedDogId(dog._id)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
+                        selectedDogId === dog._id
+                          ? 'bg-indigo-600 text-white border-indigo-600'
+                          : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-indigo-600 hover:text-indigo-600'
+                      }`}
+                    >
+                      {dog.imageUrl ? (
+                        <img
+                          src={dog.imageUrl}
+                          alt={dog.name}
+                          className="w-6 h-6 rounded-full object-cover"
+                        />
+                      ) : (
+                        <MdPets className="w-5 h-5" />
+                      )}
+                      {dog.name}
+                    </button>
+                  ))}
+                </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
 

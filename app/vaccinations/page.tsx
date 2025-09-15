@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { checkAuthStatus } from '@/app/lib/auth';
 import { apiClient, type Dog, type Vaccine, type DogWithVaccinations, type Vaccination } from '@/app/lib/api-client';
+import { MdVaccines, MdPets, MdAdd, MdClose, MdAssessment } from 'react-icons/md';
 
 // --- Types ---
 type VaccinationRecord = {
@@ -240,7 +241,7 @@ export default function VaccinationsPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="w-12 h-12 border-4 border-pink-200 border-t-pink-600 rounded-full animate-spin mx-auto"></div>
+          <div className="w-12 h-12 border-4 border-red-200 border-t-red-600 rounded-full animate-spin mx-auto"></div>
           <p className="text-gray-600 dark:text-gray-400">Loading...</p>
         </div>
       </div>
@@ -266,7 +267,7 @@ export default function VaccinationsPage() {
             </p>
             <button
               onClick={() => router.push('/add-dog')}
-              className="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors duration-200"
+              className="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors duration-200"
             >
               Add Your First Dog
             </button>
@@ -277,52 +278,69 @@ export default function VaccinationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 via-pink-50 to-rose-50 dark:from-gray-900 dark:via-red-900 dark:to-pink-900 p-4">
-      <div className="max-w-3xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 via-rose-50 to-pink-50 dark:from-gray-900 dark:via-red-900 dark:to-rose-900 p-4">
+      <div className="max-w-6xl mx-auto space-y-6">
+        
+        {/* Header */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-3">
-                <span className="text-4xl">💉</span>
+                <MdVaccines className="text-4xl text-red-600" />
                 Vaccination Records
               </h1>
               <p className="text-gray-600 dark:text-gray-400">Track your dog's vaccinations and keep them healthy</p>
             </div>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="flex flex-col gap-4">
+              {/* Dog Selector */}
               {dogs.length > 1 && (
-                <select
-                  value={selectedDog?._id || ''}
-                  onChange={e => setSelectedDog(dogs.find(d => d._id === e.target.value) || null)}
-                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-pink-400 min-w-48"
-                >
-                  {dogs.map(dog => (
-                    <option key={dog._id} value={dog._id}>🐕 {dog.name}</option>
-                  ))}
-                </select>
+                <div className="flex items-center gap-4">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Select Dog:
+                  </span>
+                  <div className="flex gap-2 flex-wrap">
+                    {dogs.map((dog) => (
+                      <button
+                        key={dog._id}
+                        onClick={() => setSelectedDog(dog)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
+                          selectedDog?._id === dog._id
+                            ? 'bg-red-600 text-white border-red-600'
+                            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-red-600 hover:text-red-600'
+                        }`}
+                      >
+                        {dog.imageUrl ? (
+                          <img
+                            src={dog.imageUrl}
+                            alt={dog.name}
+                            className="w-6 h-6 rounded-full object-cover"
+                          />
+                        ) : (
+                          <MdPets className="w-5 h-5" />
+                        )}
+                        {dog.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               )}
-              <button
-                onClick={() => setShowForm(true)}
-                disabled={!selectedDog}
-                className="bg-pink-600 hover:bg-pink-700 disabled:bg-gray-400 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-200 flex items-center gap-2 whitespace-nowrap"
-              >
-                <span className="text-lg">➕</span>
-                Add Vaccination
-              </button>
+              
+              {/* Action Button - More prominent placement */}
+              {selectedDog && (
+                <div className="flex justify-center">
+                  <button
+                    onClick={() => setShowForm(true)}
+                    className="bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 flex items-center gap-3 text-lg"
+                  >
+                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                      <MdAdd className="text-xl" />
+                    </div>
+                    Add Vaccination
+                  </button>
+                </div>
+              )}
             </div>
           </div>
-          {selectedDog && (
-            <div className="mt-4 p-4 bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 rounded-xl border border-pink-200 dark:border-pink-700">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-pink-400 to-red-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                  {selectedDog.name.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-gray-100">{selectedDog.name}</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{selectedDog.breed}</p>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Error */}
@@ -347,16 +365,14 @@ export default function VaccinationsPage() {
                 className="absolute top-4 right-4 z-10 w-8 h-8 bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-700 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-all duration-200 shadow-lg backdrop-blur-sm" 
                 title="Close form (Esc)"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <MdClose className="w-4 h-4" />
               </button>
               
               <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <div className="bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/20 dark:to-purple-900/20 p-6 border-b border-gray-200 dark:border-gray-700">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xl">
-                      💉
+                      <MdVaccines />
                     </div>
                     <div>
                       <h3 className="text-xl font-bold text-gray-900 dark:text-white">
@@ -458,7 +474,7 @@ export default function VaccinationsPage() {
                       </button>
                       <button 
                         type="submit" 
-                        className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg" 
+                        className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg" 
                         disabled={isSaving}
                       >
                         {isSaving ? (
@@ -483,7 +499,7 @@ export default function VaccinationsPage() {
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div className="p-6 border-b border-gray-200 dark:border-gray-700">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                <span className="text-3xl">📋</span>
+                <MdAssessment className="text-3xl" />
                 Vaccination History
               </h2>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
@@ -493,7 +509,7 @@ export default function VaccinationsPage() {
             
             {isLoadingVaccinations ? (
               <div className="p-8 text-center">
-                <div className="w-8 h-8 border-4 border-pink-200 border-t-pink-600 rounded-full animate-spin mx-auto mb-4"></div>
+                <div className="w-8 h-8 border-4 border-red-200 border-t-red-600 rounded-full animate-spin mx-auto mb-4"></div>
                 <p className="text-gray-600 dark:text-gray-400">Loading vaccination records...</p>
               </div>
             ) : vaccinations.length === 0 ? (
@@ -507,7 +523,7 @@ export default function VaccinationsPage() {
                 </p>
                 <button
                   onClick={() => setShowForm(true)}
-                  className="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200"
+                  className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200"
                 >
                   Add First Vaccination
                 </button>
@@ -522,7 +538,7 @@ export default function VaccinationsPage() {
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
                             <div className="w-10 h-10 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
-                              💉
+                              <MdVaccines />
                             </div>
                             <div>
                               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
