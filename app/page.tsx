@@ -1,8 +1,5 @@
-'use client';
-
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { onAuthStateChanged, clearAuth } from '@/app/lib/auth';
+import { getCurrentUser } from '@/app/lib/actions/auth';
 import { 
   MdPets, 
   MdBarChart, 
@@ -20,44 +17,11 @@ import {
   MdSchedule
 } from 'react-icons/md';
 
-export default function Page() {
-  const [userName, setUserName] = useState<string>('visitor');
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-
-  useEffect(() => {
-    // Initial check
-    verifyUser();
-    
-    // Listen for auth state changes
-    const unsubscribe = onAuthStateChanged(() => {
-      console.log('🔄 Auth state change detected on homepage, refreshing user info...');
-      verifyUser();
-    });
-    
-    return () => {
-      unsubscribe();
-    };
-  }, []);
-
-  async function verifyUser() {
-    try {
-      const response = await fetch('/api/auth/me');
-      if (response.ok) {
-        const userData = await response.json();
-        setIsAuthenticated(true);
-        // The API returns user data nested under 'user' property
-        const user = userData.user || {};
-        setUserName(user.name || user.username || user.email?.split('@')[0] || 'User');
-      } else {
-        setIsAuthenticated(false);
-        setUserName('visitor');
-      }
-    } catch (error) {
-      console.error('Error verifying user:', error);
-      setIsAuthenticated(false);
-      setUserName('visitor');
-    }
-  }
+export default async function Page() {
+  // Server-side data fetching
+  const user = await getCurrentUser();
+  const isAuthenticated = !!user;
+  const userName = user?.name || user?.email?.split('@')[0] || 'visitor';
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-slate-800 dark:to-indigo-900">
