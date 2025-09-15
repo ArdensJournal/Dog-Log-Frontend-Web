@@ -45,7 +45,9 @@ export default function Page() {
       if (response.ok) {
         const userData = await response.json();
         setIsAuthenticated(true);
-        setUserName(userData.name || userData.username || 'User');
+        // The API returns user data nested under 'user' property
+        const user = userData.user || {};
+        setUserName(user.name || user.username || user.email?.split('@')[0] || 'User');
       } else {
         setIsAuthenticated(false);
         setUserName('visitor');
