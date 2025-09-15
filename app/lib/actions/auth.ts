@@ -10,7 +10,7 @@ if (!BACKEND_URL) {
   throw new Error('BACKEND_URL is not defined. Please set BACKEND_URL or NEXT_PUBLIC_BACKEND_URL environment variable');
 }
 
-// Server action to get current user
+// Server action to get current user (read-only, safe for Server Components)
 export async function getCurrentUser() {
   try {
     const cookieStore = await cookies();
@@ -42,17 +42,14 @@ export async function getCurrentUser() {
     });
 
     if (!response.ok) {
-      if (response.status === 401) {
-        // Clear invalid token
-        cookieStore.delete('token');
-      }
+      // Don't modify cookies in a Server Component - just return null
       return null;
     }
 
     const data = await response.json();
     
     if (data.errors) {
-      cookieStore.delete('token');
+      // Don't modify cookies in a Server Component - just return null
       return null;
     }
 
@@ -61,6 +58,13 @@ export async function getCurrentUser() {
     console.error('Error getting current user:', error);
     return null;
   }
+}
+
+// Server action to clear invalid token (for use in client components)
+export async function clearInvalidToken() {
+  const cookieStore = await cookies();
+  cookieStore.delete('token');
+  revalidatePath('/');
 }
 
 // Server action to sign out

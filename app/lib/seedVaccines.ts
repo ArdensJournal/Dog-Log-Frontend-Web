@@ -42,9 +42,27 @@ export async function seedVaccines() {
     }
 
     const vaccines = [
-      { name: "DHP" },
-      { name: "Parvovirus" },
-      { name: "Rabies" }
+      { 
+        name: "DHP",
+        type: "Combination",
+        isMandatory: true,
+        recommendedAge: { unit: "Weeks", value: 8 },
+        recommendedFrequency: { unit: "Years", value: 1 }
+      },
+      { 
+        name: "Parvovirus",
+        type: "LiveAttenuated", 
+        isMandatory: true,
+        recommendedAge: { unit: "Weeks", value: 6 },
+        recommendedFrequency: { unit: "Years", value: 1 }
+      },
+      { 
+        name: "Rabies",
+        type: "Inactivated",
+        isMandatory: true, 
+        recommendedAge: { unit: "Weeks", value: 12 },
+        recommendedFrequency: { unit: "Years", value: 3 }
+      }
     ];
 
     const mutation = `
@@ -52,6 +70,16 @@ export async function seedVaccines() {
         createVaccine(createVaccineDto: $createVaccineDto) {
           _id
           name
+          type
+          isMandatory
+          recommendedAge {
+            unit
+            value
+          }
+          recommendedFrequency {
+            unit
+            value
+          }
         }
       }
     `;

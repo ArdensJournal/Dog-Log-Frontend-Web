@@ -25,13 +25,9 @@ export async function getVaccines() {
 
     const query = `
       query GetVaccines {
-        vaccines {
+        findAllVaccines {
           _id
           name
-          description
-          recommendedFrequency
-          ageCategory
-          isCore
         }
       }
     `;
@@ -47,18 +43,22 @@ export async function getVaccines() {
     });
 
     if (!response.ok) {
-      console.error('Failed to fetch vaccines:', response.status);
+      const errorText = await response.text();
+      console.error('Failed to fetch vaccines:', response.status, errorText);
       return [];
     }
 
     const data = await response.json();
+    console.log('Vaccines response:', data);
     
     if (data.errors) {
       console.error('GraphQL errors:', data.errors);
       return [];
     }
 
-    return data.data.vaccines || [];
+    const vaccines = data.data.findAllVaccines || [];
+    console.log('Fetched vaccines count:', vaccines.length);
+    return vaccines;
   } catch (error) {
     console.error('Error fetching vaccines:', error);
     return [];
@@ -76,20 +76,20 @@ export async function getVaccinations(dogId: string) {
 
     const query = `
       query GetVaccinations($dogId: ID!) {
-        vaccinations(dogId: $dogId) {
+        findAllVaccineRecordsByDog(findByDogIdDto: { dogId: $dogId }) {
           _id
-          dogId
-          vaccineId
+          date
+          note
+          createdAt
+          updatedAt
           vaccine {
             _id
             name
-            description
           }
-          dateGiven
-          nextDueDate
-          administeredBy
-          notes
-          createdAt
+          validFor {
+            unit
+            value
+          }
         }
       }
     `;
@@ -119,7 +119,7 @@ export async function getVaccinations(dogId: string) {
       return [];
     }
 
-    return data.data.vaccinations || [];
+    return data.data.findAllVaccineRecordsByDog || [];
   } catch (error) {
     console.error('Error fetching vaccinations:', error);
     return [];
@@ -143,21 +143,20 @@ export async function createVaccination(vaccinationData: {
     }
 
     const mutation = `
-      mutation CreateVaccination($input: CreateVaccinationInput!) {
-        createVaccination(input: $input) {
+      mutation CreateVaccineRecord($createVaccineRecordDto: CreateVaccineRecordDto!) {
+        createVaccineRecord(createVaccineRecordDto: $createVaccineRecordDto) {
           _id
-          dogId
-          vaccineId
           vaccine {
             _id
             name
-            description
           }
-          dateGiven
-          nextDueDate
-          administeredBy
-          notes
+          date
+          note
           createdAt
+          validFor {
+            unit
+            value
+          }
         }
       }
     `;
@@ -170,7 +169,15 @@ export async function createVaccination(vaccinationData: {
       },
       body: JSON.stringify({
         query: mutation,
-        variables: { input: vaccinationData }
+        variables: { 
+          createVaccineRecordDto: { 
+            dog: vaccinationData.dogId,
+            vaccine: vaccinationData.vaccineId, // This should be the enum value (DHP, Parvovirus, or Rabies)
+            date: vaccinationData.dateGiven,
+            note: vaccinationData.notes || "",
+            validFor: { unit: "Years", value: 1 } // Default value since frontend doesn't capture this
+          }
+        }
       }),
     });
 
@@ -189,7 +196,7 @@ export async function createVaccination(vaccinationData: {
     revalidatePath('/vaccinations');
     revalidatePath('/recent-activity');
     
-    return data.data.createVaccination;
+    return data.data.createVaccineRecord;
   } catch (error) {
     console.error('Error creating vaccination:', error);
     throw error;
@@ -205,56 +212,8 @@ export async function updateVaccination(vaccinationId: string, updates: any) {
       throw new Error('Authentication required');
     }
 
-    const mutation = `
-      mutation UpdateVaccination($id: ID!, $input: UpdateVaccinationInput!) {
-        updateVaccination(id: $id, input: $input) {
-          _id
-          dogId
-          vaccineId
-          vaccine {
-            _id
-            name
-            description
-          }
-          dateGiven
-          nextDueDate
-          administeredBy
-          notes
-          createdAt
-        }
-      }
-    `;
-
-    const response = await fetch(BACKEND_URL!, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        query: mutation,
-        variables: { id: vaccinationId, input: updates }
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to update vaccination: ${response.status}`);
-    }
-
-    const data = await response.json();
-    
-    if (data.errors) {
-      throw new Error(`GraphQL errors: ${JSON.stringify(data.errors)}`);
-    }
-
-    const vaccination = data.data.updateVaccination;
-
-    // Revalidate vaccinations data
-    revalidateTag(`vaccinations-${vaccination.dogId}`);
-    revalidatePath('/vaccinations');
-    revalidatePath('/recent-activity');
-    
-    return vaccination;
+    // TODO: Implement when backend supports vaccine record updates
+    throw new Error('Update vaccination not yet implemented');
   } catch (error) {
     console.error('Error updating vaccination:', error);
     throw error;
@@ -270,40 +229,8 @@ export async function deleteVaccination(vaccinationId: string, dogId: string) {
       throw new Error('Authentication required');
     }
 
-    const mutation = `
-      mutation DeleteVaccination($id: ID!) {
-        deleteVaccination(id: $id)
-      }
-    `;
-
-    const response = await fetch(BACKEND_URL!, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        query: mutation,
-        variables: { id: vaccinationId }
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to delete vaccination: ${response.status}`);
-    }
-
-    const data = await response.json();
-    
-    if (data.errors) {
-      throw new Error(`GraphQL errors: ${JSON.stringify(data.errors)}`);
-    }
-
-    // Revalidate vaccinations data
-    revalidateTag(`vaccinations-${dogId}`);
-    revalidatePath('/vaccinations');
-    revalidatePath('/recent-activity');
-    
-    return true;
+    // TODO: Implement when backend supports vaccine record deletion
+    throw new Error('Delete vaccination not yet implemented');
   } catch (error) {
     console.error('Error deleting vaccination:', error);
     throw error;
