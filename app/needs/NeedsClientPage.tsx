@@ -11,13 +11,15 @@ import {
   MdAdd, 
   MdAssignment, 
   MdBarChart, 
-  MdSchedule 
+  MdSchedule,
+  MdError,
+  MdWc
 } from 'react-icons/md';
 
 interface NeedsClientPageProps {
   user: any;
   dogs: Dog[];
-  defaultDog: Dog;
+  defaultDog: Dog | null;
   initialPottyRecords: PottyRecord[];
 }
 
@@ -27,7 +29,45 @@ export default function NeedsClientPage({
   defaultDog, 
   initialPottyRecords 
 }: NeedsClientPageProps) {
-  const [selectedDog, setSelectedDog] = useState<Dog>(defaultDog);
+  // No dogs state - show friendly UI instead of redirect
+  if (dogs.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
+        <div className="max-w-6xl mx-auto space-y-6">
+          {/* Header */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-3">
+              <MdWc className="text-4xl text-green-600 dark:text-green-400" />
+              Potty Tracking
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              Keep track of your dog's bathroom habits and health
+            </p>
+          </div>
+
+          {/* No Dogs Message */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 text-center border border-gray-200 dark:border-gray-700">
+            <MdPets className="w-24 h-24 text-gray-400 mx-auto mb-6" />
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+              No Dogs Found
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+              Start tracking your dog's potty habits by adding your first furry friend to the system.
+            </p>
+            <a
+              href="/add-dog"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+            >
+              <MdPets className="w-5 h-5" />
+              Add Your First Dog
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const [selectedDog, setSelectedDog] = useState<Dog>(defaultDog!);
   const [pottyRecords, setPottyRecords] = useState<PottyRecord[]>(initialPottyRecords);
   const [showLogForm, setShowLogForm] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -77,7 +117,7 @@ export default function NeedsClientPage({
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-3">
-                <span className="text-4xl">🚽</span>
+                <MdWc className="text-4xl text-green-600 dark:text-green-400" />
                 Potty Tracking
               </h1>
               <p className="text-gray-600 dark:text-gray-400">
@@ -142,7 +182,7 @@ export default function NeedsClientPage({
         {error && (
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl p-4">
             <div className="flex items-start gap-2">
-              <span className="text-xl">❌</span>
+              <MdError className="text-xl text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p className="text-red-700 dark:text-red-300">{error}</p>
                 <div className="mt-3 flex gap-2">
@@ -202,7 +242,7 @@ export default function NeedsClientPage({
         {/* No records state */}
         {selectedDog && pottyRecords.length === 0 && !isPending && (
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 text-center border border-gray-200 dark:border-gray-700">
-            <div className="text-6xl mb-4">🐕</div>
+            <MdPets className="w-24 h-24 text-indigo-400 dark:text-indigo-500 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
               Start Tracking {selectedDog.name}'s Potty Breaks
             </h3>

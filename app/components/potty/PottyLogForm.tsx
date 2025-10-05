@@ -2,6 +2,40 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { PottyType, PottyEnvironment, PottyHealthFlag, HEALTH_FLAG_INFO } from '@/app/lib/types/potty';
+import { 
+  MdEdit, 
+  MdAccessTime, 
+  MdHome, 
+  MdPark, 
+  MdLocationOn, 
+  MdSave,
+  MdCircle,
+  MdWarning,
+  MdBloodtype,
+  MdSentimentDissatisfied,
+  MdWaterDrop,
+  MdRefresh,
+  MdScience,
+  MdSentimentVeryDissatisfied,
+  MdRestaurant,
+  MdColorLens,
+  MdBugReport
+} from 'react-icons/md';
+
+// Icon mapping for dynamic rendering
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  'MdWarning': MdWarning,
+  'MdBloodtype': MdBloodtype,
+  'MdCircle': MdCircle,
+  'MdSentimentDissatisfied': MdSentimentDissatisfied,
+  'MdWaterDrop': MdWaterDrop,
+  'MdRefresh': MdRefresh,
+  'MdScience': MdScience,
+  'MdSentimentVeryDissatisfied': MdSentimentVeryDissatisfied,
+  'MdRestaurant': MdRestaurant,
+  'MdColorLens': MdColorLens,
+  'MdBugReport': MdBugReport
+};
 
 interface PottyLogFormProps {
   dogId: string;
@@ -137,7 +171,7 @@ export default function PottyLogForm({ dogId, onSubmit, onCancel, isLoading = fa
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
       <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
-        <span className="text-3xl">📝</span>
+        <MdEdit className="text-3xl text-green-600 dark:text-green-400" />
         Log Potty Break
       </h2>
 
@@ -151,9 +185,10 @@ export default function PottyLogForm({ dogId, onSubmit, onCancel, isLoading = fa
             <button
               type="button"
               onClick={() => setFormData(prev => ({ ...prev, date: getCurrentDateTime() }))}
-              className="px-3 py-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800/50 transition-colors"
+              className="px-3 py-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800/50 transition-colors flex items-center gap-1"
             >
-              🕐 Set to Now
+              <MdAccessTime className="text-sm" />
+              Set to Now
             </button>
           </div>
           <input
@@ -186,7 +221,7 @@ export default function PottyLogForm({ dogId, onSubmit, onCancel, isLoading = fa
                     : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:border-green-300 hover:bg-green-50 dark:hover:bg-green-900/20'
                 }`}
               >
-                <span className="text-2xl">{value === PottyType.PEE ? '💛' : '💩'}</span>
+                <MdCircle className={`text-2xl ${value === PottyType.PEE ? 'text-yellow-400' : 'text-amber-700 dark:text-amber-600'}`} />
                 <span className="font-medium">{value === PottyType.PEE ? 'Pee' : 'Poop'}</span>
               </button>
             ))}
@@ -210,7 +245,11 @@ export default function PottyLogForm({ dogId, onSubmit, onCancel, isLoading = fa
                     : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20'
                 }`}
               >
-                <span className="text-2xl">{value === PottyEnvironment.INDOORS ? '🏠' : '🌳'}</span>
+                {value === PottyEnvironment.INDOORS ? (
+                  <MdHome className="text-2xl text-orange-600 dark:text-orange-400" />
+                ) : (
+                  <MdPark className="text-2xl text-green-600 dark:text-green-400" />
+                )}
                 <span className="font-medium">{value === PottyEnvironment.INDOORS ? 'Indoor' : 'Outdoor'}</span>
               </button>
             ))}
@@ -227,9 +266,10 @@ export default function PottyLogForm({ dogId, onSubmit, onCancel, isLoading = fa
               type="button"
               onClick={getCurrentLocation}
               disabled={locationLoading}
-              className="px-3 py-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800/50 transition-colors disabled:opacity-50"
+              className="px-3 py-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800/50 transition-colors disabled:opacity-50 flex items-center gap-1"
             >
-              {locationLoading ? '📍 Getting...' : '📍 Use Current'}
+              <MdLocationOn className="text-sm" />
+              {locationLoading ? 'Getting...' : 'Use Current'}
             </button>
           </div>
           
@@ -265,6 +305,7 @@ export default function PottyLogForm({ dogId, onSubmit, onCancel, isLoading = fa
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-60 overflow-y-auto">
             {relevantHealthFlags.map(flag => {
               const info = HEALTH_FLAG_INFO[flag];
+              const IconComponent = ICON_MAP[info.icon] || MdWarning;
               return (
                 <button
                   key={flag}
@@ -277,7 +318,7 @@ export default function PottyLogForm({ dogId, onSubmit, onCancel, isLoading = fa
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <span>{info.icon}</span>
+                    <IconComponent className="flex-shrink-0" />
                     <span className="text-xs font-medium">{info.label}</span>
                   </div>
                   <p className="text-xs opacity-75">{info.description}</p>
@@ -321,7 +362,7 @@ export default function PottyLogForm({ dogId, onSubmit, onCancel, isLoading = fa
               </>
             ) : (
               <>
-                <span>💾</span>
+                <MdSave className="w-5 h-5" />
                 Save Potty Log
               </>
             )}

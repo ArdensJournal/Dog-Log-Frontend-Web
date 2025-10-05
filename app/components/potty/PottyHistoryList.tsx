@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { PottyRecord, PottyType, PottyEnvironment, PottyHealthFlag } from '@/app/lib/types/potty';
 import PottyCard from './PottyCard';
+import { MdBarChart, MdRefresh, MdWarning, MdSearch, MdExpandMore } from 'react-icons/md';
 
 interface PottyHistoryListProps {
   records: PottyRecord[];
@@ -123,7 +124,7 @@ export default function PottyHistoryList({ records, isLoading = false, onRefresh
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-            <span className="text-3xl">📊</span>
+            <MdBarChart className="text-3xl text-indigo-600 dark:text-indigo-400" />
             Potty History
           </h2>
           {onRefresh && (
@@ -132,7 +133,7 @@ export default function PottyHistoryList({ records, isLoading = false, onRefresh
               disabled={isLoading}
               className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
             >
-              <span className={`text-lg ${isLoading ? 'animate-spin' : ''}`}>🔄</span>
+              <MdRefresh className={`text-2xl ${isLoading ? 'animate-spin' : ''}`} />
             </button>
           )}
         </div>
@@ -160,7 +161,7 @@ export default function PottyHistoryList({ records, isLoading = false, onRefresh
         {stats.withHealthFlags > 0 && (
           <div className="mt-4 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-xl border border-orange-200 dark:border-orange-700">
             <div className="flex items-center gap-2 text-orange-700 dark:text-orange-300">
-              <span className="text-lg">⚠️</span>
+              <MdWarning className="text-xl" />
               <span className="text-sm font-medium">
                 {stats.withHealthFlags} record{stats.withHealthFlags > 1 ? 's' : ''} with health flags
               </span>
@@ -176,7 +177,7 @@ export default function PottyHistoryList({ records, isLoading = false, onRefresh
           className="w-full px-6 py-4 flex items-center justify-between text-left bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600 hover:from-gray-100 hover:to-gray-200 dark:hover:from-gray-600 dark:hover:to-gray-500 transition-all duration-200"
         >
           <div className="flex items-center gap-3">
-            <span className="text-xl">🔍</span>
+            <MdSearch className="text-xl text-gray-600 dark:text-gray-400" />
             <span className="font-semibold text-gray-900 dark:text-gray-100">
               Filters & Search
             </span>
@@ -186,9 +187,7 @@ export default function PottyHistoryList({ records, isLoading = false, onRefresh
               </span>
             )}
           </div>
-          <span className={`text-xl transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
-            ⌄
-          </span>
+          <MdExpandMore className={`text-2xl text-gray-600 dark:text-gray-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
         </button>
 
         {isExpanded && (
@@ -318,7 +317,7 @@ export default function PottyHistoryList({ records, isLoading = false, onRefresh
           </div>
         ) : filteredRecords.length === 0 ? (
           <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
-            <div className="text-6xl mb-4">🔍</div>
+            <MdSearch className="text-6xl text-gray-400 dark:text-gray-500 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
               {records.length === 0 ? 'No Records Yet' : 'No Matching Records'}
             </h3>

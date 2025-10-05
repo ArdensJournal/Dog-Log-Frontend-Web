@@ -28,7 +28,7 @@ export async function getUserDogs() {
         userDogs {
           _id
           name
-          breed
+          breeds
           birthday
           gender
           imageUrl
@@ -75,7 +75,7 @@ export async function getUserDogs() {
 // Server action to create a new dog
 export async function createDog(dogData: {
   name: string;
-  breed: string;
+  breeds: string[];
   birthday: string;
   gender?: string;
   imageUrl?: string;
@@ -92,7 +92,7 @@ export async function createDog(dogData: {
         createDog(input: $input) {
           _id
           name
-          breed
+          breeds
           birthday
           gender
           imageUrl
@@ -147,7 +147,7 @@ export async function updateDog(dogId: string, updates: any) {
         updateDog(id: $id, input: $input) {
           _id
           name
-          breed
+          breeds
           birthday
           gender
           imageUrl
@@ -199,8 +199,11 @@ export async function deleteDog(dogId: string) {
     }
 
     const mutation = `
-      mutation DeleteDog($id: ID!) {
-        deleteDog(id: $id)
+      mutation DeleteDog($findByDogIdDto: FindByDogIdDto!) {
+        deleteDog(findByDogIdDto: $findByDogIdDto) {
+          _id
+          name
+        }
       }
     `;
 
@@ -212,7 +215,9 @@ export async function deleteDog(dogId: string) {
       },
       body: JSON.stringify({
         query: mutation,
-        variables: { id: dogId }
+        variables: { 
+          findByDogIdDto: { dogId }
+        }
       }),
     });
 

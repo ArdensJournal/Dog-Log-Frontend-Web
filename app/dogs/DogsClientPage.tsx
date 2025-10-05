@@ -22,10 +22,13 @@ export default function DogsClientPage({ dogs: initialDogs }: DogsClientPageProp
     setDeleteLoading(dogId);
     startTransition(async () => {
       try {
+        console.log('🗑️ Attempting to delete dog:', dogId, dogName);
         await deleteDog(dogId);
+        console.log('✅ Delete successful');
         // Remove the deleted dog from the local state
         setDogs(prevDogs => prevDogs.filter(dog => dog._id !== dogId));
       } catch (error) {
+        console.error('❌ Delete error:', error);
         alert(`Failed to delete ${dogName}. Please try again.`);
         console.error('Delete error:', error);
       } finally {
@@ -51,7 +54,7 @@ export default function DogsClientPage({ dogs: initialDogs }: DogsClientPageProp
                 <li key={dog._id} className="bg-indigo-50 dark:bg-indigo-900/30 rounded-xl p-6 shadow flex flex-col items-start">
                   <span className="text-2xl font-bold text-indigo-700 dark:text-indigo-300 mb-2">{dog.name}</span>
                   <span className="text-sm text-gray-700 dark:text-gray-300 mb-1">
-                    <strong>Breed:</strong> {Array.isArray(dog.breed) ? dog.breed.join(', ') : dog.breed || 'Unknown'}
+                    <strong>Breed:</strong> {dog.breeds?.join(', ') || 'Unknown'}
                   </span>
                   <span className="text-sm text-gray-700 dark:text-gray-300 mb-1">
                     <strong>Born:</strong> {dog.birthday ? new Date(dog.birthday).toLocaleDateString() : 'Unknown'}

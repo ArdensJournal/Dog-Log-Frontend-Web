@@ -28,7 +28,7 @@ export async function GET() {
         userDogs {
           _id
           name
-          breed
+          breeds
           gender
           imageUrl
         }

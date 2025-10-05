@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -30,7 +30,7 @@ interface UserModel {
 interface DogModel {
   _id: string;
   name: string;
-  breed?: string[];
+  breeds?: string[];
   gender?: 'MALE' | 'FEMALE';
   birthday?: string;
   imageUrl?: string;
@@ -121,7 +121,7 @@ const RecentActivityPage = () => {
     try {
       setLoading(true);
       
-      console.log('🔄 Fetching all dogs and recent activity...');
+      console.log('נ”„ Fetching all dogs and recent activity...');
       
       // Use the new dedicated API endpoint
       const response = await fetch('/api/recent-activity', {
@@ -149,7 +149,7 @@ const RecentActivityPage = () => {
       const dogs = result.data?.dogs || [];
       const activities = result.data?.activities || [];
       
-      console.log(`✅ Fetched ${dogs.length} dogs and ${activities.length} activities`);
+      console.log(`ג… Fetched ${dogs.length} dogs and ${activities.length} activities`);
       
       setDogs(dogs);
       setActivities(activities);
@@ -403,41 +403,75 @@ const RecentActivityPage = () => {
     );
   }
 
+  // No dogs state
+  if (dogs.length === 0 && !loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900 p-4">
+        <div className="max-w-6xl mx-auto space-y-6">
+          {/* Header */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-3">
+              <MdAccessTime className="text-4xl text-blue-500" />
+              Recent Activity
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              Track all recent activities, health records, and tasks for your dogs
+            </p>
+          </div>
+
+          {/* No Dogs Message */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 text-center border border-gray-200 dark:border-gray-700">
+            <MdPets className="w-24 h-24 text-gray-400 mx-auto mb-6" />
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+              No Dogs Found
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+              Start tracking your dog's activities by adding your first furry friend to the system.
+            </p>
+            <Link
+              href="/add-dog"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+            >
+              <MdPets className="w-5 h-5" />
+              Add Your First Dog
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900 p-4">
+      <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
-        <div className="mb-8">
-          <Link
-            href="/profile"
-            className="inline-flex items-center gap-2 text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-200 mb-4"
-          >
-            <MdArrowBack />
-            Back to Profile
-          </Link>
-          
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Recent Activity
-          </h1>
-          
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Track all recent activities, health records, and tasks for your dogs
-          </p>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-3">
+                <MdAccessTime className="text-4xl text-blue-500" />
+                Recent Activity
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                Track all recent activities, health records, and tasks for your dogs
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Dog Filter */}
         {dogs.length > 1 && (
-          <div className="mb-6">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
             >
               <MdFilterList className="text-lg" />
               <span>Filter by Dogs ({selectedDogIds.length}/{dogs.length})</span>
             </button>
             
             {showFilters && (
-              <div className="mt-3 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+              <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-medium text-gray-900 dark:text-white">Select Dogs</h3>
                   <button
@@ -484,16 +518,9 @@ const RecentActivityPage = () => {
           </div>
         )}
 
-        {/* Activities Timeline */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-            <MdAccessTime className="w-8 h-8 text-blue-500" />
-            Activity Timeline
-          </h2>
-        </div>
-
+        {/* Activities Content */}
         {filteredActivities.length === 0 ? (
-          <div className="text-center py-12">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-12 text-center border border-gray-200 dark:border-gray-700">
             <MdPets className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
               {selectedDogIds.length === 0 ? 'No dogs selected' : 'No recent activity'}
@@ -523,7 +550,8 @@ const RecentActivityPage = () => {
             </div>
           </div>
         ) : (
-          <div className="relative">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+            <div className="relative">
             {/* Timeline Line */}
             <div className="absolute left-6 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-400 via-purple-500 to-green-500 rounded-full"></div>
             
@@ -641,12 +669,13 @@ const RecentActivityPage = () => {
                 );
               })}
             </div>
+            </div>
           </div>
         )}
 
         {/* Quick Actions */}
         {dogs.length > 0 && (
-          <div className="mt-12 bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               Quick Actions
             </h2>
@@ -691,3 +720,4 @@ const RecentActivityPage = () => {
 };
 
 export default RecentActivityPage;
+

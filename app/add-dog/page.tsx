@@ -89,7 +89,7 @@ async function uploadFile(file: File): Promise<string> {
 // ✅ FIXED: Create dog function to use file upload mutation correctly
 async function createDog(dogData: {
   name: string;
-  breed?: string[];
+  breeds?: string[];
   birthday?: string;
   gender?: string;
   imageFile?: File;
@@ -117,7 +117,7 @@ async function createDog(dogData: {
     variables: {
       createDogDto: {
         name: dogData.name,
-        ...(dogData.breed && dogData.breed.length > 0 && { breed: dogData.breed }),
+        ...(dogData.breeds && dogData.breeds.length > 0 && { breeds: dogData.breeds }),
         ...(dogData.birthday && { birthday: dogData.birthday }),
         ...(dogData.gender && { gender: dogData.gender }),
         // ✅ Reference the file if provided
@@ -219,7 +219,7 @@ export default function AddDogPage() {
               createDog(createDogDto: $createDogDto) {
                 _id
                 name
-                breed
+                breeds
                 birthday
                 gender
                 imageUrl
@@ -229,7 +229,7 @@ export default function AddDogPage() {
           variables: {
             createDogDto: {
               name,
-              ...(selectedBreeds.length > 0 && { breed: selectedBreeds }),
+              ...(selectedBreeds.length > 0 && { breeds: selectedBreeds }),
               ...(birthday && { birthday }),
               ...(gender && { gender }),
               image: null
@@ -258,7 +258,7 @@ export default function AddDogPage() {
         // Handle regular creation without file
         const result = await apiClient.addDog({
           name,
-          breed: selectedBreeds.join(','),
+          breeds: selectedBreeds,
           birthday: birthday || '',
           gender: gender || ''
         });

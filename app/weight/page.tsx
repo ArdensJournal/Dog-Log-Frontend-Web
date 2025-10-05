@@ -228,21 +228,33 @@ function WeightPageContent() {
   // No dogs case
   if (dogs.length === 0 && !isLoadingDogs) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="text-center py-12">
-            <MdPets className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900 p-4">
+        <div className="max-w-6xl mx-auto space-y-6">
+          {/* Header */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-3">
+              <MdScale className="text-4xl text-purple-600" />
+              Weight Tracking
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              Monitor your dog's weight trends and health
+            </p>
+          </div>
+
+          {/* No Dogs Message */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 text-center border border-gray-200 dark:border-gray-700">
+            <MdPets className="w-24 h-24 text-gray-400 mx-auto mb-6" />
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
               No Dogs Found
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Add your first dog to start tracking their weight!
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+              Start tracking your dog's weight by adding your first furry friend to the system.
             </p>
             <Link
               href="/add-dog"
-              className="inline-flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
             >
-              <MdAdd />
+              <MdPets className="w-5 h-5" />
               Add Your First Dog
             </Link>
           </div>
@@ -252,83 +264,81 @@ function WeightPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900 p-4">
+      <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <Link
-              href="/dogs"
-              className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-            >
-              <MdArrowBack className="w-5 h-5" />
-            </Link>
-            
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                <MdScale className="text-purple-600" />
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-3">
+                <MdScale className="text-4xl text-purple-600" />
                 Weight Tracking
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">
+              <p className="text-gray-600 dark:text-gray-400">
                 Monitor your dog's weight trends and health
               </p>
             </div>
-
-            {/* Unit Toggle */}
-            <div className="flex items-center gap-2">
-              <MdSettings className="w-4 h-4 text-gray-500" />
-              <div className="flex border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
-                {(Object.keys(WEIGHT_UNITS) as WeightUnit[]).map((unitOption) => (
-                  <button
-                    key={unitOption}
-                    onClick={() => setUnit(unitOption)}
-                    className={`px-3 py-1 text-sm font-medium transition-colors ${
-                      unit === unitOption
-                        ? 'bg-purple-600 text-white'
-                        : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
-                    }`}
-                  >
-                    {WEIGHT_UNITS[unitOption].symbol}
-                  </button>
-                ))}
+            
+            <div className="flex flex-col gap-4">
+              {/* Dog Selector */}
+              {dogs.length > 1 && (
+                <div className="flex items-center gap-4">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Select Dog:
+                  </span>
+                  <div className="flex gap-2 flex-wrap">
+                    {dogs.map((dog) => (
+                      <button
+                        key={dog._id}
+                        onClick={() => setSelectedDog(dog)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
+                          selectedDog?._id === dog._id
+                            ? 'bg-purple-600 text-white border-purple-600'
+                            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-purple-600 hover:text-purple-600'
+                        }`}
+                      >
+                        {dog.imageUrl ? (
+                          <img
+                            src={dog.imageUrl}
+                            alt={dog.name}
+                            className="w-6 h-6 rounded-full object-cover"
+                          />
+                        ) : (
+                          <MdPets className="w-5 h-5" />
+                        )}
+                        {dog.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Unit Toggle */}
+              <div className="flex items-center gap-2">
+                <MdSettings className="w-4 h-4 text-gray-500" />
+                <div className="flex border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
+                  {(Object.keys(WEIGHT_UNITS) as WeightUnit[]).map((unitOption) => (
+                    <button
+                      key={unitOption}
+                      onClick={() => setUnit(unitOption)}
+                      className={`px-3 py-1 text-sm font-medium transition-colors ${
+                        unit === unitOption
+                          ? 'bg-purple-600 text-white'
+                          : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                      }`}
+                    >
+                      {WEIGHT_UNITS[unitOption].symbol}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Dog Selector */}
-          {dogs.length > 1 && (
-            <div className="flex items-center gap-4 mb-6">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Select Dog:
-              </span>
-              <div className="flex gap-2 flex-wrap">
-                {dogs.map((dog) => (
-                  <button
-                    key={dog._id}
-                    onClick={() => setSelectedDog(dog)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
-                      selectedDog?._id === dog._id
-                        ? 'bg-purple-600 text-white border-purple-600'
-                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-purple-600 hover:text-purple-600'
-                    }`}
-                  >
-                    {dog.imageUrl ? (
-                      <img
-                        src={dog.imageUrl}
-                        alt={dog.name}
-                        className="w-6 h-6 rounded-full object-cover"
-                      />
-                    ) : (
-                      <MdPets className="w-5 h-5" />
-                    )}
-                    {dog.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {selectedDog && (
+        {/* Selected Dog Info */}
+        {selectedDog && (
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 {selectedDog.imageUrl ? (
@@ -378,8 +388,8 @@ function WeightPageContent() {
                 Log Weight
               </button>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {error && (
           <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">

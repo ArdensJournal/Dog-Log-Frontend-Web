@@ -1,12 +1,16 @@
 'use client';
 
 import Link from 'next/link';
+import { MdPets } from 'react-icons/md';
 
 export default function ForumMockupPage() {
   return (
     <main className="min-h-screen flex flex-col items-center bg-gradient-to-br from-blue-100 via-white to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900 p-8">
       <div className="w-full max-w-5xl bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
-        <h1 className="text-4xl font-extrabold text-indigo-700 dark:text-indigo-400 mb-2 text-center drop-shadow-lg">🐾 Dog Log Community (Vision Mockup)</h1>
+        <h1 className="text-4xl font-extrabold text-indigo-700 dark:text-indigo-400 mb-2 text-center drop-shadow-lg flex items-center justify-center gap-3">
+          <MdPets className="text-5xl" />
+          Dog Log Community (Vision Mockup)
+        </h1>
         <p className="text-lg text-gray-700 dark:text-gray-300 mb-8 text-center">
           The ultimate community for dog lovers—connect, learn, share, and celebrate your pups!
         </p>

@@ -174,48 +174,82 @@ export default function TasksPage() {
     );
   }
 
+  // No dogs state
+  if (dogs.length === 0 && !loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
+        <div className="max-w-6xl mx-auto space-y-6">
+          {/* Header */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-3">
+              <MdTaskAlt className="text-4xl text-indigo-600" />
+              Task Manager
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              Keep track of your dog care tasks and reminders
+            </p>
+          </div>
+
+          {/* No dogs message */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 text-center border border-gray-200 dark:border-gray-700">
+            <MdPets className="w-24 h-24 text-gray-400 mx-auto mb-6" />
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+              No Dogs Found
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+              You need to add a dog before you can create tasks.
+            </p>
+            <a
+              href="/add-dog"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+            >
+              <MdPets className="w-5 h-5" />
+              Add Your First Dog
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8 mobile-bottom-nav-padding">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Enhanced Header */}
-        <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-800 dark:to-purple-800 rounded-2xl p-8 mb-8 shadow-xl">
-          <div className="absolute inset-0 bg-black/10"></div>
-          <div className="relative z-10">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-              <div className="mb-6 lg:mb-0">
-                <h1 className="text-4xl lg:text-5xl font-bold text-white mb-3">
-                  Task Manager
-                </h1>
-                <p className="text-indigo-100 text-lg max-w-2xl">
-                  Keep track of your dog care tasks, schedule reminders, and never miss important appointments.
-                </p>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <button
-                  onClick={loadData}
-                  disabled={loading}
-                  className="inline-flex items-center px-6 py-3 bg-white/20 hover:bg-white/30 text-white font-medium rounded-xl backdrop-blur-sm border border-white/20 transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
-                >
-                  <MdRefresh className={`mr-2 h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
-                  Refresh
-                </button>
-                <button
-                  onClick={() => setShowForm(true)}
-                  className="inline-flex items-center px-6 py-3 bg-white text-indigo-600 hover:bg-indigo-50 font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border border-white/20"
-                >
-                  <MdAdd className="mr-2 h-5 w-5" />
-                  Create Task
-                </button>
-              </div>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4 mobile-bottom-nav-padding">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-3">
+                <MdTaskAlt className="text-4xl text-indigo-600" />
+                Task Manager
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                Keep track of your dog care tasks and reminders
+              </p>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={loadData}
+                disabled={loading}
+                className="inline-flex items-center px-6 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium rounded-xl transition-all duration-200 disabled:opacity-50"
+              >
+                <MdRefresh className={`mr-2 h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
+                Refresh
+              </button>
+              <button
+                onClick={() => setShowForm(true)}
+                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                <MdAdd className="mr-2 h-5 w-5" />
+                New Task
+              </button>
             </div>
           </div>
-          {/* Decorative elements */}
-          <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white/10 rounded-full"></div>
-          <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-32 h-32 bg-white/5 rounded-full"></div>
         </div>
 
         {/* Enhanced Filter Section */}
-        <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-6 mb-8 shadow-lg border border-white/20 dark:border-gray-700/50">
+        <div className="bg-white dark:bg-gray-800 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
           <div className="flex items-center mb-4">
             <MdFilterList className="w-5 h-5 text-indigo-600 dark:text-indigo-400 mr-2" />
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Filter Tasks</h3>

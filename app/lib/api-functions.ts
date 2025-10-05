@@ -16,7 +16,7 @@ export async function fetchDogs(): Promise<DogsResponse> {
 // Example: How to add a new dog
 export async function addDog(dogData: {
   name: string;
-  breed: string;
+  breeds: string[];
   birthday: string;
   gender: string;
 }) {

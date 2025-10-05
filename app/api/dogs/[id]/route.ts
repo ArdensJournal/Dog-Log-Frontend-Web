@@ -34,7 +34,7 @@ export async function GET(
           _id
           name
           birthday
-          breed
+          breeds
           gender
           imageUrl
           collaborators {
@@ -208,19 +208,19 @@ export async function PUT(
       // Handle regular JSON update
       console.log('🔧 Processing regular JSON update...');
       const body = await request.json();
-      const { name, breed, birthday, gender } = body;
+      const { name, breeds, birthday, gender } = body;
 
-      console.log('📝 Update data received:', { name, breed, birthday, gender });
+      console.log('📝 Update data received:', { name, breeds, birthday, gender });
 
-      // Convert breed string to array if needed
-      const breedArray = Array.isArray(breed) ? breed : [breed];
+      // Ensure breeds is an array
+      const breedArray = Array.isArray(breeds) ? breeds : (breeds ? [breeds] : []);
 
       const mutation = `
         mutation UpdateDog($updateDogDto: UpdateDogDto!) {
           updateDog(updateDogDto: $updateDogDto) {
             _id
             name
-            breed
+            breeds
             birthday
             gender
             imageUrl
@@ -240,7 +240,7 @@ export async function PUT(
             updateDogDto: { 
               dogId: id, 
               name, 
-              breed: breedArray, 
+              breeds: breedArray, 
               birthday, 
               gender 
             }

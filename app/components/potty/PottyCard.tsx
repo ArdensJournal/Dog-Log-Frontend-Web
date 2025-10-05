@@ -1,6 +1,13 @@
 import { PottyRecord, POTTY_TYPE_INFO, ENVIRONMENT_INFO } from '@/app/lib/types/potty';
 import HealthFlagIndicator from './HealthFlagIndicator';
 import PottyTypeIcon from '../PottyTypeIcon';
+import { MdLocationOn, MdCheckCircle, MdHome, MdPark } from 'react-icons/md';
+
+// Icon mapping for environment icons
+const ENV_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  'MdHome': MdHome,
+  'MdPark': MdPark
+};
 
 interface PottyCardProps {
   record: PottyRecord;
@@ -80,7 +87,10 @@ export default function PottyCard({ record, className = '' }: PottyCardProps) {
       <div className="flex items-center gap-4 mb-4">
         {environmentInfo && (
           <div className="flex items-center gap-2">
-            <span className="text-lg">{environmentInfo.icon}</span>
+            {(() => {
+              const EnvIconComponent = ENV_ICON_MAP[environmentInfo.icon] || MdHome;
+              return <EnvIconComponent className="text-lg" />;
+            })()}
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
               {environmentInfo.label}
             </span>
@@ -89,7 +99,7 @@ export default function PottyCard({ record, className = '' }: PottyCardProps) {
         
         {record.coordinates && (
           <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
-            <span className="text-sm">📍</span>
+            <MdLocationOn className="text-sm" />
             <span className="text-xs">
               {record.coordinates.latitude.toFixed(4)}, {record.coordinates.longitude.toFixed(4)}
             </span>
@@ -119,7 +129,7 @@ export default function PottyCard({ record, className = '' }: PottyCardProps) {
       {/* Quick Health Status */}
       {(!record.healthFlags || record.healthFlags.length === 0) && (
         <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-          <span className="text-sm">✅</span>
+          <MdCheckCircle className="text-sm" />
           <span className="text-sm font-medium">Normal</span>
         </div>
       )}

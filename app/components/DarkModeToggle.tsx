@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
+import { MdLightMode, MdDarkMode } from 'react-icons/md';
 
 export function DarkModeToggle() {
   const [mounted, setMounted] = useState(false);
@@ -19,9 +20,9 @@ export function DarkModeToggle() {
       aria-label="Toggle dark mode"
     >
       {theme === 'dark' ? (
-        <span className="text-xl">☀️</span>
+        <MdLightMode className="text-xl text-yellow-400" />
       ) : (
-        <span className="text-xl">🌙</span>
+        <MdDarkMode className="text-xl text-indigo-600" />
       )}
     </button>
   );

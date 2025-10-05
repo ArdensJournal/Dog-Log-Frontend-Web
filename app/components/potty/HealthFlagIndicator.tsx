@@ -1,4 +1,32 @@
 import { PottyHealthFlag, HEALTH_FLAG_INFO } from '@/app/lib/types/potty';
+import { 
+  MdWarning, 
+  MdBloodtype, 
+  MdCircle, 
+  MdSentimentDissatisfied, 
+  MdWaterDrop, 
+  MdRefresh, 
+  MdScience, 
+  MdSentimentVeryDissatisfied, 
+  MdRestaurant, 
+  MdColorLens, 
+  MdBugReport 
+} from 'react-icons/md';
+
+// Icon mapping for dynamic rendering
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  'MdWarning': MdWarning,
+  'MdBloodtype': MdBloodtype,
+  'MdCircle': MdCircle,
+  'MdSentimentDissatisfied': MdSentimentDissatisfied,
+  'MdWaterDrop': MdWaterDrop,
+  'MdRefresh': MdRefresh,
+  'MdScience': MdScience,
+  'MdSentimentVeryDissatisfied': MdSentimentVeryDissatisfied,
+  'MdRestaurant': MdRestaurant,
+  'MdColorLens': MdColorLens,
+  'MdBugReport': MdBugReport
+};
 
 interface HealthFlagIndicatorProps {
   healthFlags: PottyHealthFlag[];
@@ -40,7 +68,7 @@ export default function HealthFlagIndicator({
 
     return (
       <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${getSeverityColor(highestSeverity)} ${className}`}>
-        <span className="text-sm">⚠️</span>
+        <MdWarning className="text-sm" />
         <span>{healthFlags.length} health flag{healthFlags.length > 1 ? 's' : ''}</span>
       </div>
     );
@@ -53,12 +81,13 @@ export default function HealthFlagIndicator({
         <div className="space-y-1">
           {healthFlags.map((flag) => {
             const flagInfo = HEALTH_FLAG_INFO[flag];
+            const IconComponent = ICON_MAP[flagInfo.icon] || MdWarning;
             return (
               <div 
                 key={flag} 
                 className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm border ${getSeverityColor(flagInfo.severity)} mr-2 mb-2`}
               >
-                <span>{flagInfo.icon}</span>
+                <IconComponent className="flex-shrink-0" />
                 <div>
                   <div className="font-medium">{flagInfo.label}</div>
                   <div className="text-xs opacity-75">{flagInfo.description}</div>
@@ -83,7 +112,7 @@ export default function HealthFlagIndicator({
             return highest;
           }, 'low' as 'low' | 'medium' | 'high')
         )}`}>
-          <span className="text-sm">⚠️</span>
+          <MdWarning className="text-sm" />
           <span>{healthFlags.length}</span>
         </div>
         
@@ -93,9 +122,10 @@ export default function HealthFlagIndicator({
             <div className="space-y-2">
               {healthFlags.map((flag) => {
                 const flagInfo = HEALTH_FLAG_INFO[flag];
+                const IconComponent = ICON_MAP[flagInfo.icon] || MdWarning;
                 return (
                   <div key={flag} className="flex items-start gap-2">
-                    <span className="flex-shrink-0">{flagInfo.icon}</span>
+                    <IconComponent className="flex-shrink-0 mt-0.5" />
                     <div>
                       <div className="font-medium">{flagInfo.label}</div>
                       <div className="text-xs opacity-75">{flagInfo.description}</div>

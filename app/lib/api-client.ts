@@ -80,14 +80,14 @@ class ApiClient {
     return this.request(`/dogs/${id}`);
   }
 
-  async addDog(dogData: { name: string; breed: string; birthday: string; gender: string }) {
+  async addDog(dogData: { name: string; breeds: string[]; birthday: string; gender: string }) {
     return this.request('/dogs', {
       method: 'POST',
       body: JSON.stringify(dogData),
     });
   }
 
-  async updateDog(id: string, dogData: { name: string; breed: string; birthday: string; gender: string }) {
+  async updateDog(id: string, dogData: { name: string; breeds: string[]; birthday: string; gender: string }) {
     return this.request(`/dogs/${id}`, {
       method: 'PUT',
       body: JSON.stringify(dogData),
@@ -227,7 +227,7 @@ export interface User {
 export interface Dog {
   _id: string;
   name: string;
-  breed: string;
+  breeds: string[];
   birthday: string;
   gender: string;
   imageUrl?: string;

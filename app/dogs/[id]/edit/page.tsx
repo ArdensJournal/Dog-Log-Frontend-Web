@@ -54,7 +54,7 @@ const DOG_BREEDS = [
 interface Dog {
   _id: string;
   name: string;
-  breed?: string[];
+  breeds?: string[];
   birthday?: string;
   gender?: 'MALE' | 'FEMALE';
   imageUrl?: string;
@@ -126,7 +126,7 @@ async function fetchDogById(dogId: string): Promise<Dog | null> {
 async function updateDog(dogData: {
   dogId: string;
   name?: string;
-  breed?: string[];
+  breeds?: string[];
   birthday?: string;
   gender?: string;
   imageFile?: File;
@@ -143,7 +143,7 @@ async function updateDog(dogData: {
           updateDog(updateDogDto: $updateDogDto) {
             _id
             name
-            breed
+            breeds
             birthday
             gender
             imageUrl
@@ -154,7 +154,7 @@ async function updateDog(dogData: {
         updateDogDto: {
           dogId: dogData.dogId,
           ...(dogData.name !== undefined && { name: dogData.name }),
-          ...(dogData.breed !== undefined && dogData.breed.length > 0 && { breed: dogData.breed }),
+          ...(dogData.breeds !== undefined && dogData.breeds.length > 0 && { breeds: dogData.breeds }),
           ...(dogData.birthday !== undefined && { birthday: dogData.birthday }),
           ...(dogData.gender !== undefined && dogData.gender !== '' && { gender: dogData.gender }),
           image: null // Reference for file upload
@@ -205,7 +205,7 @@ async function updateDog(dogData: {
     
     const requestBody = {
       ...(dogData.name !== undefined && { name: dogData.name }),
-      ...(dogData.breed !== undefined && dogData.breed.length > 0 && { breed: dogData.breed }),
+      ...(dogData.breeds !== undefined && dogData.breeds.length > 0 && { breeds: dogData.breeds }),
       ...(dogData.birthday !== undefined && { birthday: dogData.birthday }),
       ...(dogData.gender !== undefined && dogData.gender !== '' && { gender: dogData.gender })
     };
@@ -253,7 +253,7 @@ export default function EditDogPage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
 
-  // Breed search and filtering
+  // breeds search and filtering
   const [breedSearch, setBreedSearch] = useState('');
   const [showBreedDropdown, setShowBreedDropdown] = useState(false);
 
@@ -274,7 +274,7 @@ export default function EditDogPage() {
           console.log('✅ Dog data loaded:', dogData);
           setDog(dogData);
           setName(dogData.name || '');
-          setSelectedBreeds(dogData.breed || []);
+          setSelectedBreeds(dogData.breeds || []);
           setBirthday(dogData.birthday ? dogData.birthday.split('T')[0] : '');
           setGender(dogData.gender || '');
           setPreviewUrl(dogData.imageUrl || '');
@@ -322,7 +322,7 @@ export default function EditDogPage() {
       const updateData = {
         dogId,
         name: name || undefined,
-        breed: selectedBreeds.length > 0 ? selectedBreeds : undefined,
+        breeds: selectedBreeds.length > 0 ? selectedBreeds : undefined,
         birthday: birthday || undefined,
         gender: gender || undefined, // ✅ Added gender to update
         imageFile: imageFile || undefined,

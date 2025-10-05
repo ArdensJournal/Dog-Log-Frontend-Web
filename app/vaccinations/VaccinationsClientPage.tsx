@@ -3,7 +3,7 @@
 import { useState, useEffect, useTransition } from 'react';
 import { getVaccinations, createVaccination } from '@/app/lib/actions/vaccinations';
 import { type Dog, type Vaccine } from '@/app/lib/api-client';
-import { MdVaccines, MdPets, MdAdd, MdClose, MdAssessment } from 'react-icons/md';
+import { MdVaccines, MdPets, MdAdd, MdClose, MdAssessment, MdError } from 'react-icons/md';
 
 // --- Types ---
 type VaccinationRecord = {
@@ -176,7 +176,7 @@ export default function VaccinationsClientPage({ user, dogs, vaccines }: Vaccina
         {error && (
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl p-4">
             <div className="flex items-start gap-2">
-              <span className="text-xl">❌</span>
+              <MdError className="text-xl text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p className="text-red-700 dark:text-red-300">{error}</p>
                 <button
@@ -332,7 +332,7 @@ export default function VaccinationsClientPage({ user, dogs, vaccines }: Vaccina
         {/* No dogs state */}
         {dogs.length === 0 && (
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 text-center border border-gray-200 dark:border-gray-700">
-            <div className="text-6xl mb-4">🐕</div>
+            <MdPets className="w-24 h-24 text-gray-400 mx-auto mb-6" />
             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
               No Dogs Found
             </h3>
@@ -341,8 +341,9 @@ export default function VaccinationsClientPage({ user, dogs, vaccines }: Vaccina
             </p>
             <a
               href="/add-dog"
-              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200"
             >
+              <MdPets className="w-5 h-5" />
               Add Your First Dog
             </a>
           </div>

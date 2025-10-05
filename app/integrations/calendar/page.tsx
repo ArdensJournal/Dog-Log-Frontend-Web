@@ -1,3 +1,5 @@
+import { MdCalendarToday } from 'react-icons/md';
+
 export default function CalendarPage() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-sky-50 dark:from-gray-900 dark:via-blue-900 dark:to-cyan-900">
@@ -5,7 +7,7 @@ export default function CalendarPage() {
         {/* Header Section */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center w-24 h-24 bg-blue-100 dark:bg-blue-900/30 rounded-full mb-6">
-            <span className="text-5xl">📅</span>
+            <MdCalendarToday className="text-5xl text-blue-600 dark:text-blue-400" />
           </div>
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Calendar Integration

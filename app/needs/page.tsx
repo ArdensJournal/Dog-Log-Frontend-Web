@@ -18,8 +18,17 @@ export default async function NeedsPage() {
     const dogs = await getUserDogs();
     console.log('NeedsPage: Dogs count:', dogs.length);
     
+    // Pass empty data to client component when no dogs
+    // Client component will handle the no-dogs UI
     if (dogs.length === 0) {
-      redirect('/add-dog');
+      return (
+        <NeedsClientPage 
+          user={user}
+          dogs={[]}
+          defaultDog={null}
+          initialPottyRecords={[]}
+        />
+      );
     }
 
     // Get potty records for the first dog (default selection)

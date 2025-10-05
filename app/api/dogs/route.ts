@@ -30,7 +30,7 @@ export async function GET() {
           _id
           name
           birthday
-          breed
+          breeds
           gender
           imageUrl
           collaborators {
@@ -127,6 +127,15 @@ export async function POST(request: NextRequest) {
       console.log('📄 Multipart map:', map);
       console.log('📄 Multipart file:', file ? `${file.name} (${file.size} bytes)` : 'No file');
 
+      // Parse and log the operations to see what's being sent
+      try {
+        const parsedOps = JSON.parse(operations);
+        console.log('🔍 Parsed operations query:', parsedOps.query);
+        console.log('🔍 Parsed operations variables:', JSON.stringify(parsedOps.variables, null, 2));
+      } catch (e) {
+        console.error('❌ Failed to parse operations:', e);
+      }
+
       if (!operations) {
         console.error('❌ No operations found in multipart request');
         return Response.json(
@@ -183,10 +192,10 @@ export async function POST(request: NextRequest) {
       console.log('🔧 Processing regular JSON request...');
       const body = await request.json();
       console.log('📄 Request body:', body);
-      const { name, breed, birthday, gender, image } = body;
+      const { name, breeds, birthday, gender, image } = body;
 
-      // Convert breed string to array if needed
-      const breedArray = Array.isArray(breed) ? breed : [breed];
+      // Ensure breeds is an array
+      const breedArray = Array.isArray(breeds) ? breeds : (breeds ? [breeds] : []);
       console.log('📝 Processed breed array:', breedArray);
 
       const mutation = `
@@ -194,7 +203,7 @@ export async function POST(request: NextRequest) {
           createDog(createDogDto: $createDogDto) {
             _id
             name
-            breed
+            breeds
             birthday
             gender
             imageUrl
@@ -205,7 +214,7 @@ export async function POST(request: NextRequest) {
       const variables = { 
         createDogDto: { 
           name, 
-          breed: breedArray, 
+          breeds: breedArray, 
           birthday, 
           gender,
           ...(image && { image })

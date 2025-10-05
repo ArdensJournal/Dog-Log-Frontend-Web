@@ -90,84 +90,84 @@ export const HEALTH_FLAG_INFO: Record<PottyHealthFlag, {
     description: 'Dark, tar-like appearance may indicate internal bleeding',
     severity: 'high',
     color: 'red',
-    icon: '⚠️'
+    icon: 'MdWarning'
   },
   [PottyHealthFlag.BLOOD]: {
     label: 'Blood in Stool',
     description: 'Visible blood may indicate digestive issues',
     severity: 'high',
     color: 'red',
-    icon: '🩸'
+    icon: 'MdBloodtype'
   },
   [PottyHealthFlag.BLOODY_URINE]: {
     label: 'Bloody Urine',
     description: 'Blood in urine may indicate urinary tract issues',
     severity: 'high',
     color: 'red',
-    icon: '🔴'
+    icon: 'MdBloodtype'
   },
   [PottyHealthFlag.CONSTIPATION]: {
     label: 'Constipation',
     description: 'Difficulty or straining during bowel movements',
     severity: 'medium',
     color: 'orange',
-    icon: '😣'
+    icon: 'MdSentimentDissatisfied'
   },
   [PottyHealthFlag.DARK_URINE]: {
     label: 'Dark Urine',
     description: 'Unusually dark colored urine',
     severity: 'medium',
     color: 'orange',
-    icon: '🟤'
+    icon: 'MdCircle'
   },
   [PottyHealthFlag.DIARRHEA]: {
     label: 'Diarrhea',
     description: 'Loose or watery stool',
     severity: 'medium',
     color: 'orange',
-    icon: '💧'
+    icon: 'MdWaterDrop'
   },
   [PottyHealthFlag.FREQUENT_URINATION]: {
     label: 'Frequent Urination',
     description: 'More frequent urination than usual',
     severity: 'low',
     color: 'yellow',
-    icon: '🔄'
+    icon: 'MdRefresh'
   },
   [PottyHealthFlag.MUCUS]: {
     label: 'Mucus Present',
     description: 'Visible mucus in stool',
     severity: 'low',
     color: 'yellow',
-    icon: '🧪'
+    icon: 'MdScience'
   },
   [PottyHealthFlag.PAINFUL_URINATION]: {
     label: 'Painful Urination',
     description: 'Signs of discomfort during urination',
     severity: 'medium',
     color: 'orange',
-    icon: '😖'
+    icon: 'MdSentimentVeryDissatisfied'
   },
   [PottyHealthFlag.UNDIGESTED_FOOD]: {
     label: 'Undigested Food',
     description: 'Visible undigested food in stool',
     severity: 'low',
     color: 'yellow',
-    icon: '🍽️'
+    icon: 'MdRestaurant'
   },
   [PottyHealthFlag.UNUSUAL_COLOR]: {
     label: 'Unusual Color',
     description: 'Abnormal coloring of stool or urine',
     severity: 'medium',
     color: 'orange',
-    icon: '🌈'
+    icon: 'MdColorLens'
   },
   [PottyHealthFlag.WORMS]: {
     label: 'Worms Visible',
     description: 'Visible worms or parasites in stool',
     severity: 'high',
     color: 'red',
-    icon: '🪱'
+    icon: 'MdBugReport'
   }
 };
 
@@ -179,12 +179,12 @@ export const ENVIRONMENT_INFO: Record<PottyEnvironment, {
 }> = {
   [PottyEnvironment.INDOORS]: {
     label: 'Indoor',
-    icon: '🏠',
+    icon: 'MdHome',
     color: 'blue'
   },
   [PottyEnvironment.OUTDOORS]: {
     label: 'Outdoor',
-    icon: '🌳',
+    icon: 'MdPark',
     color: 'green'
   }
 };
