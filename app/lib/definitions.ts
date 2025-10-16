@@ -86,3 +86,31 @@ export type InvoiceForm = {
   amount: number;
   status: 'pending' | 'paid';
 };
+
+// Dog Collaborator Types
+export enum DogCollaboratorRole {
+  Editor = 'Editor',
+  Viewer = 'Viewer',
+}
+
+export type UserModel = {
+  _id: string;
+  email: string;
+  name?: string;
+  profileImageUrl?: string;
+};
+
+export type CollaboratorRoleModel = {
+  role: DogCollaboratorRole;
+  user: UserModel;
+};
+
+export type DogModel = {
+  _id: string;
+  name: string;
+  birthday?: string;
+  breeds?: string[];
+  gender?: string;
+  imageUrl?: string;
+  collaborators?: CollaboratorRoleModel[];
+};

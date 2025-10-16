@@ -109,6 +109,20 @@ class ApiClient {
     });
   }
 
+  // Collaborator methods
+  async addCollaborator(dogId: string, email: string, role: string) {
+    return this.request(`/dogs/${dogId}/collaborators`, {
+      method: 'POST',
+      body: JSON.stringify({ email, role }),
+    });
+  }
+
+  async removeCollaborator(dogId: string, collaboratorId: string) {
+    return this.request(`/dogs/${dogId}/collaborators/${collaboratorId}`, {
+      method: 'DELETE',
+    });
+  }
+
   // Potty methods
   async getPottyRecords(dogId: string) {
     return this.request(`/potty?dogId=${dogId}`);

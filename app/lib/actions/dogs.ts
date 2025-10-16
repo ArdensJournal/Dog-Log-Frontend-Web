@@ -32,6 +32,15 @@ export async function getUserDogs() {
           birthday
           gender
           imageUrl
+          collaborators {
+            role
+            user {
+              _id
+              email
+              name
+              profileImageUrl
+            }
+          }
         }
       }
     `;
@@ -239,5 +248,200 @@ export async function deleteDog(dogId: string) {
   } catch (error) {
     console.error('Error deleting dog:', error);
     throw error;
+  }
+}
+
+// Server action to add a collaborator to a dog
+export async function addCollaborator(
+  dogId: string,
+  email: string,
+  role: 'Editor' | 'Viewer'
+) {
+  try {
+    const token = await getAuthToken();
+    
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+
+    const mutation = `
+      mutation AddDogCollaborator($dogId: ID!, $email: String!, $role: DogCollaboratorRole!) {
+        addDogCollaborator(addDogCollaboratorDto: {
+          dogId: $dogId
+          email: $email
+          role: $role
+        }) {
+          _id
+          name
+          collaborators {
+            role
+            user {
+              _id
+              email
+              name
+              profileImageUrl
+            }
+          }
+        }
+      }
+    `;
+
+    const response = await fetch(BACKEND_URL!, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        query: mutation,
+        variables: { dogId, email, role }
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to add collaborator: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    if (data.errors) {
+      throw new Error(`GraphQL errors: ${JSON.stringify(data.errors)}`);
+    }
+
+    // Revalidate dogs data
+    revalidateTag('dogs');
+    revalidatePath('/dogs');
+    revalidatePath(`/dogs/${dogId}`);
+    revalidatePath(`/dogs/${dogId}/collaborators`);
+    
+    return data.data.addDogCollaborator;
+  } catch (error) {
+    console.error('Error adding collaborator:', error);
+    throw error;
+  }
+}
+
+// Server action to remove a collaborator from a dog
+export async function removeCollaborator(dogId: string, collaboratorId: string) {
+  try {
+    const token = await getAuthToken();
+    
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+
+    const mutation = `
+      mutation RemoveDogCollaborator($dogId: ID!, $collaboratorId: ID!) {
+        removeDogCollaborator(removeDogCollaboratorDto: {
+          dogId: $dogId
+          collaboratorId: $collaboratorId
+        }) {
+          _id
+          name
+          collaborators {
+            role
+            user {
+              _id
+              email
+              name
+              profileImageUrl
+            }
+          }
+        }
+      }
+    `;
+
+    const response = await fetch(BACKEND_URL!, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        query: mutation,
+        variables: { dogId, collaboratorId }
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to remove collaborator: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    if (data.errors) {
+      throw new Error(`GraphQL errors: ${JSON.stringify(data.errors)}`);
+    }
+
+    // Revalidate dogs data
+    revalidateTag('dogs');
+    revalidatePath('/dogs');
+    revalidatePath(`/dogs/${dogId}`);
+    revalidatePath(`/dogs/${dogId}/collaborators`);
+    
+    return data.data.removeDogCollaborator;
+  } catch (error) {
+    console.error('Error removing collaborator:', error);
+    throw error;
+  }
+}
+
+// Server action to get dog by ID with collaborators
+export async function getDogById(dogId: string) {
+  try {
+    const token = await getAuthToken();
+    
+    if (!token) {
+      return null;
+    }
+
+    const query = `
+      query GetUserDogs {
+        userDogs {
+          _id
+          name
+          breeds
+          birthday
+          gender
+          imageUrl
+          collaborators {
+            role
+            user {
+              _id
+              email
+              name
+              profileImageUrl
+            }
+          }
+        }
+      }
+    `;
+
+    const response = await fetch(BACKEND_URL!, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ query }),
+      next: { tags: ['dogs'] }
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json();
+    
+    if (data.errors) {
+      console.error('GraphQL errors:', data.errors);
+      return null;
+    }
+
+    const dogs = data.data.userDogs || [];
+    return dogs.find((dog: any) => dog._id === dogId) || null;
+  } catch (error) {
+    console.error('Error fetching dog by ID:', error);
+    return null;
   }
 }

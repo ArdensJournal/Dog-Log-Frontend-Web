@@ -75,20 +75,28 @@ export default function DogsClientPage({ dogs: initialDogs }: DogsClientPageProp
                   )}
                   
                   {/* Action buttons */}
-                  <div className="mt-4 flex gap-2 w-full">
+                  <div className="mt-4 flex flex-col gap-2 w-full">
+                    <div className="flex gap-2">
+                      <Link
+                        href={`/dogs/${dog._id}/edit`}
+                        className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow transition text-center"
+                      >
+                        Edit
+                      </Link>
+                      <button
+                        onClick={() => handleDeleteDog(dog._id, dog.name)}
+                        disabled={deleteLoading === dog._id || isPending}
+                        className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white rounded-lg shadow transition"
+                      >
+                        {deleteLoading === dog._id ? 'Deleting...' : 'Delete'}
+                      </button>
+                    </div>
                     <Link
-                      href={`/dogs/${dog._id}/edit`}
-                      className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow transition text-center"
+                      href={`/dogs/${dog._id}/collaborators`}
+                      className="w-full px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg shadow transition text-center"
                     >
-                      Edit
+                      Manage Collaborators
                     </Link>
-                    <button
-                      onClick={() => handleDeleteDog(dog._id, dog.name)}
-                      disabled={deleteLoading === dog._id || isPending}
-                      className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white rounded-lg shadow transition"
-                    >
-                      {deleteLoading === dog._id ? 'Deleting...' : 'Delete'}
-                    </button>
                   </div>
                 </li>
               ))}
