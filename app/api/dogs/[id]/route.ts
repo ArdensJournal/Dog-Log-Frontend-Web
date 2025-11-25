@@ -66,7 +66,7 @@ export async function GET(
     }
 
     const dogData = await response.json();
-
+    console.log({ dogData });
     if (dogData.errors) {
       return Response.json(
         { error: 'GraphQL query failed', details: dogData.errors }, 
