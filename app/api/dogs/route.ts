@@ -207,7 +207,7 @@ export async function POST(request: NextRequest) {
       console.log("🔧 Processing regular JSON request...");
       const body = await request.json();
       console.log("📄 Request body:", body);
-      const { name, breeds, birthday, gender, image } = body;
+      const { name, breeds, birthday, gender, image, houseCoordinates } = body;
 
       // Ensure breeds is an array
       const breedArray = Array.isArray(breeds)
@@ -226,6 +226,10 @@ export async function POST(request: NextRequest) {
             birthday
             gender
             imageUrl
+            houseCoordinates {
+              latitude
+              longitude
+            }
           }
         }
       `;
@@ -237,6 +241,7 @@ export async function POST(request: NextRequest) {
           birthday,
           gender,
           ...(image && { image }),
+          ...(houseCoordinates && { houseCoordinates }),
         },
       };
 
