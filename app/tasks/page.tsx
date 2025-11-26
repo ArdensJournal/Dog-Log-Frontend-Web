@@ -80,8 +80,8 @@ export default function TasksPage() {
       
       console.log(`✅ Task ${isCompleted ? 'completed' : 'marked as incomplete'} successfully`);
       
-      // Reload data to ensure UI sections (Pending/Completed/Overdue) update properly
-      await loadData();
+      // No need to reload - the optimistic update already updated the state
+      // React will automatically re-render and move the task to the correct section
       
     } catch (error) {
       console.error('Failed to complete/uncomplete task:', error);
