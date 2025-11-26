@@ -32,6 +32,10 @@ export async function getUserDogs() {
           birthday
           gender
           imageUrl
+          houseCoordinates {
+            latitude
+            longitude
+          }
           collaborators {
             role
             user {
@@ -404,6 +408,10 @@ export async function getDogById(dogId: string) {
           birthday
           gender
           imageUrl
+          houseCoordinates {
+            latitude
+            longitude
+          }
           collaborators {
             role
             user {
