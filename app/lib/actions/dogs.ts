@@ -1,24 +1,25 @@
-'use server';
+"use server";
 
-import { cookies } from 'next/headers';
-import { revalidatePath, revalidateTag } from 'next/cache';
+import { cookies } from "next/headers";
+import { revalidatePath, revalidateTag } from "next/cache";
 
-const BACKEND_URL = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
+const BACKEND_URL =
+  process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
 
 if (!BACKEND_URL) {
-  throw new Error('BACKEND_URL is not defined');
+  throw new Error("BACKEND_URL is not defined");
 }
 
 async function getAuthToken() {
   const cookieStore = await cookies();
-  return cookieStore.get('token')?.value;
+  return cookieStore.get("token")?.value;
 }
 
 // Server action to get all dogs for the current user
 export async function getUserDogs() {
   try {
     const token = await getAuthToken();
-    
+
     if (!token) {
       return [];
     }
@@ -50,37 +51,37 @@ export async function getUserDogs() {
     `;
 
     const response = await fetch(BACKEND_URL!, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ query }),
-      next: { tags: ['dogs'] } // Cache tag for revalidation
+      next: { tags: ["dogs"] }, // Cache tag for revalidation
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Failed to fetch dogs:', response.status, errorText);
-      console.error('Request URL:', BACKEND_URL);
-      console.error('Request headers:', {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token?.substring(0, 10)}...`,
+      console.error("Failed to fetch dogs:", response.status, errorText);
+      console.error("Request URL:", BACKEND_URL);
+      console.error("Request headers:", {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token?.substring(0, 10)}...`,
       });
-      console.error('Request body:', JSON.stringify({ query }));
+      console.error("Request body:", JSON.stringify({ query }));
       return [];
     }
 
     const data = await response.json();
-    
+
     if (data.errors) {
-      console.error('GraphQL errors:', data.errors);
+      console.error("GraphQL errors:", data.errors);
       return [];
     }
 
     return data.data.userDogs || [];
   } catch (error) {
-    console.error('Error fetching dogs:', error);
+    console.error("Error fetching dogs:", error);
     return [];
   }
 }
@@ -95,9 +96,9 @@ export async function createDog(dogData: {
 }) {
   try {
     const token = await getAuthToken();
-    
+
     if (!token) {
-      throw new Error('Authentication required');
+      throw new Error("Authentication required");
     }
 
     const mutation = `
@@ -114,14 +115,14 @@ export async function createDog(dogData: {
     `;
 
     const response = await fetch(BACKEND_URL!, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         query: mutation,
-        variables: { input: dogData }
+        variables: { input: dogData },
       }),
     });
 
@@ -130,18 +131,18 @@ export async function createDog(dogData: {
     }
 
     const data = await response.json();
-    
+
     if (data.errors) {
       throw new Error(`GraphQL errors: ${JSON.stringify(data.errors)}`);
     }
 
     // Revalidate dogs data
-    revalidateTag('dogs');
-    revalidatePath('/dogs');
-    
+    revalidateTag("dogs");
+    revalidatePath("/dogs");
+
     return data.data.createDog;
   } catch (error) {
-    console.error('Error creating dog:', error);
+    console.error("Error creating dog:", error);
     throw error;
   }
 }
@@ -150,9 +151,9 @@ export async function createDog(dogData: {
 export async function updateDog(dogId: string, updates: any) {
   try {
     const token = await getAuthToken();
-    
+
     if (!token) {
-      throw new Error('Authentication required');
+      throw new Error("Authentication required");
     }
 
     const mutation = `
@@ -169,14 +170,14 @@ export async function updateDog(dogId: string, updates: any) {
     `;
 
     const response = await fetch(BACKEND_URL!, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         query: mutation,
-        variables: { id: dogId, input: updates }
+        variables: { id: dogId, input: updates },
       }),
     });
 
@@ -185,19 +186,19 @@ export async function updateDog(dogId: string, updates: any) {
     }
 
     const data = await response.json();
-    
+
     if (data.errors) {
       throw new Error(`GraphQL errors: ${JSON.stringify(data.errors)}`);
     }
 
     // Revalidate dogs data
-    revalidateTag('dogs');
-    revalidatePath('/dogs');
+    revalidateTag("dogs");
+    revalidatePath("/dogs");
     revalidatePath(`/dogs/${dogId}`);
-    
+
     return data.data.updateDog;
   } catch (error) {
-    console.error('Error updating dog:', error);
+    console.error("Error updating dog:", error);
     throw error;
   }
 }
@@ -206,9 +207,9 @@ export async function updateDog(dogId: string, updates: any) {
 export async function deleteDog(dogId: string) {
   try {
     const token = await getAuthToken();
-    
+
     if (!token) {
-      throw new Error('Authentication required');
+      throw new Error("Authentication required");
     }
 
     const mutation = `
@@ -221,16 +222,16 @@ export async function deleteDog(dogId: string) {
     `;
 
     const response = await fetch(BACKEND_URL!, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         query: mutation,
-        variables: { 
-          findByDogIdDto: { dogId }
-        }
+        variables: {
+          findByDogIdDto: { dogId },
+        },
       }),
     });
 
@@ -239,18 +240,18 @@ export async function deleteDog(dogId: string) {
     }
 
     const data = await response.json();
-    
+
     if (data.errors) {
       throw new Error(`GraphQL errors: ${JSON.stringify(data.errors)}`);
     }
 
     // Revalidate dogs data
-    revalidateTag('dogs');
-    revalidatePath('/dogs');
-    
+    revalidateTag("dogs");
+    revalidatePath("/dogs");
+
     return true;
   } catch (error) {
-    console.error('Error deleting dog:', error);
+    console.error("Error deleting dog:", error);
     throw error;
   }
 }
@@ -259,13 +260,13 @@ export async function deleteDog(dogId: string) {
 export async function addCollaborator(
   dogId: string,
   email: string,
-  role: 'Editor' | 'Viewer'
+  role: "Editor" | "Viewer"
 ) {
   try {
     const token = await getAuthToken();
-    
+
     if (!token) {
-      throw new Error('Authentication required');
+      throw new Error("Authentication required");
     }
 
     const mutation = `
@@ -291,14 +292,14 @@ export async function addCollaborator(
     `;
 
     const response = await fetch(BACKEND_URL!, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         query: mutation,
-        variables: { dogId, email, role }
+        variables: { dogId, email, role },
       }),
     });
 
@@ -307,31 +308,34 @@ export async function addCollaborator(
     }
 
     const data = await response.json();
-    
+
     if (data.errors) {
       throw new Error(`GraphQL errors: ${JSON.stringify(data.errors)}`);
     }
 
     // Revalidate dogs data
-    revalidateTag('dogs');
-    revalidatePath('/dogs');
+    revalidateTag("dogs");
+    revalidatePath("/dogs");
     revalidatePath(`/dogs/${dogId}`);
     revalidatePath(`/dogs/${dogId}/collaborators`);
-    
+
     return data.data.addDogCollaborator;
   } catch (error) {
-    console.error('Error adding collaborator:', error);
+    console.error("Error adding collaborator:", error);
     throw error;
   }
 }
 
 // Server action to remove a collaborator from a dog
-export async function removeCollaborator(dogId: string, collaboratorId: string) {
+export async function removeCollaborator(
+  dogId: string,
+  collaboratorId: string
+) {
   try {
     const token = await getAuthToken();
-    
+
     if (!token) {
-      throw new Error('Authentication required');
+      throw new Error("Authentication required");
     }
 
     const mutation = `
@@ -356,14 +360,14 @@ export async function removeCollaborator(dogId: string, collaboratorId: string) 
     `;
 
     const response = await fetch(BACKEND_URL!, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         query: mutation,
-        variables: { dogId, collaboratorId }
+        variables: { dogId, collaboratorId },
       }),
     });
 
@@ -372,20 +376,20 @@ export async function removeCollaborator(dogId: string, collaboratorId: string) 
     }
 
     const data = await response.json();
-    
+
     if (data.errors) {
       throw new Error(`GraphQL errors: ${JSON.stringify(data.errors)}`);
     }
 
     // Revalidate dogs data
-    revalidateTag('dogs');
-    revalidatePath('/dogs');
+    revalidateTag("dogs");
+    revalidatePath("/dogs");
     revalidatePath(`/dogs/${dogId}`);
     revalidatePath(`/dogs/${dogId}/collaborators`);
-    
+
     return data.data.removeDogCollaborator;
   } catch (error) {
-    console.error('Error removing collaborator:', error);
+    console.error("Error removing collaborator:", error);
     throw error;
   }
 }
@@ -394,7 +398,7 @@ export async function removeCollaborator(dogId: string, collaboratorId: string) 
 export async function getDogById(dogId: string) {
   try {
     const token = await getAuthToken();
-    
+
     if (!token) {
       return null;
     }
@@ -426,13 +430,13 @@ export async function getDogById(dogId: string) {
     `;
 
     const response = await fetch(BACKEND_URL!, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ query }),
-      next: { tags: ['dogs'] }
+      next: { tags: ["dogs"] },
     });
 
     if (!response.ok) {
@@ -440,16 +444,16 @@ export async function getDogById(dogId: string) {
     }
 
     const data = await response.json();
-    
+
     if (data.errors) {
-      console.error('GraphQL errors:', data.errors);
+      console.error("GraphQL errors:", data.errors);
       return null;
     }
 
     const dogs = data.data.userDogs || [];
     return dogs.find((dog: any) => dog._id === dogId) || null;
   } catch (error) {
-    console.error('Error fetching dog by ID:', error);
+    console.error("Error fetching dog by ID:", error);
     return null;
   }
 }

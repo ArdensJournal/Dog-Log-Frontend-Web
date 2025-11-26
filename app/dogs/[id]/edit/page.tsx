@@ -620,10 +620,15 @@ export default function EditDogPage() {
               </button>
               
               {locationName && (
-                <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                  <MdLocationOn className="w-5 h-5 text-green-600 dark:text-green-400" />
-                  <p className="text-sm text-green-600 dark:text-green-400">
-                    {locationName}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                    <MdLocationOn className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    <p className="text-sm text-green-600 dark:text-green-400">
+                      {locationName}
+                    </p>
+                  </div>
+                  <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                    ℹ️ Click "Update Dog" button below to save this location
                   </p>
                 </div>
               )}

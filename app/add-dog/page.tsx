@@ -497,10 +497,15 @@ export default function AddDogPage() {
               </button>
               
               {locationName && (
-                <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                  <p className="text-sm text-green-700 dark:text-green-300 flex items-center gap-2">
-                    <MdLocationOn className="w-4 h-4" />
-                    {locationName}
+                <div className="space-y-2">
+                  <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                    <p className="text-sm text-green-700 dark:text-green-300 flex items-center gap-2">
+                      <MdLocationOn className="w-4 h-4" />
+                      {locationName}
+                    </p>
+                  </div>
+                  <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                    ℹ️ Click "Add Dog" button below to save this dog with the location
                   </p>
                 </div>
               )}

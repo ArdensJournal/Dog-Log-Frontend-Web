@@ -214,13 +214,14 @@ export async function PUT(
       // Handle regular JSON update
       console.log("🔧 Processing regular JSON update...");
       const body = await request.json();
-      const { name, breeds, birthday, gender } = body;
+      const { name, breeds, birthday, gender, houseCoordinates } = body;
 
       console.log("📝 Update data received:", {
         name,
         breeds,
         birthday,
         gender,
+        houseCoordinates,
       });
 
       // Ensure breeds is an array
@@ -239,6 +240,10 @@ export async function PUT(
             birthday
             gender
             imageUrl
+            houseCoordinates {
+              latitude
+              longitude
+            }
           }
         }
       `;
@@ -258,6 +263,7 @@ export async function PUT(
               breeds: breedArray,
               birthday,
               gender,
+              ...(houseCoordinates && { houseCoordinates }),
             },
           },
         }),
