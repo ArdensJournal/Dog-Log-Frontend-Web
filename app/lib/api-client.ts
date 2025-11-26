@@ -100,6 +100,7 @@ class ApiClient {
     breeds: string[];
     birthday: string;
     gender: string;
+    houseCoordinates?: { latitude: number; longitude: number };
   }) {
     return this.request("/dogs", {
       method: "POST",
@@ -114,6 +115,7 @@ class ApiClient {
       breeds: string[];
       birthday: string;
       gender: string;
+      houseCoordinates?: { latitude: number; longitude: number };
     }
   ) {
     return this.request(`/dogs/${id}`, {
@@ -290,6 +292,10 @@ export interface Dog {
   birthday: string;
   gender: string;
   imageUrl?: string;
+  houseCoordinates?: {
+    latitude: number;
+    longitude: number;
+  };
   collaborators?: Array<{
     role: string;
     user: User;

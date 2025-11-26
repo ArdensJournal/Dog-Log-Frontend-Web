@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import { MdLocationOn } from 'react-icons/md';
 import ProtectedRoute from '../../../../components/ProtectedRoute';
 
 // Complete Dog breeds enum
@@ -58,6 +59,10 @@ interface Dog {
   birthday?: string;
   gender?: 'MALE' | 'FEMALE';
   imageUrl?: string;
+  houseCoordinates?: {
+    latitude: number;
+    longitude: number;
+  };
 }
 
 // Upload file function
@@ -129,6 +134,7 @@ async function updateDog(dogData: {
   breeds?: string[];
   birthday?: string;
   gender?: string;
+  houseCoordinates?: { latitude: number; longitude: number };
   imageFile?: File;
 }) {
   // ✅ Use API routes instead of direct backend calls - no token needed
@@ -147,6 +153,10 @@ async function updateDog(dogData: {
             birthday
             gender
             imageUrl
+            houseCoordinates {
+              latitude
+              longitude
+            }
           }
         }
       `,
@@ -157,6 +167,7 @@ async function updateDog(dogData: {
           ...(dogData.breeds !== undefined && dogData.breeds.length > 0 && { breeds: dogData.breeds }),
           ...(dogData.birthday !== undefined && { birthday: dogData.birthday }),
           ...(dogData.gender !== undefined && dogData.gender !== '' && { gender: dogData.gender }),
+          ...(dogData.houseCoordinates && { houseCoordinates: dogData.houseCoordinates }),
           image: null // Reference for file upload
         }
       }
@@ -207,10 +218,11 @@ async function updateDog(dogData: {
       ...(dogData.name !== undefined && { name: dogData.name }),
       ...(dogData.breeds !== undefined && dogData.breeds.length > 0 && { breeds: dogData.breeds }),
       ...(dogData.birthday !== undefined && { birthday: dogData.birthday }),
-      ...(dogData.gender !== undefined && dogData.gender !== '' && { gender: dogData.gender })
+      ...(dogData.gender !== undefined && dogData.gender !== '' && { gender: dogData.gender }),
+      ...(dogData.houseCoordinates && { houseCoordinates: dogData.houseCoordinates })
     };
 
-    console.log('� Regular GraphQL operations:', JSON.stringify(requestBody, null, 2));
+    console.log('🐕 Regular GraphQL operations:', JSON.stringify(requestBody, null, 2));
 
     const res = await fetch(`/api/dogs/${dogData.dogId}`, {
       method: 'PUT',
@@ -253,6 +265,11 @@ export default function EditDogPage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
 
+  // Location fields
+  const [latitude, setLatitude] = useState('');
+  const [longitude, setLongitude] = useState('');
+  const [gettingLocation, setGettingLocation] = useState(false);
+
   // breeds search and filtering
   const [breedSearch, setBreedSearch] = useState('');
   const [showBreedDropdown, setShowBreedDropdown] = useState(false);
@@ -278,6 +295,12 @@ export default function EditDogPage() {
           setBirthday(dogData.birthday ? dogData.birthday.split('T')[0] : '');
           setGender(dogData.gender || '');
           setPreviewUrl(dogData.imageUrl || '');
+          
+          // Load house coordinates if they exist
+          if (dogData.houseCoordinates) {
+            setLatitude(dogData.houseCoordinates.latitude.toString());
+            setLongitude(dogData.houseCoordinates.longitude.toString());
+          }
         } else {
           console.log('❌ No dog data found');
         }
@@ -294,6 +317,30 @@ export default function EditDogPage() {
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
     }
+  };
+
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      setError('Geolocation is not supported by your browser');
+      return;
+    }
+
+    setGettingLocation(true);
+    setError('');
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLatitude(position.coords.latitude.toString());
+        setLongitude(position.coords.longitude.toString());
+        setGettingLocation(false);
+        console.log('📍 Location obtained:', position.coords.latitude, position.coords.longitude);
+      },
+      (error) => {
+        setGettingLocation(false);
+        console.error('Error getting location:', error);
+        setError(`Could not get location: ${error.message}`);
+      }
+    );
   };
 
   const handleAddBreed = (breed: string) => {
@@ -318,17 +365,23 @@ export default function EditDogPage() {
     console.log('🚀 Form submission started');
 
     try {
-      // ✅ Single call with image AND gender included
+      // Build house coordinates if both lat and lng are provided
+      const houseCoordinates = latitude && longitude 
+        ? { latitude: parseFloat(latitude), longitude: parseFloat(longitude) }
+        : undefined;
+
+      // ✅ Single call with image AND gender AND location included
       const updateData = {
         dogId,
         name: name || undefined,
         breeds: selectedBreeds.length > 0 ? selectedBreeds : undefined,
         birthday: birthday || undefined,
-        gender: gender || undefined, // ✅ Added gender to update
+        gender: gender || undefined,
+        houseCoordinates,
         imageFile: imageFile || undefined,
       };
 
-      console.log('🐕 Updating dog with data (including gender):', updateData);
+      console.log('🐕 Updating dog with data (including gender and location):', updateData);
       const result = await updateDog(updateData);
       console.log('✅ Dog updated successfully with all data:', result);
 
@@ -491,6 +544,38 @@ export default function EditDogPage() {
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
               💡 Tip: Start typing to search for breeds, then click to add them
             </p>
+          </div>
+
+          {/* House Location (GPS) */}
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <MdLocationOn className="inline w-5 h-5 mr-1" />
+              House Location (Optional)
+            </label>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+              Add your dog's home coordinates for location-based features
+            </p>
+            
+            <div className="space-y-3">
+              <button
+                type="button"
+                onClick={handleGetLocation}
+                disabled={gettingLocation}
+                className="w-full px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                <MdLocationOn className="w-5 h-5" />
+                {gettingLocation ? 'Getting location...' : 'Use My Current Location'}
+              </button>
+              
+              {latitude && longitude && (
+                <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                  <MdLocationOn className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  <p className="text-sm text-green-600 dark:text-green-400">
+                    Location set: {parseFloat(latitude).toFixed(4)}, {parseFloat(longitude).toFixed(4)}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Image Upload - unchanged */}

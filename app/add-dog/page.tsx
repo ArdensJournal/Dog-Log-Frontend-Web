@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { MdLocationOn } from 'react-icons/md';
 import ProtectedRoute from '../../components/ProtectedRoute';
 import { apiClient } from '../lib/api-client';
 
@@ -165,6 +166,11 @@ export default function AddDogPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  // Location fields
+  const [latitude, setLatitude] = useState('');
+  const [longitude, setLongitude] = useState('');
+  const [gettingLocation, setGettingLocation] = useState(false);
+
   // Breed search and filtering
   const [breedSearch, setBreedSearch] = useState('');
   const [showBreedDropdown, setShowBreedDropdown] = useState(false);
@@ -185,6 +191,30 @@ export default function AddDogPage() {
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
     }
+  };
+
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      setError('Geolocation is not supported by your browser');
+      return;
+    }
+
+    setGettingLocation(true);
+    setError('');
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLatitude(position.coords.latitude.toString());
+        setLongitude(position.coords.longitude.toString());
+        setGettingLocation(false);
+        console.log('📍 Location obtained:', position.coords.latitude, position.coords.longitude);
+      },
+      (error) => {
+        setGettingLocation(false);
+        console.error('Error getting location:', error);
+        setError(`Could not get location: ${error.message}`);
+      }
+    );
   };
 
   const handleAddBreed = (breed: string) => {
@@ -209,6 +239,11 @@ export default function AddDogPage() {
     try {
       console.log('🚀 Starting dog creation process...');
 
+      // Build house coordinates if both lat and lng are provided
+      const houseCoordinates = latitude && longitude 
+        ? { latitude: parseFloat(latitude), longitude: parseFloat(longitude) }
+        : undefined;
+
       if (image) {
         // Handle file upload case - create FormData
         const formData = new FormData();
@@ -223,6 +258,10 @@ export default function AddDogPage() {
                 birthday
                 gender
                 imageUrl
+                houseCoordinates {
+                  latitude
+                  longitude
+                }
               }
             }
           `,
@@ -232,6 +271,7 @@ export default function AddDogPage() {
               ...(selectedBreeds.length > 0 && { breeds: selectedBreeds }),
               ...(birthday && { birthday }),
               ...(gender && { gender }),
+              ...(houseCoordinates && { houseCoordinates }),
               image: null
             }
           }
@@ -260,7 +300,8 @@ export default function AddDogPage() {
           name,
           breeds: selectedBreeds,
           birthday: birthday || '',
-          gender: gender || ''
+          gender: gender || '',
+          ...(houseCoordinates && { houseCoordinates })
         });
         
         console.log('✅ Dog created successfully:', result);
@@ -405,6 +446,37 @@ export default function AddDogPage() {
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
               💡 Tip: Start typing to search for breeds, then click to add them
             </p>
+          </div>
+
+          {/* House Location (Coordinates) */}
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              House Location (Optional)
+            </label>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+              Set your dog's home location using your current GPS position
+            </p>
+            
+            <div className="space-y-3">
+              <button
+                type="button"
+                onClick={handleGetLocation}
+                disabled={gettingLocation}
+                className="w-full px-4 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-lg font-medium transition disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                <MdLocationOn className="w-5 h-5" />
+                {gettingLocation ? 'Getting location...' : 'Use My Current Location'}
+              </button>
+              
+              {latitude && longitude && (
+                <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                  <p className="text-sm text-green-700 dark:text-green-300 flex items-center gap-2">
+                    <MdLocationOn className="w-4 h-4" />
+                    Location set: {parseFloat(latitude).toFixed(4)}, {parseFloat(longitude).toFixed(4)}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Image Upload */}

@@ -62,6 +62,11 @@ export default function DogsClientPage({ dogs: initialDogs }: DogsClientPageProp
                   <span className="text-sm text-gray-700 dark:text-gray-300 mb-1">
                     <strong>Gender:</strong> {dog.gender || 'Unknown'}
                   </span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300 mb-1">
+                    <strong>Location:</strong> {dog.houseCoordinates 
+                      ? `${dog.houseCoordinates.latitude.toFixed(4)}, ${dog.houseCoordinates.longitude.toFixed(4)}` 
+                      : 'No location set'}
+                  </span>
                   {dog.imageUrl ? (
                     <img
                       src={dog.imageUrl}
