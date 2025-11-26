@@ -268,6 +268,7 @@ export default function EditDogPage() {
   // Location fields
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
+  const [locationName, setLocationName] = useState('');
   const [gettingLocation, setGettingLocation] = useState(false);
 
   // breeds search and filtering
@@ -298,8 +299,32 @@ export default function EditDogPage() {
           
           // Load house coordinates if they exist
           if (dogData.houseCoordinates) {
-            setLatitude(dogData.houseCoordinates.latitude.toString());
-            setLongitude(dogData.houseCoordinates.longitude.toString());
+            const lat = dogData.houseCoordinates.latitude;
+            const lon = dogData.houseCoordinates.longitude;
+            setLatitude(lat.toString());
+            setLongitude(lon.toString());
+            
+            // Reverse geocode to get location name
+            fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`
+            )
+              .then(res => res.json())
+              .then(data => {
+                const address = data.address || {};
+                const parts = [
+                  address.road || address.pedestrian || address.path,
+                  address.city || address.town || address.village,
+                  address.state,
+                  address.country
+                ].filter(Boolean);
+                
+                const name = parts.length > 0 ? parts.join(', ') : `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+                setLocationName(name);
+              })
+              .catch(err => {
+                console.error('Error reverse geocoding:', err);
+                setLocationName(`${lat.toFixed(4)}, ${lon.toFixed(4)}`);
+              });
           }
         } else {
           console.log('❌ No dog data found');
@@ -329,11 +354,38 @@ export default function EditDogPage() {
     setError('');
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLatitude(position.coords.latitude.toString());
-        setLongitude(position.coords.longitude.toString());
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        
+        setLatitude(lat.toString());
+        setLongitude(lon.toString());
+        
+        // Reverse geocode to get location name
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`
+          );
+          const data = await response.json();
+          
+          // Build a readable location name
+          const address = data.address || {};
+          const parts = [
+            address.road || address.pedestrian || address.path,
+            address.city || address.town || address.village,
+            address.state,
+            address.country
+          ].filter(Boolean);
+          
+          const name = parts.length > 0 ? parts.join(', ') : `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+          setLocationName(name);
+          console.log('📍 Location obtained:', name, lat, lon);
+        } catch (err) {
+          console.error('Error reverse geocoding:', err);
+          setLocationName(`${lat.toFixed(4)}, ${lon.toFixed(4)}`);
+        }
+        
         setGettingLocation(false);
-        console.log('📍 Location obtained:', position.coords.latitude, position.coords.longitude);
       },
       (error) => {
         setGettingLocation(false);
@@ -567,11 +619,11 @@ export default function EditDogPage() {
                 {gettingLocation ? 'Getting location...' : 'Use My Current Location'}
               </button>
               
-              {latitude && longitude && (
+              {locationName && (
                 <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
                   <MdLocationOn className="w-5 h-5 text-green-600 dark:text-green-400" />
                   <p className="text-sm text-green-600 dark:text-green-400">
-                    Location set: {parseFloat(latitude).toFixed(4)}, {parseFloat(longitude).toFixed(4)}
+                    {locationName}
                   </p>
                 </div>
               )}

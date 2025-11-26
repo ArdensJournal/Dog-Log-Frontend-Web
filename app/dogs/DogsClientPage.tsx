@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { deleteDog } from '@/app/lib/actions/dogs';
 import { Dog } from '@/app/lib/api-client';
 
@@ -9,10 +9,64 @@ interface DogsClientPageProps {
   dogs: Dog[];
 }
 
+// Cache for location names to avoid repeated API calls
+const locationCache = new Map<string, string>();
+
 export default function DogsClientPage({ dogs: initialDogs }: DogsClientPageProps) {
   const [dogs, setDogs] = useState<Dog[]>(initialDogs);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [locationNames, setLocationNames] = useState<Map<string, string>>(new Map());
+
+  // Fetch location names for all dogs with coordinates
+  useEffect(() => {
+    const fetchLocationNames = async () => {
+      const newLocationNames = new Map<string, string>();
+      
+      for (const dog of dogs) {
+        if (dog.houseCoordinates) {
+          const { latitude, longitude } = dog.houseCoordinates;
+          const cacheKey = `${latitude},${longitude}`;
+          
+          // Check cache first
+          if (locationCache.has(cacheKey)) {
+            newLocationNames.set(dog._id, locationCache.get(cacheKey)!);
+            continue;
+          }
+          
+          try {
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`
+            );
+            const data = await response.json();
+            
+            const address = data.address || {};
+            const parts = [
+              address.road || address.pedestrian || address.path,
+              address.city || address.town || address.village,
+              address.state,
+              address.country
+            ].filter(Boolean);
+            
+            const name = parts.length > 0 ? parts.join(', ') : `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+            locationCache.set(cacheKey, name);
+            newLocationNames.set(dog._id, name);
+            
+            // Add small delay to respect API rate limits
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          } catch (err) {
+            console.error('Error reverse geocoding:', err);
+            const fallback = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+            newLocationNames.set(dog._id, fallback);
+          }
+        }
+      }
+      
+      setLocationNames(newLocationNames);
+    };
+    
+    fetchLocationNames();
+  }, [dogs]);
 
   const handleDeleteDog = async (dogId: string, dogName: string) => {
     if (!confirm(`Are you sure you want to delete ${dogName}? This action cannot be undone.`)) {
@@ -64,7 +118,7 @@ export default function DogsClientPage({ dogs: initialDogs }: DogsClientPageProp
                   </span>
                   <span className="text-sm text-gray-700 dark:text-gray-300 mb-1">
                     <strong>Location:</strong> {dog.houseCoordinates 
-                      ? `${dog.houseCoordinates.latitude.toFixed(4)}, ${dog.houseCoordinates.longitude.toFixed(4)}` 
+                      ? (locationNames.get(dog._id) || 'Loading location...') 
                       : 'No location set'}
                   </span>
                   {dog.imageUrl ? (
