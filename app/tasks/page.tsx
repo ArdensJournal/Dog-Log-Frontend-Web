@@ -61,12 +61,12 @@ export default function TasksPage() {
     loadData(); // Reload tasks after creation
   };
 
-  // Task completion handler - UI ready, waiting for backend updateTask mutation
+  // Task completion handler
   const handleTaskComplete = async (taskId: string, isCompleted: boolean) => {
     try {
       console.log(`🔄 ${isCompleted ? 'Completing' : 'Uncompleting'} task ${taskId}...`);
       
-      // Update the task in local state immediately
+      // Update the task in local state immediately (optimistic update)
       setTasks(prevTasks => 
         prevTasks.map(task => 
           task._id === taskId 
@@ -75,10 +75,13 @@ export default function TasksPage() {
         )
       );
 
-      // Call API (currently just returns success for local state management)
+      // Call API to persist the change
       await apiClient.completeTask(taskId, isCompleted);
       
       console.log(`✅ Task ${isCompleted ? 'completed' : 'marked as incomplete'} successfully`);
+      
+      // Reload data to ensure UI sections (Pending/Completed/Overdue) update properly
+      await loadData();
       
     } catch (error) {
       console.error('Failed to complete/uncomplete task:', error);
