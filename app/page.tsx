@@ -94,32 +94,48 @@ export default async function Page() {
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">Quick Actions</h2>
               <p className="text-gray-600 dark:text-gray-400 text-lg">Manage your dogs and get started</p>
             </div>
-            <div className="flex flex-col sm:flex-row justify-center gap-6 max-w-2xl mx-auto">
-              <Link 
-                href="/dogs" 
-                className="group relative overflow-hidden px-8 py-6 rounded-2xl bg-gradient-to-br from-indigo-500 to-blue-600 text-white font-bold text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative z-10 flex items-center justify-center gap-3">
-                  <div className="text-left">
-                    <div className="font-bold text-xl">View All Dogs</div>
-                    <div className="text-indigo-100 text-sm">Manage your dog profiles</div>
+            <div className="flex flex-col gap-6 max-w-2xl mx-auto">
+              <div className="flex flex-col sm:flex-row justify-center gap-6">
+                <Link 
+                  href="/dogs" 
+                  className="group relative overflow-hidden px-8 py-6 rounded-2xl bg-gradient-to-br from-indigo-500 to-blue-600 text-white font-bold text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="relative z-10 flex items-center justify-center gap-3">
+                    <div className="text-left">
+                      <div className="font-bold text-xl">View All Dogs</div>
+                      <div className="text-indigo-100 text-sm">Manage your dog profiles</div>
+                    </div>
+                    <MdPets className="text-3xl" />
                   </div>
-                  <MdPets className="text-3xl" />
-                </div>
-              </Link>
+                </Link>
 
+                <Link 
+                  href="/add-dog" 
+                  className="group relative overflow-hidden px-8 py-6 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-600 text-white font-bold text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-600 to-green-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="relative z-10 flex items-center justify-center gap-3">
+                    <div className="text-left">
+                      <div className="font-bold text-xl">Add New Dog</div>
+                      <div className="text-emerald-100 text-sm">Register a new companion</div>
+                    </div>
+                    <MdAdd className="text-3xl" />
+                  </div>
+                </Link>
+              </div>
+              
               <Link 
-                href="/add-dog" 
-                className="group relative overflow-hidden px-8 py-6 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-600 text-white font-bold text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300"
+                href="/health-insights" 
+                className="group relative overflow-hidden px-8 py-6 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 text-white font-bold text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-600 to-green-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-pink-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="relative z-10 flex items-center justify-center gap-3">
                   <div className="text-left">
-                    <div className="font-bold text-xl">Add New Dog</div>
-                    <div className="text-emerald-100 text-sm">Register a new companion</div>
+                    <div className="font-bold text-xl">Check My Dog</div>
+                    <div className="text-purple-100 text-sm">Get AI-powered health insights</div>
                   </div>
-                  <MdAdd className="text-3xl" />
+                  <MdAutoAwesome className="text-3xl" />
                 </div>
               </Link>
             </div>
