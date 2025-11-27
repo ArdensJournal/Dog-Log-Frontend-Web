@@ -14,7 +14,8 @@ import {
   MdPeople,
   MdScience,
   MdCloud,
-  MdSchedule
+  MdSchedule,
+  MdAutoAwesome
 } from 'react-icons/md';
 
 export default async function Page() {
