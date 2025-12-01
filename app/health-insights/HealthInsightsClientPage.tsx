@@ -65,7 +65,9 @@ export default function HealthInsightsClientPage({ dogs }: HealthInsightsClientP
       });
 
       if (!generateResponse.ok) {
-        throw new Error('Failed to generate health insights');
+        const errorData = await generateResponse.json().catch(() => ({}));
+        console.error('Generate API error:', errorData);
+        throw new Error(errorData.error || 'Failed to generate health insights');
       }
 
       // Immediately try to fetch insights (removed timeout)
