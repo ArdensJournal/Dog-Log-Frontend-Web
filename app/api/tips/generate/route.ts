@@ -44,7 +44,13 @@ export async function POST(request: NextRequest) {
 
     const mutation = gql`
       mutation CreateGeminiTip($createTipDto: GeminiTipDto!) {
-        createGeminiTip(createTipDto: $createTipDto)
+        createGeminiTip(createTipDto: $createTipDto) {
+          _id
+          content
+          language
+          source
+          createdAt
+        }
       }
     `;
 
