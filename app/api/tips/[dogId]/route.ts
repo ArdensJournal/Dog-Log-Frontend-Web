@@ -39,7 +39,6 @@ export async function GET(
           _id
           content
           createdAt
-          isRead
           language
           source
           updatedAt
