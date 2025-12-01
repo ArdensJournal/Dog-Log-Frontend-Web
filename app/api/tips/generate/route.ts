@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     console.log("Authentication token found");
 
     const body = await request.json();
-    const { dogId, language = "HEBREW" } = body;
+    const { dogId, language = "ENGLISH" } = body;
 
     console.log("🤖 Request params:", { dogId, language });
     console.log("🤖 Dog ID type:", typeof dogId);
