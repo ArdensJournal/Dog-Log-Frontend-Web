@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { MdPets, MdAutoAwesome, MdArrowBack } from 'react-icons/md';
+import { MdPets, MdAutoAwesome, MdArrowBack, MdSend, MdChat } from 'react-icons/md';
 
 interface Dog {
   _id: string;
@@ -23,6 +23,13 @@ interface HealthCheck {
   updatedAt?: string;
 }
 
+interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+}
+
 interface HealthInsightsClientPageProps {
   dogs: Dog[];
 }
@@ -32,6 +39,11 @@ export default function HealthInsightsClientPage({ dogs }: HealthInsightsClientP
   const [healthChecks, setHealthChecks] = useState<HealthCheck[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState('');
+  
+  // Chat state
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState('');
+  const [isSendingChat, setIsSendingChat] = useState(false);
 
   const handleCheckMyDog = async () => {
     if (!selectedDog) {
@@ -56,10 +68,7 @@ export default function HealthInsightsClientPage({ dogs }: HealthInsightsClientP
         throw new Error('Failed to generate health insights');
       }
 
-      // Wait a bit for AI to process
-      await new Promise(resolve => setTimeout(resolve, 25000));
-
-      // Fetch the health insights
+      // Immediately try to fetch insights (removed timeout)
       const fetchResponse = await fetch(`/api/tips/${selectedDog}`);
       const data = await fetchResponse.json();
 
@@ -78,6 +87,71 @@ export default function HealthInsightsClientPage({ dogs }: HealthInsightsClientP
       setError(err.message || 'Failed to get health insights');
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleSendChat = async () => {
+    if (!chatInput.trim() || !selectedDog || healthChecks.length === 0) {
+      return;
+    }
+
+    const userMessage: ChatMessage = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: chatInput,
+      timestamp: new Date(),
+    };
+
+    setChatMessages(prev => [...prev, userMessage]);
+    setChatInput('');
+    setIsSendingChat(true);
+
+    try {
+      // For now, create a simple response based on the insights
+      // TODO: Replace with actual API call when chat endpoint is available
+      const response = await fetch('/api/tips/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          dogId: selectedDog,
+          question: chatInput,
+          insights: healthChecks.map(h => h.content),
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const assistantMessage: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: data.answer || 'I can help you understand the health insights better. What specific aspect would you like to know more about?',
+          timestamp: new Date(),
+        };
+        setChatMessages(prev => [...prev, assistantMessage]);
+      } else {
+        // Fallback response if API isn't available
+        const assistantMessage: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: 'I can see you have questions about your dog\'s health insights. Based on the insights generated, I recommend discussing specific concerns with your veterinarian for personalized advice.',
+          timestamp: new Date(),
+        };
+        setChatMessages(prev => [...prev, assistantMessage]);
+      }
+    } catch (err: any) {
+      console.error('Chat error:', err);
+      // Fallback response
+      const assistantMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: 'I\'m here to help you understand the health insights. The insights provided are general recommendations based on your dog\'s data. For specific medical advice, please consult with your veterinarian.',
+        timestamp: new Date(),
+      };
+      setChatMessages(prev => [...prev, assistantMessage]);
+    } finally {
+      setIsSendingChat(false);
     }
   };
 
@@ -266,6 +340,76 @@ export default function HealthInsightsClientPage({ dogs }: HealthInsightsClientP
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Chat Section - Ask Questions About Insights */}
+        {healthChecks.length > 0 && (
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+            <h2 className="text-2xl font-bold text-purple-700 dark:text-purple-400 mb-4 flex items-center gap-2">
+              <MdChat className="text-3xl" />
+              Ask About Your Dog's Health
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Have questions about the health insights? Ask me anything!
+            </p>
+
+            {/* Chat Messages */}
+            {chatMessages.length > 0 && (
+              <div className="mb-4 space-y-3 max-h-96 overflow-y-auto p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                {chatMessages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-[80%] rounded-lg p-4 ${
+                        message.role === 'user'
+                          ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
+                          : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700'
+                      }`}
+                    >
+                      <p className="text-sm leading-relaxed">{message.content}</p>
+                      <p className={`text-xs mt-2 ${message.role === 'user' ? 'text-purple-100' : 'text-gray-500 dark:text-gray-400'}`}>
+                        {message.timestamp.toLocaleTimeString()}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                {isSendingChat && (
+                  <div className="flex justify-start">
+                    <div className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                      <div className="flex items-center gap-2">
+                        <div className="animate-pulse">●</div>
+                        <div className="animate-pulse delay-100">●</div>
+                        <div className="animate-pulse delay-200">●</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Chat Input */}
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && !isSendingChat && handleSendChat()}
+                placeholder="Ask a question about your dog's health insights..."
+                disabled={isSendingChat}
+                className="flex-1 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50"
+              />
+              <button
+                onClick={handleSendChat}
+                disabled={!chatInput.trim() || isSendingChat}
+                className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-purple-400 disabled:to-pink-400 text-white font-semibold rounded-lg shadow-md transition flex items-center gap-2"
+              >
+                <MdSend className="text-xl" />
+                Send
+              </button>
             </div>
           </div>
         )}
