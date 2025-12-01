@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
         JSON.stringify(error.response.errors, null, 2)
       );
     }
-    
+
     // Extract actual error message from GraphQL response
     const graphqlError = error.response?.errors?.[0]?.message || error.message;
 
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
       {
         error: graphqlError || "Failed to generate tips",
         details: error.response?.errors || null,
-        fullError: process.env.NODE_ENV === 'development' ? error : undefined,
+        fullError: process.env.NODE_ENV === "development" ? error : undefined,
       },
       { status: 500 }
     );
