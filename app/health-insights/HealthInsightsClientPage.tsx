@@ -65,16 +65,7 @@ export default function HealthInsightsClientPage({ dogs }: HealthInsightsClientP
       });
 
       if (!generateResponse.ok) {
-        const errorData = await generateResponse.json().catch(() => ({}));
-        console.error('Generate API error:', errorData);
-        
-        // If it's a 500 with GraphQL 400 error, it's likely missing dog data
-        let errorMessage = errorData.error || 'Failed to generate health insights';
-        if (errorMessage.includes('Code: 400')) {
-          errorMessage = 'Unable to generate insights for this dog. Please make sure your dog has:\n• Weight data\n• Birthday\n• Breed information\n\nYou can add these in the dog\'s profile.';
-        }
-        
-        throw new Error(errorMessage);
+        throw new Error('Failed to generate health insights');
       }
 
       // Immediately try to fetch insights (removed timeout)
