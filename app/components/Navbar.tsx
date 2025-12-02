@@ -86,6 +86,7 @@ export default function Navbar() {
   const [authChecked, setAuthChecked] = useState(false);
   const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [unreadCount, setUnreadCount] = useState(0);
   // Store refs for each dropdown
   const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
   // Expose checkAuth for use in handlers
@@ -93,6 +94,21 @@ export default function Navbar() {
     const result = await checkAuthStatus();
     setIsSignedIn(result.isAuthenticated);
     setAuthChecked(true);
+  };
+
+  // Fetch unread notifications count
+  const fetchUnreadCount = async () => {
+    if (!isSignedIn) return;
+    try {
+      const response = await fetch('/api/notifications');
+      const data = await response.json();
+      if (response.ok && data.notifications) {
+        const unread = data.notifications.filter((n: any) => !n.isRead).length;
+        setUnreadCount(unread);
+      }
+    } catch (error) {
+      console.error('Error fetching unread count:', error);
+    }
   };
 
   // Click outside to close dropdown
@@ -185,6 +201,15 @@ export default function Navbar() {
     };
   }, []);
 
+  // Fetch unread notifications count periodically
+  useEffect(() => {
+    if (isSignedIn) {
+      fetchUnreadCount();
+      const interval = setInterval(fetchUnreadCount, 30000); // Refresh every 30 seconds
+      return () => clearInterval(interval);
+    }
+  }, [isSignedIn]);
+
   if (!mounted || !authChecked) return null;
 
   // Desktop Navbar
@@ -217,10 +242,15 @@ export default function Navbar() {
               </Link>
               <Link
                 href="/notifications"
-                className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors relative"
               >
                 <MdNotifications className="text-lg" />
                 Notifications
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
               </Link>
               <Link
                 href="/services"
@@ -307,7 +337,14 @@ export default function Navbar() {
               <span className={`text-xs font-medium ${pathname === '/forum' ? 'text-indigo-600' : 'text-gray-600 dark:text-gray-400'}`}>Community</span>
             </Link>
             <Link href="/notifications" className="flex flex-col items-center py-2 px-3 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800">
-              <MdNotifications className={`text-2xl mb-1 ${pathname === '/notifications' ? 'text-indigo-600' : 'text-gray-600 dark:text-gray-400'}`} />
+              <div className="relative">
+                <MdNotifications className={`text-2xl mb-1 ${pathname === '/notifications' ? 'text-indigo-600' : 'text-gray-600 dark:text-gray-400'}`} />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </div>
               <span className={`text-xs font-medium ${pathname === '/notifications' ? 'text-indigo-600' : 'text-gray-600 dark:text-gray-400'}`}>Notifications</span>
             </Link>
             <Link href="/services" className="flex flex-col items-center py-2 px-3 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800">
